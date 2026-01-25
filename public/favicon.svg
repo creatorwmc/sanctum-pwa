@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#d4a259;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8b6914;stop-opacity:1" />
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#d4a259;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#d4a259;stop-opacity:0" />
+    </radialGradient>
+  </defs>
+  <!-- Outer glow -->
+  <circle cx="50" cy="50" r="48" fill="url(#glow)"/>
+  <!-- Main circle - deep forest -->
+  <circle cx="50" cy="50" r="42" fill="#1a241f"/>
+  <!-- Tree trunk -->
+  <path d="M46 75 L46 55 Q46 50 50 45 Q54 50 54 55 L54 75 Z" fill="#3d3428"/>
+  <!-- Tree canopy - simplified Tree of Life shape -->
+  <circle cx="50" cy="38" r="18" fill="none" stroke="url(#grad)" stroke-width="2"/>
+  <circle cx="50" cy="38" r="10" fill="none" stroke="url(#grad)" stroke-width="1.5"/>
+  <circle cx="50" cy="38" r="3" fill="url(#grad)"/>
+  <!-- Roots -->
+  <path d="M42 75 Q35 80 30 78 M46 75 Q44 82 40 85 M54 75 Q56 82 60 85 M58 75 Q65 80 70 78"
+        fill="none" stroke="#3d3428" stroke-width="2" stroke-linecap="round"/>
+</svg>
