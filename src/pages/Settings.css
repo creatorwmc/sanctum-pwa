@@ -1,0 +1,96 @@
+.settings-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.settings-section-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding-left: 0.25rem;
+}
+
+.settings-list {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.settings-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-primary);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  width: 100%;
+}
+
+.settings-item:last-child {
+  border-bottom: none;
+}
+
+.settings-item:hover:not(.settings-item--disabled) {
+  background: var(--bg-secondary);
+}
+
+.settings-item--disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.settings-item-content {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+}
+
+.settings-item-icon {
+  font-size: 1.25rem;
+  width: 2rem;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.settings-item-label {
+  display: block;
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
+.settings-item-desc {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 0.125rem;
+}
+
+.settings-item-arrow {
+  color: var(--text-muted);
+  font-size: 1rem;
+}
+
+.settings-footer {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.5;
+  padding: 0.5rem;
+}

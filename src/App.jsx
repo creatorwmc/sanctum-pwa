@@ -7,6 +7,7 @@ import Links from './pages/Links'
 import DailyLog from './pages/DailyLog'
 import Calendar from './pages/Calendar'
 import Journal from './pages/Journal'
+import Settings from './pages/Settings'
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/daily" element={<DailyLog />} />
         <Route path="/calendar" element={<Calendar />} />
         <Route path="/journal" element={<Journal />} />
+        <Route path="/settings" element={<Settings />} />
       </Routes>
     </Layout>
   )

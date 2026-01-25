@@ -1,7 +1,7 @@
 import { openDB } from 'idb'
 
 const DB_NAME = 'sanctum-db'
-const DB_VERSION = 1
+const DB_VERSION = 2
 
 // Database schema definition
 const stores = {
@@ -10,7 +10,8 @@ const stores = {
   links: 'id, title, url, *tags, createdAt',
   dailyLogs: 'id, date, *practices',
   ceremonies: 'id, date, type, title',
-  journal: 'id, date, type, createdAt'
+  journal: 'id, date, type, createdAt',
+  feedback: 'id, category, createdAt'
 }
 
 // Initialize the database
@@ -57,6 +58,13 @@ async function initDB() {
         journalStore.createIndex('date', 'date')
         journalStore.createIndex('type', 'type')
         journalStore.createIndex('createdAt', 'createdAt')
+      }
+
+      // Feedback store (whispers to the oracle)
+      if (!db.objectStoreNames.contains('feedback')) {
+        const feedbackStore = db.createObjectStore('feedback', { keyPath: 'id' })
+        feedbackStore.createIndex('category', 'category')
+        feedbackStore.createIndex('createdAt', 'createdAt')
       }
     }
   })
