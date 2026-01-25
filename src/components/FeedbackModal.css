@@ -69,6 +69,12 @@
   margin-bottom: 1.5rem;
 }
 
+.feedback-icon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0.75rem;
+}
+
 .feedback-header h2 {
   font-size: 1.25rem;
   font-weight: 600;
@@ -109,6 +115,15 @@
 
 .feedback-submit {
   margin-top: 0.5rem;
+}
+
+.feedback-error {
+  color: #e57373;
+  font-size: 0.875rem;
+  text-align: center;
+  padding: 0.5rem;
+  background: rgba(229, 115, 115, 0.1);
+  border-radius: 0.5rem;
 }
 
 /* Success state */

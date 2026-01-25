@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { db } from '../db'
 import FeedbackModal from '../components/FeedbackModal'
+import StoneIcon from '../components/StoneIcon'
 import './Settings.css'
 
 function Settings() {
@@ -89,7 +90,7 @@ function Settings() {
 
           <button className="settings-item" onClick={() => setFeedbackOpen(true)}>
             <div className="settings-item-content">
-              <span className="settings-item-icon">🪶</span>
+              <span className="settings-item-icon"><StoneIcon size={20} glow={false} /></span>
               <div>
                 <span className="settings-item-label">Whisper to the Oracle</span>
                 <span className="settings-item-desc">Send feedback or suggestions</span>

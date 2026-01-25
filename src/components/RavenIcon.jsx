@@ -4,48 +4,19 @@ function RavenIcon({ size = 32, className = '' }) {
       width={size}
       height={size}
       viewBox="0 0 32 32"
-      fill="currentColor"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
       className={className}
       style={{ display: 'inline-block' }}
     >
-      {/* Mystical raven silhouette */}
-      <path d="
-        M8 24
-        C6 24 4 22 4 20
-        C4 18 5 17 6 16
-        L5 14
-        C5 12 6 10 8 9
-        L7 7
-        C7 5 9 4 11 4
-        C12 4 13 4.5 14 5
-        C15 4 17 3 19 3
-        C22 3 24 5 25 7
-        C26 7 27 8 27 9
-        L26 10
-        C27 11 28 12 28 14
-        C28 16 27 18 25 19
-        L26 20
-        C26 21 25 22 24 22
-        L22 22
-        C21 23 19 24 17 24
-        L15 28
-        L14 28
-        L15 24
-        L12 24
-        L11 27
-        L10 27
-        L11 24
-        Z
-        M12 8
-        C11.5 8 11 8.5 11 9
-        C11 9.5 11.5 10 12 10
-        C12.5 10 13 9.5 13 9
-        C13 8.5 12.5 8 12 8
-        M22 10
-        L24 9
-        L23 11
-        Z
-      " />
+      {/* Simple raven head and body silhouette */}
+      <path
+        d="M6 22 C4 20 4 17 6 14 C7 11 10 9 13 8 C14 7 15 6 17 6 C19 6 21 7 22 8 L26 6 L24 10 C25 11 26 13 26 15 C26 18 24 21 21 23 C18 25 14 26 10 25 C8 25 7 24 6 22 Z"
+        fill="currentColor"
+      />
+      {/* Eye */}
+      <circle cx="18" cy="12" r="1.5" fill="var(--bg-primary, #0d1210)" />
     </svg>
   )
 }

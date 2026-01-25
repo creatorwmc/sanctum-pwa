@@ -10,6 +10,16 @@
     <title>Sanctum</title>
   </head>
   <body>
+    <!-- Hidden form for Netlify Forms detection (SPA) -->
+    <form name="oracle-whisper" data-netlify="true" data-netlify-honeypot="bot-field" hidden>
+      <input type="hidden" name="form-name" value="oracle-whisper" />
+      <input type="text" name="bot-field" />
+      <input type="text" name="name" />
+      <input type="text" name="section" />
+      <textarea name="message"></textarea>
+      <input type="text" name="timestamp" />
+    </form>
+
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
