@@ -25,3 +25,6 @@ Thumbs.db
 
 # PWA generated files
 dev-dist/
+
+# Local Netlify folder
+.netlify
