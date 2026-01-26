@@ -352,6 +352,27 @@ function generateLanternImage(size) {
   return canvas.toDataURL()
 }
 
+const PUZZLE_SCORES_KEY = 'sanctum-puzzle-scores'
+
+function getStoredScores() {
+  try {
+    const saved = localStorage.getItem(PUZZLE_SCORES_KEY)
+    return saved ? JSON.parse(saved) : { '3': null, '4': null }
+  } catch {
+    return { '3': null, '4': null }
+  }
+}
+
+function saveScore(size, moves) {
+  const scores = getStoredScores()
+  if (scores[size] === null || moves < scores[size]) {
+    scores[size] = moves
+    localStorage.setItem(PUZZLE_SCORES_KEY, JSON.stringify(scores))
+    return true
+  }
+  return false
+}
+
 function PuzzleGame({ isOpen, onClose }) {
   const [gridSize, setGridSize] = useState(3) // 3x3 or 4x4
   const [puzzleImage, setPuzzleImage] = useState('lantern') // lantern or lighthouse
@@ -360,6 +381,8 @@ function PuzzleGame({ isOpen, onClose }) {
   const [moves, setMoves] = useState(0)
   const [solved, setSolved] = useState(false)
   const [imageUrl, setImageUrl] = useState('')
+  const [bestScores, setBestScores] = useState(getStoredScores())
+  const [isNewBest, setIsNewBest] = useState(false)
 
   const totalTiles = gridSize * gridSize
 
@@ -405,6 +428,7 @@ function PuzzleGame({ isOpen, onClose }) {
     setEmptyIndex(currentEmpty)
     setMoves(0)
     setSolved(false)
+    setIsNewBest(false)
   }, [totalTiles, gridSize])
 
   // Get valid neighbor indices
@@ -448,12 +472,24 @@ function PuzzleGame({ isOpen, onClose }) {
 
     if (checkSolved(newTiles)) {
       setSolved(true)
+      const finalMoves = moves + 1
+      const newBest = saveScore(gridSize, finalMoves)
+      if (newBest) {
+        setIsNewBest(true)
+        setBestScores(getStoredScores())
+      }
     }
   }
 
   // Change difficulty
   function handleDifficultyChange(newSize) {
     setGridSize(newSize)
+  }
+
+  // Reset best scores
+  function resetBestScores() {
+    localStorage.removeItem(PUZZLE_SCORES_KEY)
+    setBestScores({ '3': null, '4': null })
   }
 
   // Reset when grid size changes
@@ -479,7 +515,12 @@ function PuzzleGame({ isOpen, onClose }) {
 
         <div className="puzzle-header">
           <h2>Mindful Puzzle</h2>
-          <p className="puzzle-moves">{moves} moves</p>
+          <div className="puzzle-stats">
+            <p className="puzzle-moves">{moves} moves</p>
+            {bestScores[gridSize] !== null && (
+              <p className="puzzle-best">Best: {bestScores[gridSize]}</p>
+            )}
+          </div>
         </div>
 
         <div className="puzzle-options">
@@ -551,12 +592,18 @@ function PuzzleGame({ isOpen, onClose }) {
           <div className="puzzle-solved">
             <span className="solved-icon">✦</span>
             <p>Solved in {moves} moves!</p>
+            {isNewBest && <p className="new-best">New Best Score!</p>}
           </div>
         )}
 
-        <button className="puzzle-shuffle" onClick={shufflePuzzle}>
-          {solved ? 'Play Again' : 'Shuffle'}
-        </button>
+        <div className="puzzle-actions">
+          <button className="puzzle-shuffle" onClick={shufflePuzzle}>
+            {solved ? 'Play Again' : 'Shuffle'}
+          </button>
+          <button className="puzzle-reset-scores" onClick={resetBestScores}>
+            Reset Scores
+          </button>
+        </div>
       </div>
     </div>
   )

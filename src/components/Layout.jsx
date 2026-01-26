@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import StoneIcon from './StoneIcon'
+import AstragalusIcon from './AstragalusIcon'
 import FeedbackModal from './FeedbackModal'
 import RateModal from './RateModal'
 import PuzzleGame from './PuzzleGame'
@@ -47,7 +48,8 @@ const ROUTE_TO_PAGE = {
   '/calendar': 'calendar',
   '/settings': 'settings',
   '/guide': 'settings',
-  '/tools': 'tools'
+  '/tools': 'tools',
+  '/play': 'play'
 }
 
 function Layout({ children }) {
@@ -437,16 +439,6 @@ function Layout({ children }) {
                     className="settings-drawer-link"
                     onClick={() => {
                       setSettingsOpen(false)
-                      navigate('/tools')
-                    }}
-                  >
-                    <span>✡</span>
-                    <span>Esoteric Tools</span>
-                  </button>
-                  <button
-                    className="settings-drawer-link"
-                    onClick={() => {
-                      setSettingsOpen(false)
                       navigate('/settings')
                     }}
                   >
@@ -464,14 +456,24 @@ function Layout({ children }) {
                     <span>Whisper to the Oracle</span>
                   </button>
                   <button
-                    className="settings-drawer-link settings-drawer-link--subtle"
+                    className="settings-drawer-link"
                     onClick={() => {
                       setSettingsOpen(false)
-                      setPuzzleOpen(true)
+                      navigate('/tools')
                     }}
                   >
-                    <span>✧</span>
-                    <span>Mindful Puzzle</span>
+                    <span>✡</span>
+                    <span>Esoteric Tools</span>
+                  </button>
+                  <button
+                    className="settings-drawer-link"
+                    onClick={() => {
+                      setSettingsOpen(false)
+                      navigate('/play')
+                    }}
+                  >
+                    <span><AstragalusIcon size={18} /></span>
+                    <span>Play</span>
                   </button>
                 </div>
               </section>

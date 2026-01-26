@@ -1,0 +1,193 @@
+.ttt-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.ttt-modal {
+  position: relative;
+  width: 100%;
+  max-width: 340px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.ttt-close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.5rem;
+  cursor: pointer;
+  border-radius: 0.375rem;
+  transition: all 0.15s ease;
+}
+
+.ttt-close:hover {
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+}
+
+.ttt-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.ttt-header h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.ttt-mode-toggle {
+  padding: 0.375rem 0.75rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ttt-mode-toggle:hover {
+  background: var(--border);
+  color: var(--text-primary);
+}
+
+.ttt-scores {
+  display: flex;
+  justify-content: space-around;
+  padding: 0.75rem;
+  background: var(--bg-secondary);
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.ttt-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.ttt-score-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.ttt-score--ties .ttt-score-label {
+  color: var(--text-muted);
+}
+
+.ttt-score-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.ttt-best-streak {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--accent);
+  padding: 0.375rem;
+  background: rgba(212, 162, 89, 0.1);
+  border-radius: 0.375rem;
+  margin-bottom: 0.75rem;
+}
+
+.ttt-status {
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+}
+
+.ttt-status--winner {
+  background: var(--accent);
+  color: #1a1a1a;
+}
+
+.ttt-board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.ttt-cell {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-secondary);
+  border: 2px solid var(--border);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ttt-cell:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: var(--bg-card);
+}
+
+.ttt-cell:disabled {
+  cursor: default;
+}
+
+.ttt-cell--filled {
+  cursor: default;
+}
+
+.ttt-cell--winner {
+  background: rgba(212, 162, 89, 0.2);
+  border-color: var(--accent);
+  box-shadow: 0 0 12px var(--accent-glow);
+}
+
+.ttt-mark {
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.ttt-mark--x {
+  color: var(--accent);
+}
+
+.ttt-mark--o {
+  color: var(--text-primary);
+}
+
+.ttt-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.ttt-actions .btn {
+  flex: 1;
+  padding: 0.75rem;
+}

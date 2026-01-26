@@ -13,6 +13,7 @@ import Journal from './pages/Journal'
 import Settings from './pages/Settings'
 import Guide from './pages/Guide'
 import EsotericTools from './pages/EsotericTools'
+import Play from './pages/Play'
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
             <Route path="/settings" element={<Settings />} />
             <Route path="/guide" element={<Guide />} />
             <Route path="/tools" element={<EsotericTools />} />
+            <Route path="/play" element={<Play />} />
           </Routes>
         </Layout>
       </ThemeProvider>

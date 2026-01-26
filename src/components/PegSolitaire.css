@@ -1,0 +1,229 @@
+.peg-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.peg-modal {
+  position: relative;
+  width: 100%;
+  max-width: 340px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.peg-close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.5rem;
+  cursor: pointer;
+  border-radius: 0.375rem;
+  transition: all 0.15s ease;
+}
+
+.peg-close:hover {
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+}
+
+.peg-header {
+  text-align: center;
+  margin-bottom: 0.75rem;
+}
+
+.peg-header h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 0.25rem;
+}
+
+.peg-instruction {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.peg-stats {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.peg-best {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--accent);
+  padding: 0.5rem;
+  background: rgba(212, 162, 89, 0.1);
+  border-radius: 0.375rem;
+  margin-bottom: 1rem;
+}
+
+.peg-board {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.5rem 0;
+  margin-bottom: 1rem;
+}
+
+.peg-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.peg-hole {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: var(--bg-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.peg-hole:disabled {
+  cursor: default;
+}
+
+.peg-hole--filled {
+  background: var(--bg-card);
+}
+
+.peg-hole--empty {
+  background: var(--bg-secondary);
+}
+
+.peg-hole--selectable:hover {
+  border-color: var(--accent);
+  transform: scale(1.05);
+}
+
+.peg-hole--selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 12px var(--accent-glow);
+}
+
+.peg-hole--valid-target {
+  border-color: rgba(92, 184, 92, 0.8);
+  background: rgba(92, 184, 92, 0.2);
+  animation: pulse-target 1s ease infinite;
+}
+
+@keyframes pulse-target {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(92, 184, 92, 0.4); }
+  50% { box-shadow: 0 0 10px 3px rgba(92, 184, 92, 0.2); }
+}
+
+.peg-hole--has-moves:not(.peg-hole--selected) {
+  border-color: var(--text-muted);
+}
+
+.peg-hole--has-moves:hover:not(.peg-hole--selected) {
+  border-color: var(--accent);
+}
+
+.peg {
+  font-size: 1.25rem;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.peg-hole--selected .peg {
+  color: var(--text-primary);
+  animation: peg-pulse 0.5s ease infinite;
+}
+
+@keyframes peg-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.peg-result {
+  text-align: center;
+  padding: 1rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.peg-result--genius {
+  background: rgba(212, 162, 89, 0.15);
+  border-color: var(--accent);
+}
+
+.result-emoji {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.result-rating {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.result-detail {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.peg-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.peg-actions .btn {
+  flex: 1;
+  padding: 0.75rem;
+}
+
+.peg-actions .btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.peg-reset-scores {
+  width: 100%;
+  margin-top: 0.75rem;
+  padding: 0.5rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.peg-reset-scores:hover {
+  border-color: var(--text-muted);
+  color: var(--text-secondary);
+}

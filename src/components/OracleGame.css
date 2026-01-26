@@ -1,0 +1,411 @@
+.oracle-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.oracle-modal {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.oracle-close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.5rem;
+  cursor: pointer;
+  border-radius: 0.375rem;
+  transition: all 0.15s ease;
+}
+
+.oracle-close:hover {
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+}
+
+/* Settings Screen */
+.oracle-settings h2 {
+  text-align: center;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+
+.oracle-intro {
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: 1.25rem;
+  line-height: 1.5;
+}
+
+.oracle-setting {
+  margin-bottom: 1rem;
+}
+
+.oracle-setting label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.setting-slider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.setting-slider input[type="range"] {
+  flex: 1;
+  height: 4px;
+  background: var(--bg-secondary);
+  border-radius: 2px;
+  appearance: none;
+}
+
+.setting-slider input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  background: var(--accent);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.setting-slider span {
+  min-width: 2rem;
+  text-align: center;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.setting-toggle {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.setting-toggle button {
+  flex: 1;
+  padding: 0.5rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.setting-toggle button:hover {
+  border-color: var(--text-muted);
+}
+
+.setting-toggle button.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg-primary);
+  font-weight: 500;
+}
+
+.ai-modes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ai-mode {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0.75rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+
+.ai-mode:hover {
+  border-color: var(--text-muted);
+}
+
+.ai-mode.active {
+  border-color: var(--accent);
+  background: rgba(212, 162, 89, 0.1);
+}
+
+.ai-icon {
+  font-size: 1.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.ai-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.ai-desc {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.oracle-record {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem;
+  background: var(--bg-secondary);
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.oracle-start {
+  width: 100%;
+  padding: 0.875rem;
+  background: var(--accent);
+  border: none;
+  border-radius: 0.5rem;
+  color: var(--bg-primary);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.oracle-start:hover {
+  filter: brightness(1.1);
+}
+
+.oracle-reset-scores {
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.oracle-reset-scores:hover {
+  border-color: var(--text-muted);
+  color: var(--text-secondary);
+}
+
+/* Game Screen */
+.oracle-game {
+  display: flex;
+  flex-direction: column;
+}
+
+.oracle-header {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.oracle-header h2 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 0.25rem;
+}
+
+.oracle-info {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  font-size: 0.75rem;
+}
+
+.oracle-remaining {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.oracle-rules {
+  color: var(--text-muted);
+}
+
+.oracle-objects {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1.5rem 1rem;
+  min-height: 120px;
+  background: var(--bg-secondary);
+  border-radius: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.oracle-object {
+  font-size: 1.25rem;
+  color: var(--accent);
+  animation: objectAppear 0.2s ease;
+}
+
+@keyframes objectAppear {
+  from { opacity: 0; transform: scale(0.5); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.oracle-last-move {
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+.oracle-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.oracle-select {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.oracle-select label {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.amount-buttons {
+  display: flex;
+  gap: 0.375rem;
+  flex: 1;
+}
+
+.amount-btn {
+  flex: 1;
+  padding: 0.625rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.amount-btn:hover {
+  border-color: var(--text-muted);
+}
+
+.amount-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg-primary);
+}
+
+.oracle-take {
+  width: 100%;
+  padding: 0.875rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.oracle-take:hover {
+  border-color: var(--accent);
+  background: var(--border);
+}
+
+.oracle-thinking {
+  text-align: center;
+  padding: 1.5rem;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  font-style: italic;
+  animation: pulse 1.5s ease infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+/* Result Screen */
+.oracle-result {
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  text-align: center;
+}
+
+.oracle-result--win {
+  background: rgba(92, 184, 92, 0.1);
+  border: 1px solid rgba(92, 184, 92, 0.3);
+}
+
+.oracle-result--loss {
+  background: rgba(212, 162, 89, 0.1);
+  border: 1px solid rgba(212, 162, 89, 0.3);
+}
+
+.result-text {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+}
+
+.result-hint {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 1rem;
+  font-style: italic;
+}
+
+.result-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.result-actions .btn {
+  flex: 1;
+  padding: 0.75rem;
+}

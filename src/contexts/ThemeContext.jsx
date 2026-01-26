@@ -188,7 +188,8 @@ export const PAGES = [
   { id: 'links', name: 'Links' },
   { id: 'calendar', name: 'Calendar' },
   { id: 'settings', name: 'Settings' },
-  { id: 'tools', name: 'Esoteric Tools' }
+  { id: 'tools', name: 'Esoteric Tools' },
+  { id: 'play', name: 'Play' }
 ]
 
 const STORAGE_KEY = 'sanctum-theme-settings'
@@ -203,10 +204,9 @@ export function ThemeProvider({ children }) {
     } catch (e) {
       console.error('Error loading theme settings:', e)
     }
-    // Default: dark theme globally, yellow for daily
+    // Default: dark theme globally
     return {
-      global: 'dark',
-      daily: 'yellow'
+      global: 'dark'
     }
   })
 
