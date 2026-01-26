@@ -1,0 +1,90 @@
+.rate-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: rateOverlayFadeIn 0.2s ease;
+}
+
+@keyframes rateOverlayFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.rate-modal {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  padding: 2rem;
+  text-align: center;
+  min-width: 280px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  animation: rateModalSlideUp 0.2s ease;
+}
+
+@keyframes rateModalSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.rate-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 1.5rem 0;
+}
+
+.rate-stars {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.rate-star {
+  background: none;
+  border: none;
+  font-size: 2.5rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.25rem;
+  transition: transform 0.15s ease, color 0.15s ease;
+  line-height: 1;
+}
+
+.rate-star:hover {
+  transform: scale(1.15);
+}
+
+.rate-star--filled {
+  color: var(--accent);
+}
+
+.rate-thanks {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+}
+
+.rate-thanks-icon {
+  font-size: 2rem;
+  color: var(--accent);
+}
+
+.rate-thanks p {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin: 0;
+}

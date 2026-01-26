@@ -10,7 +10,7 @@
     <title>Sanctum</title>
   </head>
   <body>
-    <!-- Hidden form for Netlify Forms detection (SPA) -->
+    <!-- Hidden forms for Netlify Forms detection (SPA) -->
     <form name="oracle-whisper" data-netlify="true" data-netlify-honeypot="bot-field" hidden>
       <input type="hidden" name="form-name" value="oracle-whisper" />
       <input type="text" name="bot-field" />
@@ -18,6 +18,15 @@
       <input type="text" name="section" />
       <textarea name="message"></textarea>
       <input type="text" name="timestamp" />
+    </form>
+
+    <form name="app-rating" data-netlify="true" hidden>
+      <input type="hidden" name="form-name" value="app-rating" />
+      <input type="number" name="rating" />
+      <input type="text" name="timestamp" />
+      <input type="text" name="userAgent" />
+      <input type="text" name="platform" />
+      <input type="text" name="language" />
     </form>
 
     <div id="root"></div>

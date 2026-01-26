@@ -290,6 +290,42 @@
   margin-bottom: 0.75rem;
 }
 
+.support-buttons {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.support-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.support-btn:hover {
+  background: var(--bg-card);
+  border-color: var(--accent);
+}
+
+.support-btn:active {
+  transform: scale(0.98);
+}
+
+.support-btn-icon {
+  font-size: 1rem;
+  color: var(--accent);
+}
+
 .nav-toggles {
   display: flex;
   flex-direction: column;
@@ -365,6 +401,32 @@
   color: var(--text-muted);
 }
 
+.nav-toggle--hidden {
+  opacity: 0.7;
+}
+
+.nav-toggle--hidden:hover {
+  opacity: 1;
+}
+
+.nav-toggle-visit {
+  padding: 0.25rem 0.5rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+  color: var(--accent);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.nav-toggle-visit:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg-primary);
+}
+
 .settings-drawer-links {
   display: flex;
   flex-direction: column;
@@ -395,6 +457,190 @@
   font-size: 1.125rem;
   width: 1.5rem;
   text-align: center;
+}
+
+.settings-drawer-link--subtle {
+  opacity: 0.6;
+  font-size: 0.8125rem;
+}
+
+.settings-drawer-link--subtle:hover {
+  opacity: 1;
+}
+
+/* Danger zone */
+.settings-drawer-danger {
+  border-top: 1px solid var(--border);
+  padding-top: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.settings-drawer-danger h3 {
+  color: #e57373;
+}
+
+.settings-drawer-link--danger {
+  border: 1px solid rgba(229, 115, 115, 0.3);
+}
+
+.settings-drawer-link--danger:hover {
+  background: rgba(229, 115, 115, 0.1);
+  border-color: rgba(229, 115, 115, 0.5);
+}
+
+.delete-confirm {
+  background: var(--bg-secondary);
+  border: 1px solid rgba(229, 115, 115, 0.3);
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+.delete-confirm-text {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}
+
+.delete-confirm-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.btn-danger {
+  background: #e57373;
+  color: white;
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.btn-danger:hover {
+  background: #ef5350;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-secondary:hover {
+  background: var(--bg-card);
+  border-color: var(--text-muted);
+}
+
+/* Version display */
+.settings-drawer-version {
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  opacity: 0.6;
+  letter-spacing: 0.05em;
+}
+
+/* Account section in drawer */
+.account-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: var(--bg-secondary);
+  border-radius: 0.5rem;
+}
+
+.account-summary-avatar {
+  width: 2.25rem;
+  height: 2.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent);
+  color: #1a1a1a;
+  border-radius: 50%;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.account-summary-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.account-summary-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.account-summary-email {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.account-manage-btn {
+  padding: 0.375rem 0.75rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.account-manage-btn:hover {
+  background: var(--bg-card);
+  border-color: var(--accent);
+}
+
+.account-signin-prompt {
+  padding: 0.75rem;
+  background: var(--bg-secondary);
+  border-radius: 0.5rem;
+  text-align: center;
+}
+
+.account-signin-prompt p {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  margin: 0 0 0.75rem 0;
+}
+
+.account-signin-btn-small {
+  padding: 0.5rem 1rem;
+  font-size: 0.8125rem;
+}
+
+.account-not-configured-small {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-style: italic;
+  margin: 0;
 }
 
 /* Desktop adjustments */

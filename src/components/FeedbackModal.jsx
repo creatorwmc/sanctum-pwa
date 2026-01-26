@@ -1,5 +1,8 @@
 import { useState } from 'react'
-import { db } from '../db'
+import emailjs from '@emailjs/browser'
+import { db, queries } from '../db'
+import { getLocalDateString } from '../utils/dateUtils'
+import { EMAILJS_CONFIG } from '../config/emailjs'
 import StoneIcon from './StoneIcon'
 import './FeedbackModal.css'
 
@@ -24,6 +27,8 @@ function FeedbackModal({ isOpen, onClose }) {
   const [submitted, setSubmitted] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [logAsPractice, setLogAsPractice] = useState(true)
+  const [practiceLogged, setPracticeLogged] = useState(false)
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -33,48 +38,110 @@ function FeedbackModal({ isOpen, onClose }) {
     setError('')
 
     const timestamp = new Date().toISOString()
-    const formData = {
-      'form-name': 'oracle-whisper',
-      name: name.trim() || 'Anonymous',
-      message: message.trim(),
-      section: section || 'general',
-      timestamp
+    const senderName = name.trim() || 'Anonymous'
+    const sectionName = section || 'general'
+
+    let emailSent = false
+
+    // Try EmailJS if configured
+    if (EMAILJS_CONFIG.ENABLED) {
+      try {
+        await emailjs.send(
+          EMAILJS_CONFIG.SERVICE_ID,
+          EMAILJS_CONFIG.TEMPLATE_ID,
+          {
+            to_email: 'creatorwmc@gmail.com',
+            from_name: senderName,
+            section: sectionName,
+            message: message.trim(),
+            timestamp: new Date().toLocaleString(),
+            user_agent: navigator.userAgent
+          },
+          EMAILJS_CONFIG.PUBLIC_KEY
+        )
+        emailSent = true
+      } catch (err) {
+        console.error('EmailJS error:', err)
+      }
     }
 
-    // Encode form data for submission
-    const encode = (data) => {
-      return Object.keys(data)
-        .map(key => encodeURIComponent(key) + '=' + encodeURIComponent(data[key]))
-        .join('&')
-    }
+    // Fallback to Netlify Forms
+    if (!emailSent) {
+      const formData = {
+        'form-name': 'oracle-whisper',
+        name: senderName,
+        message: message.trim(),
+        section: sectionName,
+        timestamp
+      }
 
-    let netlifySuccess = false
+      const encode = (data) => {
+        return Object.keys(data)
+          .map(key => encodeURIComponent(key) + '=' + encodeURIComponent(data[key]))
+          .join('&')
+      }
 
-    try {
-      // Submit to Netlify Forms
-      const response = await fetch('/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: encode(formData)
-      })
-
-      netlifySuccess = response.ok
-    } catch (err) {
-      console.error('Netlify submission error:', err)
+      try {
+        const response = await fetch('/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: encode(formData)
+        })
+        emailSent = response.ok
+      } catch (err) {
+        console.error('Netlify submission error:', err)
+      }
     }
 
     // Always save locally as backup
     try {
       await db.add('feedback', {
-        name: name.trim() || 'Anonymous',
+        name: senderName,
         message: message.trim(),
-        section: section || 'general',
+        section: sectionName,
         timestamp,
         userAgent: navigator.userAgent,
-        sentToNetlify: netlifySuccess
+        emailSent
       })
     } catch (err) {
       console.error('Local save error:', err)
+    }
+
+    // If logging as practice, save to journal and daily log
+    if (logAsPractice && message.trim()) {
+      try {
+        // Save to journal
+        const today = getLocalDateString()
+        await db.add('journal', {
+          type: 'reflection',
+          title: 'Feedback to Oracle',
+          content: message.trim(),
+          date: today,
+          tags: ['feedback-to-oracle', 'reflection']
+        })
+
+        // Log Integration Journaling as today's practice
+        const todayLog = await queries.getTodayLog()
+
+        if (todayLog) {
+          if (!todayLog.practices?.includes('journaling')) {
+            await db.update('dailyLogs', {
+              ...todayLog,
+              practices: [...(todayLog.practices || []), 'journaling']
+            })
+          }
+        } else {
+          await db.add('dailyLogs', {
+            date: today,
+            practices: ['journaling'],
+            notes: ''
+          })
+        }
+
+        setPracticeLogged(true)
+      } catch (err) {
+        console.error('Error logging practice:', err)
+      }
     }
 
     // Show success even if Netlify failed (we have local backup)
@@ -91,6 +158,8 @@ function FeedbackModal({ isOpen, onClose }) {
     setSection('')
     setSubmitted(false)
     setError('')
+    setLogAsPractice(true)
+    setPracticeLogged(false)
     onClose()
   }
 
@@ -108,7 +177,7 @@ function FeedbackModal({ isOpen, onClose }) {
             <StoneIcon size={48} />
           </div>
           <h2>Whisper to the Oracle</h2>
-          <p className="feedback-subtitle">Speak freely - this reaches willing ears.</p>
+          <p className="feedback-subtitle">Speak freely - this reaches open ears.</p>
         </div>
 
         {!submitted ? (
@@ -164,6 +233,21 @@ function FeedbackModal({ isOpen, onClose }) {
 
             <input type="hidden" name="timestamp" value={new Date().toISOString()} />
 
+            {message.trim() && (
+              <label className="feedback-practice-checkbox">
+                <input
+                  type="checkbox"
+                  checked={logAsPractice}
+                  onChange={(e) => setLogAsPractice(e.target.checked)}
+                />
+                <span>Count this as today's Integration Journaling practice</span>
+              </label>
+            )}
+
+            {message.trim() && (
+              <p className="feedback-practice-hint">Your reflection is practice</p>
+            )}
+
             {error && <p className="feedback-error">{error}</p>}
 
             <button
@@ -176,6 +260,9 @@ function FeedbackModal({ isOpen, onClose }) {
           </form>
         ) : (
           <div className="feedback-success">
+            {practiceLogged && (
+              <div className="practice-logged-badge">Practice logged ✓</div>
+            )}
             <div className="success-icon">✦</div>
             <p className="success-message">
               Your whisper has been carried across the threshold.

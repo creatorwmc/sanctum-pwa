@@ -1,7 +1,18 @@
+/* Daily Log Styles */
 .daily-log {
+  /* Flame accent colors for active states */
+  --flame-orange: color-mix(in srgb, var(--accent) 70%, #ff6600 30%);
+  --ember: color-mix(in srgb, var(--accent) 50%, #cc4400 50%);
+
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+
+  /* Apply theme background */
+  background: var(--theme-bg-gradient, var(--bg-glow));
+  margin: -1rem;
+  padding: 1rem;
+  min-height: calc(100vh - 8rem);
 }
 
 .log-header {
@@ -12,6 +23,7 @@
 .log-header h2 {
   font-size: 1.25rem;
   font-weight: 600;
+  color: var(--accent);
 }
 
 .log-subtitle {
@@ -20,10 +32,122 @@
   margin-top: 0.25rem;
 }
 
+/* Stats Bar */
+.stats-bar {
+  display: flex;
+  justify-content: space-around;
+  padding: 0.75rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.125rem;
+}
+
+.stat-icon {
+  font-size: 1rem;
+}
+
+.stats-bar .stat-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.stats-bar .stat-label {
+  font-size: 0.625rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Stored Practice Banner */
+.stored-practice-banner {
+  padding: 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.stored-practice-banner p {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.75rem;
+}
+
+.use-stored-btn {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #1a1a1a;
+}
+
+.use-stored-btn:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+.stored-practice-used {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  color: var(--accent);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.used-icon {
+  font-size: 1.125rem;
+}
+
+/* Auto-used Notification */
+.auto-used-notification {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  color: var(--accent);
+  font-size: 0.8125rem;
+  text-align: center;
+  font-weight: 500;
+  animation: slideIn 0.3s ease-out;
+}
+
+.auto-used-icon {
+  font-size: 1rem;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .section-title {
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--text-muted);
+  color: var(--accent);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 0.75rem;
@@ -52,7 +176,7 @@
   color: var(--text-secondary);
   text-align: left;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .practice-btn:hover {
@@ -61,10 +185,20 @@
 }
 
 .practice-btn--active {
-  background: linear-gradient(135deg, var(--accent) 0%, #c4923f 100%);
+  background: linear-gradient(135deg, var(--accent) 0%, var(--flame-orange) 100%);
   border-color: var(--accent);
   color: #1a1a1a;
-  box-shadow: 0 2px 12px rgba(212, 162, 89, 0.3);
+  box-shadow: 0 2px 12px var(--accent-glow);
+  animation: flameGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes flameGlow {
+  from {
+    box-shadow: 0 2px 12px var(--accent-glow);
+  }
+  to {
+    box-shadow: 0 2px 20px var(--accent-glow), 0 0 30px var(--accent-glow);
+  }
 }
 
 .practice-btn--active .practice-icon {
@@ -168,7 +302,7 @@
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 0.75rem;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .progress-summary {
@@ -202,6 +336,7 @@
   gap: 0.375rem;
   padding: 0.375rem 0.75rem;
   background: var(--bg-secondary);
+  border: 1px solid var(--border);
   border-radius: 2rem;
   font-size: 0.6875rem;
   color: var(--text-secondary);
@@ -209,6 +344,198 @@
 
 .completed-chip svg {
   flex-shrink: 0;
+}
+
+/* Bonus Display */
+.bonus-display {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.bonus-today {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.bonus-label {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.bonus-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.bonus-scale {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.375rem;
+}
+
+.bonus-milestone {
+  flex: 1;
+  padding: 0.375rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  transition: all 0.2s ease;
+}
+
+.bonus-milestone.achieved {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #1a1a1a;
+  box-shadow: 0 0 8px var(--accent-glow);
+  font-weight: 600;
+}
+
+/* Conversion Section */
+.conversion-section {
+  margin-top: 0.5rem;
+}
+
+.conversion-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.conversion-info h4 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 0.25rem;
+}
+
+.conversion-info p {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+.convert-btn {
+  align-self: flex-start;
+}
+
+/* Info Section */
+.info-section {
+  margin-top: 0.5rem;
+}
+
+.info-card {
+  padding: 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+}
+
+.info-card h4 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.info-card > p {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  margin-bottom: 0.75rem;
+}
+
+.info-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 0.75rem 0;
+}
+
+.info-list li {
+  position: relative;
+  padding-left: 1rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.info-list li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+}
+
+.info-note {
+  font-size: 0.6875rem;
+  font-style: italic;
+  color: var(--text-muted);
+  opacity: 0.8;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modal-content {
+  width: 100%;
+  max-width: 320px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.modal-content h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.modal-content > p {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+.modal-stats {
+  padding: 0.75rem;
+  background: var(--bg-secondary);
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.modal-stats div {
+  margin: 0.25rem 0;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
 }
 
 @media (min-width: 480px) {
@@ -231,4 +558,153 @@
   .practices-grid {
     grid-template-columns: repeat(5, 1fr);
   }
+}
+
+/* Practice Detail Modal */
+.practice-detail-modal {
+  position: relative;
+  width: 100%;
+  max-width: 340px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-warm);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.practice-detail-modal--expanded {
+  max-width: 380px;
+}
+
+.detail-close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.5rem;
+  cursor: pointer;
+  border-radius: 0.375rem;
+  transition: all 0.15s ease;
+}
+
+.detail-close:hover {
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+}
+
+.detail-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.detail-icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.detail-header h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.detail-description {
+  font-size: 0.9375rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 1.25rem;
+}
+
+.examples-toggle {
+  display: block;
+  width: 100%;
+  padding: 0.75rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  color: var(--accent);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.examples-toggle:hover {
+  background: var(--border);
+  border-color: var(--accent);
+}
+
+.examples-section {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  animation: expandIn 0.3s ease;
+}
+
+@keyframes expandIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.examples-section h4 {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.75rem;
+}
+
+.examples-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.examples-list li {
+  position: relative;
+  padding-left: 1.25rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 0.5rem;
+}
+
+.examples-list li:last-child {
+  margin-bottom: 0;
+}
+
+.examples-list li::before {
+  content: '✦';
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+  font-size: 0.75rem;
+}
+
+.detail-toggle-btn {
+  width: 100%;
+  padding: 0.875rem;
+  font-size: 0.9375rem;
 }

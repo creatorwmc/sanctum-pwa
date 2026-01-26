@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { db, queries } from '../db'
+import { getLocalDateString } from '../utils/dateUtils'
 import './Journal.css'
 
 const ENTRY_TYPES = [
@@ -44,7 +45,7 @@ function Journal() {
         type: entryType,
         title: title.trim(),
         content: content.trim(),
-        date: new Date().toISOString().split('T')[0]
+        date: getLocalDateString()
       }
 
       await db.add('journal', entry)

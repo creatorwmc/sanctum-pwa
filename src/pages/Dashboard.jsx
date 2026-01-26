@@ -1,33 +1,58 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { db, queries } from '../db'
+import RatingPrompt, { shouldShowRatingPrompt, markRatingShown } from '../components/RatingPrompt'
+import FeedbackModal from '../components/FeedbackModal'
 import './Dashboard.css'
 
 function Dashboard() {
   const [stats, setStats] = useState({
     streak: 0,
+    longestStreak: 0,
+    bonusPoints: 0,
+    storedPractices: 0,
     todayLogged: false,
+    todayPracticeCount: 0,
     totalSessions: 0,
     recentEntries: []
   })
   const [loading, setLoading] = useState(true)
+  const [showRating, setShowRating] = useState(false)
+  const [showFeedback, setShowFeedback] = useState(false)
 
   useEffect(() => {
     loadDashboardData()
   }, [])
 
+  // Check if we should show rating prompt after data loads
+  useEffect(() => {
+    if (!loading && shouldShowRatingPrompt()) {
+      // Small delay so it doesn't feel abrupt
+      const timer = setTimeout(() => {
+        markRatingShown()
+        setShowRating(true)
+      }, 1500)
+      return () => clearTimeout(timer)
+    }
+  }, [loading])
+
   async function loadDashboardData() {
     try {
-      const [streak, todayLog, sessions, recentEntries] = await Promise.all([
+      const [streak, todayLog, sessions, recentEntries, practiceStats] = await Promise.all([
         queries.getPracticeStreak(),
         queries.getTodayLog(),
         db.getAll('sessions'),
-        queries.getRecentJournalEntries(3)
+        queries.getRecentJournalEntries(3),
+        queries.getPracticeStats()
       ])
 
       setStats({
         streak,
+        longestStreak: practiceStats.longestStreak || 0,
+        bonusPoints: practiceStats.bonusPoints || 0,
+        storedPractices: practiceStats.storedPractices || 0,
         todayLogged: !!todayLog,
+        todayPracticeCount: todayLog?.practices?.length || 0,
         totalSessions: sessions.length,
         recentEntries
       })
@@ -72,20 +97,66 @@ function Dashboard() {
         </Link>
       </div>
 
+      {/* Main Stats */}
       <div className="stats-grid">
-        <div className="stat-card">
+        <div className="stat-card stat-card--streak">
+          <span className="stat-icon">🔥</span>
           <span className="stat-value">{stats.streak}</span>
           <span className="stat-label">Day Streak</span>
         </div>
         <div className="stat-card">
-          <span className="stat-value">{stats.totalSessions}</span>
-          <span className="stat-label">Sessions</span>
+          <span className="stat-icon">🏆</span>
+          <span className="stat-value">{stats.longestStreak}</span>
+          <span className="stat-label">Best Streak</span>
         </div>
         <div className="stat-card">
           <span className={`stat-indicator ${stats.todayLogged ? 'stat-indicator--complete' : ''}`}>
             {stats.todayLogged ? '✓' : '○'}
           </span>
           <span className="stat-label">Today</span>
+        </div>
+      </div>
+
+      {/* Resources */}
+      <div className="resources-section">
+        <h3 className="section-title">Your Resources</h3>
+        <div className="resources-grid">
+          <div className="resource-card">
+            <div className="resource-header">
+              <span className="resource-icon">⭐</span>
+              <span className="resource-value">{stats.bonusPoints}</span>
+            </div>
+            <span className="resource-label">Bonus Points</span>
+            <p className="resource-hint">Earned through extra practices</p>
+          </div>
+          <div className="resource-card">
+            <div className="resource-header">
+              <span className="resource-icon">🏦</span>
+              <span className="resource-value">{stats.storedPractices}</span>
+            </div>
+            <span className="resource-label">Stored Practices</span>
+            <p className="resource-hint">Banked energy for rest days</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Today's Progress */}
+      {stats.todayLogged && (
+        <div className="today-progress">
+          <div className="progress-info">
+            <span className="progress-number">{stats.todayPracticeCount}</span>
+            <span className="progress-text">practices today</span>
+          </div>
+          <div className="progress-bonus">
+            +{queries.calculateBonusPoints(stats.todayPracticeCount)} bonus earned
+          </div>
+        </div>
+      )}
+
+      <div className="stats-row">
+        <div className="stat-mini">
+          <span className="stat-mini-value">{stats.totalSessions}</span>
+          <span className="stat-mini-label">Total Sessions</span>
         </div>
       </div>
 
@@ -120,6 +191,17 @@ function Dashboard() {
           <Link to="/library?tradition=Jedi" className="tradition-chip">Jedi</Link>
         </div>
       </section>
+
+      <RatingPrompt
+        isOpen={showRating}
+        onClose={() => setShowRating(false)}
+        onOpenFeedback={() => setShowFeedback(true)}
+      />
+
+      <FeedbackModal
+        isOpen={showFeedback}
+        onClose={() => setShowFeedback(false)}
+      />
     </div>
   )
 }

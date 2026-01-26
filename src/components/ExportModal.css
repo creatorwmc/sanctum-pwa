@@ -1,0 +1,180 @@
+.export-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: fadeIn 0.2s ease;
+}
+
+.export-modal {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.export-close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.5rem;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: all 0.15s ease;
+}
+
+.export-close:hover {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.export-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.export-header h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+
+.export-filename {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-family: monospace;
+  background: var(--bg-secondary);
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  display: inline-block;
+}
+
+.export-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.export-option {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+  width: 100%;
+}
+
+.export-option:hover:not(:disabled):not(.export-option--disabled) {
+  border-color: var(--accent);
+  background: var(--bg-card);
+}
+
+.export-option:disabled,
+.export-option--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.export-option--connect {
+  border-style: dashed;
+}
+
+.export-option-icon {
+  font-size: 1.5rem;
+  width: 2.5rem;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.export-option-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.export-option-title {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.export-option-desc {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.export-error {
+  color: #e57373;
+  font-size: 0.875rem;
+  text-align: center;
+  padding: 0.5rem;
+  background: rgba(229, 115, 115, 0.1);
+  border-radius: 0.5rem;
+}
+
+.export-success {
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.export-success .success-icon {
+  font-size: 3rem;
+  color: var(--success, #4caf50);
+  margin-bottom: 1rem;
+}
+
+.export-success p {
+  font-size: 1rem;
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+}
+
+.export-success .btn {
+  display: block;
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.export-success .btn-secondary {
+  background: transparent;
+  border: 1px solid var(--border);
+}
+
+.export-success .btn-secondary:hover {
+  background: var(--bg-secondary);
+}

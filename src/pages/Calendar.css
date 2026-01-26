@@ -1,13 +1,13 @@
 .calendar-page {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
 }
 
 .calendar-nav {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 0.5rem;
 }
 
 .nav-btn {
@@ -31,8 +31,10 @@
 }
 
 .month-title {
+  flex: 1;
   font-size: 1.125rem;
   font-weight: 600;
+  text-align: center;
 }
 
 .calendar-grid {
@@ -51,9 +53,9 @@
 }
 
 .weekday {
-  padding: 0.625rem;
+  padding: 0.5rem;
   text-align: center;
-  font-size: 0.6875rem;
+  font-size: 0.625rem;
   font-weight: 600;
   color: var(--text-muted);
   text-transform: uppercase;
@@ -66,14 +68,15 @@
 }
 
 .day-cell {
-  aspect-ratio: 1;
-  padding: 0.25rem;
+  min-height: 3.5rem;
+  padding: 0.2rem;
   border-right: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
   cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 0.1rem;
   transition: background-color 0.15s ease;
 }
 
@@ -99,35 +102,399 @@
   background: var(--accent);
   color: #1a1a1a;
   border-radius: 50%;
+  width: 1.25rem;
+  height: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.6875rem;
+  box-shadow: 0 0 8px rgba(212, 162, 89, 0.4);
+}
+
+.day-cell--major-phase {
+  background: rgba(168, 180, 196, 0.08);
+}
+
+.day-cell--eclipse {
+  background: rgba(180, 100, 100, 0.1);
+}
+
+.day-cell--seasonal {
+  background: rgba(139, 155, 122, 0.1);
+}
+
+.day-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 0.1rem;
+}
+
+.day-number {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.day-moon {
+  font-size: 0.625rem;
+  line-height: 1;
+  opacity: 0.8;
+}
+
+.day-zodiac {
+  font-size: 0.5rem;
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+.day-indicators {
+  display: flex;
+  gap: 0.1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 100%;
+}
+
+.indicator {
+  font-size: 0.5rem;
+  font-weight: 700;
+  width: 0.75rem;
+  height: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
+}
+
+.indicator--eclipse {
+  background: rgba(180, 100, 100, 0.8);
+  color: white;
+}
+
+.indicator--blue {
+  background: rgba(100, 140, 200, 0.8);
+  color: white;
+}
+
+.indicator--season {
+  background: rgba(139, 155, 122, 0.8);
+  color: white;
+}
+
+.ceremony-dot {
+  width: 0.3rem;
+  height: 0.3rem;
+  border-radius: 50%;
+}
+
+/* Lunar Legend */
+.lunar-legend {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  font-size: 0.6875rem;
+}
+
+.legend-section {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.legend-title {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.legend-items {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.legend-items span {
+  font-size: 0.75rem;
+}
+
+/* Day Detail View */
+.day-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.day-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.back-btn {
+  padding: 0.5rem 0.75rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.back-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.day-detail-date {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.lunar-detail-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.lunar-main {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.lunar-phase-large {
+  font-size: 3rem;
+  line-height: 1;
+}
+
+.lunar-info {
+  flex: 1;
+}
+
+.lunar-phase-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.lunar-illumination {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.lunar-waxwane {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.lunar-sign-detail {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.zodiac-symbol-large {
+  font-size: 2rem;
+  line-height: 1;
+  color: var(--accent);
+}
+
+.zodiac-info h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.zodiac-element {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.zodiac-description {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.special-event {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.special-event--eclipse {
+  background: rgba(180, 100, 100, 0.15);
+  color: #e57373;
+}
+
+.special-event--blue {
+  background: rgba(100, 140, 200, 0.15);
+  color: #64b5f6;
+}
+
+.special-event--season {
+  background: rgba(139, 155, 122, 0.15);
+  color: #a5d6a7;
+}
+
+.special-icon {
+  font-size: 1.25rem;
+}
+
+.special-event--season div {
+  display: flex;
+  flex-direction: column;
+}
+
+.event-name {
+  font-weight: 600;
+}
+
+.event-ceremony {
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+/* Day Events Section */
+.day-events-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 1rem;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.add-event-btn {
+  padding: 0.375rem 0.75rem;
+  background: var(--accent);
+  border: none;
+  border-radius: 0.375rem;
+  color: #1a1a1a;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.add-event-btn:hover {
+  background: #e0b369;
+}
+
+.no-events {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.event-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.event-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: var(--bg-secondary);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.event-item:hover {
+  background: var(--border);
+}
+
+.event-color {
+  width: 0.25rem;
+  height: 2rem;
+  border-radius: 0.125rem;
+  flex-shrink: 0;
+}
+
+.event-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.event-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.event-notes {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.event-annual {
+  font-size: 0.6875rem;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.event-delete {
   width: 1.5rem;
   height: 1.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
-  box-shadow: 0 0 12px rgba(212, 162, 89, 0.4);
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.25rem;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  cursor: pointer;
 }
 
-.day-number {
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--text-primary);
+.event-item:hover .event-delete {
+  opacity: 1;
 }
 
-.day-indicators {
-  display: flex;
-  gap: 0.125rem;
-  margin-top: 0.125rem;
-  flex-wrap: wrap;
-  justify-content: center;
+.event-delete:hover {
+  color: var(--danger);
 }
 
-.ceremony-dot {
-  width: 0.375rem;
-  height: 0.375rem;
-  border-radius: 50%;
-}
-
+/* Upcoming Section */
 .upcoming-section {
   padding: 1rem;
   background: var(--bg-card);
@@ -211,6 +578,7 @@
   font-size: 1.25rem;
   opacity: 0;
   transition: opacity 0.15s ease;
+  cursor: pointer;
 }
 
 .ceremony-item:hover .ceremony-delete {
@@ -221,10 +589,11 @@
   color: var(--danger);
 }
 
+/* Type Legend */
 .type-legend {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 0.75rem;
   padding: 0.75rem;
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -281,4 +650,329 @@
 .form-actions {
   display: flex;
   gap: 0.75rem;
+}
+
+.annual-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: var(--bg-secondary);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.annual-toggle input {
+  accent-color: var(--accent);
+}
+
+/* Responsive */
+@media (min-width: 480px) {
+  .day-cell {
+    min-height: 4rem;
+    padding: 0.25rem;
+  }
+
+  .day-number {
+    font-size: 0.75rem;
+  }
+
+  .day-moon {
+    font-size: 0.75rem;
+  }
+
+  .day-zodiac {
+    font-size: 0.625rem;
+  }
+
+  .indicator {
+    font-size: 0.5625rem;
+    width: 0.875rem;
+    height: 0.875rem;
+  }
+
+  .ceremony-dot {
+    width: 0.375rem;
+    height: 0.375rem;
+  }
+}
+
+/* ============ CALENDAR SETTINGS ============ */
+.calendar-settings {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+}
+
+.settings-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.settings-header h2 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.settings-hint {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+.calendar-toggles {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.calendar-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: var(--bg-secondary);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.calendar-toggle:hover {
+  background: var(--border);
+}
+
+.calendar-toggle input {
+  width: 1.125rem;
+  height: 1.125rem;
+  accent-color: var(--accent);
+}
+
+.toggle-icon {
+  font-size: 1.25rem;
+  width: 1.5rem;
+  text-align: center;
+}
+
+.toggle-name {
+  flex: 1;
+  font-size: 0.9375rem;
+  color: var(--text-primary);
+}
+
+.toggle-indicator {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  transition: background-color 0.15s ease;
+}
+
+.settings-note {
+  margin-top: 1.25rem;
+  padding: 0.75rem;
+  background: var(--bg-secondary);
+  border-radius: 0.5rem;
+}
+
+.settings-note p {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.settings-btn {
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  color: var(--text-muted);
+  font-size: 1.125rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.settings-btn:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 12px var(--accent-glow);
+}
+
+/* ============ HOLIDAY INDICATORS ============ */
+.indicator--holiday {
+  font-size: 0.5rem;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ============ RELIGIOUS HOLIDAYS SECTION ============ */
+.day-holidays-section {
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.day-holidays-section .section-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.75rem;
+}
+
+.holiday-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.holiday-item {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.625rem 0.75rem;
+  background: var(--bg-secondary);
+  border-radius: 0.5rem;
+}
+
+.holiday-color {
+  width: 0.375rem;
+  height: 1.5rem;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.holiday-icon {
+  font-size: 1rem;
+  width: 1.25rem;
+  text-align: center;
+}
+
+.holiday-name {
+  font-size: 0.875rem;
+  color: var(--text-primary);
+}
+
+/* Detailed holiday item (day detail view) */
+.holiday-item-detailed {
+  padding: 0.75rem;
+  background: var(--bg-secondary);
+  border-radius: 0.5rem;
+  border-left: 3px solid var(--accent);
+}
+
+.holiday-item-detailed .holiday-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.holiday-item-detailed .holiday-color {
+  width: 0.375rem;
+  height: 1.25rem;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.holiday-item-detailed .holiday-icon {
+  font-size: 1rem;
+}
+
+.holiday-item-detailed .holiday-name {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.holiday-description {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  margin: 0 0 0.375rem 0;
+  padding-left: 0.5rem;
+}
+
+.holiday-date-rule {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  font-style: italic;
+  margin: 0;
+  padding-left: 0.5rem;
+}
+
+/* Holiday Traditions Section */
+.holiday-traditions-section {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.traditions-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.5rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  width: 100%;
+}
+
+.traditions-toggle:hover {
+  background: var(--bg-secondary);
+  border-color: var(--accent);
+}
+
+.traditions-toggle--active {
+  background: var(--bg-secondary);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.traditions-toggle-icon {
+  font-size: 0.5rem;
+  transition: transform 0.15s ease;
+}
+
+.traditions-count {
+  color: var(--text-muted);
+  font-size: 0.6875rem;
+}
+
+.traditions-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: var(--bg-primary);
+  border-radius: 0.375rem;
+}
+
+.tradition-tag {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  font-size: 0.6875rem;
+  color: var(--text-secondary);
 }

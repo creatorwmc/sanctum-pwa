@@ -5,24 +5,36 @@
 }
 
 :root {
-  /* Deep forest floor - the sacred grove */
-  --bg-primary: #0d1210;
-  --bg-secondary: #141c18;
-  --bg-card: #1a241f;
+  /* Theme variables (can be overridden by ThemeContext) */
+  --theme-bg-primary: #0d1210;
+  --theme-bg-secondary: #141c18;
+  --theme-bg-card: #1a241f;
+  --theme-border: #2d3a32;
+  --theme-border-warm: #3d3428;
+  --theme-text-primary: #e8e0d4;
+  --theme-text-secondary: #b8a992;
+  --theme-text-muted: #7a6f5f;
+  --theme-accent: #d4a259;
+  --theme-bg-gradient: radial-gradient(ellipse at center, rgba(212, 162, 89, 0.08) 0%, transparent 70%);
+
+  /* Map theme variables to app variables */
+  --bg-primary: var(--theme-bg-primary);
+  --bg-secondary: var(--theme-bg-secondary);
+  --bg-card: var(--theme-bg-card);
 
   /* Parchment and candlelight text */
-  --text-primary: #e8e0d4;
-  --text-secondary: #b8a992;
-  --text-muted: #7a6f5f;
+  --text-primary: var(--theme-text-primary);
+  --text-secondary: var(--theme-text-secondary);
+  --text-muted: var(--theme-text-muted);
 
   /* Warm amber candlelight - the eternal flame */
-  --accent: #d4a259;
+  --accent: var(--theme-accent);
   --accent-hover: #e8b86d;
   --accent-glow: rgba(212, 162, 89, 0.15);
 
   /* Ancient wood and stone borders */
-  --border: #2d3a32;
-  --border-warm: #3d3428;
+  --border: var(--theme-border);
+  --border-warm: var(--theme-border-warm);
 
   /* Mystical accents */
   --mystic: #8b7bb5;
@@ -35,7 +47,7 @@
 
   /* Special surfaces */
   --bg-tree: linear-gradient(180deg, #1a241f 0%, #141c18 50%, #0d1210 100%);
-  --bg-glow: radial-gradient(ellipse at center, rgba(212, 162, 89, 0.08) 0%, transparent 70%);
+  --bg-glow: var(--theme-bg-gradient);
 }
 
 html, body {

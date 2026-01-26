@@ -9,10 +9,60 @@
   justify-content: flex-start;
 }
 
+.tradition-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
 .tradition-tabs {
   display: flex;
   flex-wrap: wrap;
   gap: 0.375rem;
+}
+
+.tradition-actions {
+  display: flex;
+  gap: 0.375rem;
+  justify-content: flex-end;
+}
+
+.edit-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  color: var(--accent);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.edit-btn:hover {
+  background: var(--bg-secondary);
+  border-color: var(--accent);
+}
+
+.tab-input {
+  padding: 0.375rem 0.5rem;
+  background: var(--bg-card);
+  border: 1px solid var(--accent);
+  border-radius: 2rem;
+  color: var(--text-primary);
+  font-size: 0.75rem;
+  width: 90px;
+  text-align: center;
+}
+
+.tab-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--accent-glow);
+}
+
+.tab-btn--disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 
 .tab-btn {

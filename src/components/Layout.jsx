@@ -2,6 +2,12 @@ import { useState, useEffect } from 'react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import StoneIcon from './StoneIcon'
 import FeedbackModal from './FeedbackModal'
+import RateModal from './RateModal'
+import PuzzleGame from './PuzzleGame'
+import AuthModal from './AuthModal'
+import { useAuth } from '../contexts/AuthContext'
+import { useTheme } from '../contexts/ThemeContext'
+import versionInfo from '../version.json'
 import './Layout.css'
 
 const ALL_NAV_ITEMS = [
@@ -10,11 +16,12 @@ const ALL_NAV_ITEMS = [
   { path: '/daily', label: 'Daily', icon: '☀', id: 'daily' },
   { path: '/journal', label: 'Journal', icon: '✎', id: 'journal' },
   { path: '/library', label: 'Library', icon: '▤', id: 'library' },
+  { path: '/resources', label: 'Resources', icon: '☁', id: 'resources' },
   { path: '/links', label: 'Links', icon: '⛓', id: 'links' },
   { path: '/calendar', label: 'Calendar', icon: '▦', id: 'calendar' }
 ]
 
-const DEFAULT_VISIBLE = ['home', 'timer', 'daily', 'journal', 'library', 'links', 'calendar']
+const DEFAULT_VISIBLE = ['home', 'timer', 'daily', 'journal', 'library', 'resources', 'calendar']
 
 // Default labels for nav items
 const DEFAULT_LABELS = {
@@ -23,18 +30,47 @@ const DEFAULT_LABELS = {
   daily: 'Daily',
   journal: 'Journal',
   library: 'Library',
+  resources: 'Resources',
   links: 'Links',
   calendar: 'Calendar'
+}
+
+// Map routes to page IDs for theming
+const ROUTE_TO_PAGE = {
+  '/': 'home',
+  '/timer': 'timer',
+  '/daily': 'daily',
+  '/journal': 'journal',
+  '/library': 'library',
+  '/resources': 'resources',
+  '/links': 'links',
+  '/calendar': 'calendar',
+  '/settings': 'settings',
+  '/guide': 'settings',
+  '/tools': 'tools'
 }
 
 function Layout({ children }) {
   const location = useLocation()
   const navigate = useNavigate()
+  const { user, isAuthenticated, firebaseAvailable } = useAuth()
+  const { getThemeForPage, applyTheme } = useTheme()
   const [feedbackOpen, setFeedbackOpen] = useState(false)
+  const [rateOpen, setRateOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [authModalOpen, setAuthModalOpen] = useState(false)
   const [visibleNavItems, setVisibleNavItems] = useState(DEFAULT_VISIBLE)
   const [customLabels, setCustomLabels] = useState(DEFAULT_LABELS)
   const [editingLabels, setEditingLabels] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [puzzleOpen, setPuzzleOpen] = useState(false)
+
+  // Apply theme based on current route
+  useEffect(() => {
+    const pageId = ROUTE_TO_PAGE[location.pathname] || 'home'
+    const themeId = getThemeForPage(pageId)
+    applyTheme(themeId)
+  }, [location.pathname, getThemeForPage, applyTheme])
 
   // Load nav preferences from localStorage
   useEffect(() => {
@@ -97,6 +133,80 @@ function Layout({ children }) {
   function resetLabels() {
     setCustomLabels(DEFAULT_LABELS)
     localStorage.removeItem('sanctum-nav-labels')
+  }
+
+  // Share the app
+  async function handleShareApp() {
+    const shareData = {
+      title: 'Sanctum',
+      text: 'A sacred space for spiritual practice tracking',
+      url: 'https://sanctum-pwa-app.netlify.app'
+    }
+
+    try {
+      if (navigator.share && navigator.canShare(shareData)) {
+        await navigator.share(shareData)
+      } else {
+        // Fallback: copy to clipboard
+        await navigator.clipboard.writeText(shareData.url)
+        alert('Link copied to clipboard!')
+      }
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        // User didn't cancel, try clipboard fallback
+        try {
+          await navigator.clipboard.writeText(shareData.url)
+          alert('Link copied to clipboard!')
+        } catch {
+          alert('Share link: ' + shareData.url)
+        }
+      }
+    }
+  }
+
+  // Delete all data and uninstall
+  async function handleDeleteAllData() {
+    try {
+      // Clear IndexedDB
+      const databases = await indexedDB.databases()
+      for (const db of databases) {
+        if (db.name) {
+          indexedDB.deleteDatabase(db.name)
+        }
+      }
+
+      // Clear localStorage
+      localStorage.clear()
+
+      // Clear sessionStorage
+      sessionStorage.clear()
+
+      // Unregister service workers
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations()
+        for (const registration of registrations) {
+          await registration.unregister()
+        }
+      }
+
+      // Clear caches
+      if ('caches' in window) {
+        const cacheNames = await caches.keys()
+        for (const cacheName of cacheNames) {
+          await caches.delete(cacheName)
+        }
+      }
+
+      // Show success and instructions
+      alert('All data has been deleted.\n\nTo complete uninstall:\n• iOS: Long-press the app icon → Remove App\n• Android: Long-press → Uninstall\n• Desktop: Click the install icon in address bar → Uninstall')
+
+      // Redirect to home and reload
+      window.location.href = '/'
+      window.location.reload()
+    } catch (error) {
+      console.error('Error deleting data:', error)
+      alert('Error deleting some data. Please try again.')
+    }
   }
 
   // Get current page title
@@ -172,6 +282,70 @@ function Layout({ children }) {
 
             <div className="settings-drawer-content">
               <section className="settings-drawer-section">
+                <h3>Account</h3>
+                {isAuthenticated ? (
+                  <div className="account-summary">
+                    <div className="account-summary-avatar">
+                      {user?.displayName?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || '?'}
+                    </div>
+                    <div className="account-summary-info">
+                      {user?.displayName && <span className="account-summary-name">{user.displayName}</span>}
+                      <span className="account-summary-email">{user?.email}</span>
+                    </div>
+                    <button
+                      className="account-manage-btn"
+                      onClick={() => {
+                        setSettingsOpen(false)
+                        navigate('/settings')
+                      }}
+                    >
+                      Manage
+                    </button>
+                  </div>
+                ) : (
+                  <div className="account-signin-prompt">
+                    <p>Sign in to sync your practice across devices</p>
+                    {firebaseAvailable ? (
+                      <button
+                        className="btn btn-primary account-signin-btn-small"
+                        onClick={() => {
+                          setSettingsOpen(false)
+                          setAuthModalOpen(true)
+                        }}
+                      >
+                        Sign In
+                      </button>
+                    ) : (
+                      <p className="account-not-configured-small">Cloud sync not configured</p>
+                    )}
+                  </div>
+                )}
+              </section>
+
+              <section className="settings-drawer-section">
+                <h3>Support Sanctum</h3>
+                <div className="support-buttons">
+                  <button
+                    className="support-btn"
+                    onClick={() => {
+                      setSettingsOpen(false)
+                      setRateOpen(true)
+                    }}
+                  >
+                    <span className="support-btn-icon">★</span>
+                    <span>Rate</span>
+                  </button>
+                  <button
+                    className="support-btn"
+                    onClick={handleShareApp}
+                  >
+                    <span className="support-btn-icon">↗</span>
+                    <span>Share</span>
+                  </button>
+                </div>
+              </section>
+
+              <section className="settings-drawer-section">
                 <div className="settings-section-header">
                   <h3>Navigation</h3>
                   <div className="settings-section-actions">
@@ -194,14 +368,14 @@ function Layout({ children }) {
                 <p className="settings-drawer-hint">
                   {editingLabels
                     ? 'Tap a name to customize it'
-                    : 'Toggle which items appear in the bottom menu'}
+                    : 'Uncheck to hide from menu'}
                 </p>
                 <div className="nav-toggles">
-                  {ALL_NAV_ITEMS.map(item => (
+                  {ALL_NAV_ITEMS.filter(item => visibleNavItems.includes(item.id)).map(item => (
                     <label key={item.id} className="nav-toggle">
                       <input
                         type="checkbox"
-                        checked={visibleNavItems.includes(item.id)}
+                        checked={true}
                         onChange={() => toggleNavItem(item.id)}
                         disabled={item.id === 'home' || editingLabels}
                       />
@@ -224,9 +398,51 @@ function Layout({ children }) {
                 </div>
               </section>
 
+              {/* Hidden Pages - show navigation for pages not in bottom nav */}
+              {ALL_NAV_ITEMS.filter(item => !visibleNavItems.includes(item.id)).length > 0 && (
+                <section className="settings-drawer-section">
+                  <h3>Hidden Pages</h3>
+                  <p className="settings-drawer-hint">Check to restore to menu, or tap to visit</p>
+                  <div className="nav-toggles">
+                    {ALL_NAV_ITEMS.filter(item => !visibleNavItems.includes(item.id)).map(item => (
+                      <label key={item.id} className="nav-toggle nav-toggle--hidden">
+                        <input
+                          type="checkbox"
+                          checked={false}
+                          onChange={() => toggleNavItem(item.id)}
+                        />
+                        <span className="nav-toggle-icon">{item.icon}</span>
+                        <span className="nav-toggle-label">{getLabel(item.id)}</span>
+                        <button
+                          className="nav-toggle-visit"
+                          onClick={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation()
+                            setSettingsOpen(false)
+                            navigate(item.path)
+                          }}
+                        >
+                          Go
+                        </button>
+                      </label>
+                    ))}
+                  </div>
+                </section>
+              )}
+
               <section className="settings-drawer-section">
                 <h3>More Options</h3>
                 <div className="settings-drawer-links">
+                  <button
+                    className="settings-drawer-link"
+                    onClick={() => {
+                      setSettingsOpen(false)
+                      navigate('/tools')
+                    }}
+                  >
+                    <span>✡</span>
+                    <span>Esoteric Tools</span>
+                  </button>
                   <button
                     className="settings-drawer-link"
                     onClick={() => {
@@ -247,14 +463,64 @@ function Layout({ children }) {
                     <span><StoneIcon size={18} glow={false} /></span>
                     <span>Whisper to the Oracle</span>
                   </button>
+                  <button
+                    className="settings-drawer-link settings-drawer-link--subtle"
+                    onClick={() => {
+                      setSettingsOpen(false)
+                      setPuzzleOpen(true)
+                    }}
+                  >
+                    <span>✧</span>
+                    <span>Mindful Puzzle</span>
+                  </button>
                 </div>
               </section>
+
+              <section className="settings-drawer-section settings-drawer-danger">
+                <h3>Danger Zone</h3>
+                {!showDeleteConfirm ? (
+                  <button
+                    className="settings-drawer-link settings-drawer-link--danger"
+                    onClick={() => setShowDeleteConfirm(true)}
+                  >
+                    <span>🗑</span>
+                    <span>Delete All Data & Uninstall</span>
+                  </button>
+                ) : (
+                  <div className="delete-confirm">
+                    <p className="delete-confirm-text">
+                      This will permanently delete all your data including journal entries, meditation sessions, and practice logs. This cannot be undone.
+                    </p>
+                    <div className="delete-confirm-buttons">
+                      <button
+                        className="btn btn-danger"
+                        onClick={handleDeleteAllData}
+                      >
+                        Yes, Delete Everything
+                      </button>
+                      <button
+                        className="btn btn-secondary"
+                        onClick={() => setShowDeleteConfirm(false)}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </section>
+
+              <div className="settings-drawer-version">
+                v{versionInfo.version}
+              </div>
             </div>
           </div>
         </div>
       )}
 
       <FeedbackModal isOpen={feedbackOpen} onClose={() => setFeedbackOpen(false)} />
+      <RateModal isOpen={rateOpen} onClose={() => setRateOpen(false)} />
+      <PuzzleGame isOpen={puzzleOpen} onClose={() => setPuzzleOpen(false)} />
+      <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
     </div>
   )
 }

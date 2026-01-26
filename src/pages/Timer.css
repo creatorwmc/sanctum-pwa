@@ -224,6 +224,427 @@
   max-width: 200px;
 }
 
+/* Interval Sounds */
+.interval-sounds {
+  width: 100%;
+  max-width: 320px;
+}
+
+.interval-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.interval-toggle:hover {
+  border-color: var(--accent);
+}
+
+.interval-toggle--active {
+  border-color: var(--accent);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.interval-toggle-icon {
+  font-size: 1rem;
+  color: var(--accent);
+}
+
+.interval-toggle-status {
+  flex: 1;
+  text-align: right;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.interval-toggle-arrow {
+  font-size: 0.625rem;
+  color: var(--text-muted);
+}
+
+.interval-settings {
+  background: var(--bg-card);
+  border: 1px solid var(--accent);
+  border-top: none;
+  border-radius: 0 0 0.5rem 0.5rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.interval-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.interval-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sound-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.sound-btn {
+  padding: 0.5rem 0.75rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.sound-btn:hover {
+  border-color: var(--text-muted);
+  color: var(--text-primary);
+}
+
+.sound-btn--active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #1a1a1a;
+  font-weight: 500;
+}
+
+.interval-options,
+.repeat-options {
+  display: flex;
+  gap: 0.375rem;
+}
+
+.interval-btn,
+.repeat-btn {
+  flex: 1;
+  padding: 0.5rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.interval-btn:hover,
+.repeat-btn:hover {
+  border-color: var(--text-muted);
+}
+
+.interval-btn--active,
+.repeat-btn--active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #1a1a1a;
+  font-weight: 500;
+}
+
+.repeat-options {
+  max-width: 150px;
+}
+
+/* Sound Mode Toggle */
+.sound-mode-toggle {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  background: var(--bg-secondary);
+  border-radius: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.mode-toggle-btn {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  background: transparent;
+  border: none;
+  border-radius: 0.375rem;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.mode-toggle-btn:hover {
+  color: var(--text-secondary);
+}
+
+.mode-toggle-btn--active {
+  background: var(--accent);
+  color: #1a1a1a;
+}
+
+/* Pattern List */
+.pattern-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.pattern-btn {
+  padding: 0.375rem 0.625rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  color: var(--text-secondary);
+  font-size: 0.6875rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pattern-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.pattern-btn--saved {
+  border-color: rgba(212, 162, 89, 0.3);
+}
+
+.pattern-item {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+}
+
+.pattern-delete-btn {
+  width: 1.25rem;
+  height: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pattern-delete-btn:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+/* Custom Events List */
+.custom-events-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.custom-event {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.625rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+}
+
+.event-time {
+  min-width: 2.5rem;
+  font-weight: 600;
+  font-size: 0.75rem;
+  color: var(--accent);
+}
+
+.event-sound {
+  flex: 1;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.event-repeats {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+}
+
+.event-edit-btn,
+.event-delete-btn {
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.event-edit-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.event-delete-btn:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.no-events-hint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Add Event Form */
+.add-event-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+}
+
+.event-form-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.event-form-row label {
+  min-width: 4.5rem;
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+}
+
+.event-select {
+  flex: 1;
+  padding: 0.375rem 0.5rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+  color: var(--text-primary);
+  font-size: 0.75rem;
+}
+
+.event-repeat-btns {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.event-repeat-btns .repeat-btn {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.6875rem;
+}
+
+.event-form-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.event-add-btn {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+}
+
+/* Timeline Preview */
+.timeline-preview {
+  padding: 0.75rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+}
+
+.timeline-bar {
+  position: relative;
+  height: 1.5rem;
+  background: var(--bg-primary);
+  border-radius: 0.25rem;
+  margin-bottom: 0.375rem;
+}
+
+.timeline-marker {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.timeline-dot {
+  width: 0.625rem;
+  height: 0.625rem;
+  background: var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 0 6px var(--accent-glow);
+}
+
+.timeline-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.625rem;
+  color: var(--text-muted);
+}
+
+/* Save Pattern */
+.save-pattern-form {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.pattern-name-input {
+  flex: 1;
+  min-width: 120px;
+  padding: 0.375rem 0.5rem;
+  font-size: 0.75rem;
+}
+
+.save-pattern-btn {
+  width: 100%;
+  font-size: 0.75rem;
+}
+
+.clear-events-btn {
+  width: 100%;
+  padding: 0.5rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  color: var(--text-muted);
+  font-size: 0.6875rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.clear-events-btn:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
 /* Timer Controls */
 .timer-controls {
   display: flex;

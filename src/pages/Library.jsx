@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { db } from '../db'
 import './Library.css'
 
-const TRADITIONS = [
+const DEFAULT_TRADITIONS = [
   { id: 'all', label: 'All' },
   { id: 'BOTA', label: 'BOTA' },
   { id: 'Kabbalah', label: 'Kabbalah' },
@@ -13,6 +13,11 @@ const TRADITIONS = [
   { id: 'Jedi', label: 'Jedi/Metaphor' }
 ]
 
+const DEFAULT_LABELS = DEFAULT_TRADITIONS.reduce((acc, t) => {
+  acc[t.id] = t.label
+  return acc
+}, {})
+
 function Library() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [documents, setDocuments] = useState([])
@@ -20,6 +25,10 @@ function Library() {
   const [showForm, setShowForm] = useState(false)
   const [editDoc, setEditDoc] = useState(null)
   const [loading, setLoading] = useState(true)
+
+  // Custom labels state
+  const [customLabels, setCustomLabels] = useState(DEFAULT_LABELS)
+  const [editingLabels, setEditingLabels] = useState(false)
 
   // Form state
   const [title, setTitle] = useState('')
@@ -29,6 +38,16 @@ function Library() {
 
   useEffect(() => {
     loadDocuments()
+    // Load custom labels from localStorage
+    const savedLabels = localStorage.getItem('sanctum-tradition-labels')
+    if (savedLabels) {
+      try {
+        const parsed = JSON.parse(savedLabels)
+        setCustomLabels({ ...DEFAULT_LABELS, ...parsed })
+      } catch (e) {
+        console.error('Error loading tradition labels:', e)
+      }
+    }
   }, [])
 
   useEffect(() => {
@@ -111,6 +130,21 @@ function Library() {
     }
   }
 
+  function getLabel(id) {
+    return customLabels[id] || DEFAULT_LABELS[id]
+  }
+
+  function updateLabel(id, newLabel) {
+    const updated = { ...customLabels, [id]: newLabel || DEFAULT_LABELS[id] }
+    setCustomLabels(updated)
+    localStorage.setItem('sanctum-tradition-labels', JSON.stringify(updated))
+  }
+
+  function resetLabels() {
+    setCustomLabels(DEFAULT_LABELS)
+    localStorage.removeItem('sanctum-tradition-labels')
+  }
+
   const filteredDocs = filter === 'all'
     ? documents
     : documents.filter(d => d.tradition === filter)
@@ -132,16 +166,43 @@ function Library() {
             </button>
           </div>
 
-          <div className="tradition-tabs">
-            {TRADITIONS.map(t => (
+          <div className="tradition-header">
+            <div className="tradition-tabs">
+              {DEFAULT_TRADITIONS.map(t => (
+                editingLabels && t.id !== 'all' ? (
+                  <input
+                    key={t.id}
+                    type="text"
+                    className="tab-input"
+                    value={getLabel(t.id)}
+                    onChange={(e) => updateLabel(t.id, e.target.value)}
+                    placeholder={DEFAULT_LABELS[t.id]}
+                    maxLength={15}
+                  />
+                ) : (
+                  <button
+                    key={t.id}
+                    onClick={() => !editingLabels && handleFilterChange(t.id)}
+                    className={`tab-btn ${filter === t.id ? 'tab-btn--active' : ''} ${editingLabels ? 'tab-btn--disabled' : ''}`}
+                  >
+                    {getLabel(t.id)}
+                  </button>
+                )
+              ))}
+            </div>
+            <div className="tradition-actions">
+              {editingLabels && (
+                <button className="edit-btn" onClick={resetLabels}>
+                  Reset
+                </button>
+              )}
               <button
-                key={t.id}
-                onClick={() => handleFilterChange(t.id)}
-                className={`tab-btn ${filter === t.id ? 'tab-btn--active' : ''}`}
+                className="edit-btn"
+                onClick={() => setEditingLabels(!editingLabels)}
               >
-                {t.label}
+                {editingLabels ? 'Done' : 'Edit'}
               </button>
-            ))}
+            </div>
           </div>
 
           {filteredDocs.length === 0 ? (
@@ -153,7 +214,7 @@ function Library() {
               {filteredDocs.map(doc => (
                 <article key={doc.id} className="doc-card" onClick={() => startEdit(doc)}>
                   <div className="doc-header">
-                    <span className="doc-tradition">{doc.tradition}</span>
+                    <span className="doc-tradition">{getLabel(doc.tradition)}</span>
                     <span className="doc-date">
                       {new Date(doc.createdAt).toLocaleDateString()}
                     </span>
@@ -199,8 +260,8 @@ function Library() {
               onChange={(e) => setTradition(e.target.value)}
               className="input"
             >
-              {TRADITIONS.filter(t => t.id !== 'all').map(t => (
-                <option key={t.id} value={t.id}>{t.label}</option>
+              {DEFAULT_TRADITIONS.filter(t => t.id !== 'all').map(t => (
+                <option key={t.id} value={t.id}>{getLabel(t.id)}</option>
               ))}
             </select>
           </div>

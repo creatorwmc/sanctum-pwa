@@ -1,0 +1,145 @@
+.guide-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.guide-header {
+  text-align: center;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 0.75rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+
+.back-link:hover {
+  color: var(--accent);
+}
+
+.guide-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.guide-subtitle {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.guide-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.guide-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.section-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.section-header:hover {
+  background: rgba(212, 162, 89, 0.05);
+}
+
+.section-header--active {
+  background: rgba(212, 162, 89, 0.1);
+  border-bottom: 1px solid var(--border);
+}
+
+.section-icon {
+  font-size: 1.25rem;
+}
+
+.section-title {
+  flex: 1;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.section-arrow {
+  font-size: 0.625rem;
+  color: var(--text-muted);
+}
+
+.section-content {
+  padding: 1rem 1.25rem 1.25rem;
+  background: var(--bg-secondary);
+}
+
+.content-paragraph {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+.content-paragraph:last-child {
+  margin-bottom: 0;
+}
+
+.content-paragraph strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.list-item {
+  display: block;
+  padding-left: 0.5rem;
+  margin: 0.25rem 0;
+  color: var(--text-secondary);
+}
+
+.list-item::before {
+  content: '';
+}
+
+.guide-footer {
+  text-align: center;
+  padding: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.guide-footer p {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* Mobile adjustments */
+@media (max-width: 480px) {
+  .section-header {
+    padding: 0.875rem;
+  }
+
+  .section-content {
+    padding: 0.875rem 1rem 1rem;
+  }
+
+  .content-paragraph {
+    font-size: 0.875rem;
+  }
+}

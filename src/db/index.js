@@ -1,7 +1,8 @@
 import { openDB } from 'idb'
+import { getLocalDateString, getYesterdayDateString, getLocalMonthString } from '../utils/dateUtils'
 
 const DB_NAME = 'sanctum-db'
-const DB_VERSION = 2
+const DB_VERSION = 5
 
 // Database schema definition
 const stores = {
@@ -11,7 +12,9 @@ const stores = {
   dailyLogs: 'id, date, *practices',
   ceremonies: 'id, date, type, title',
   journal: 'id, date, type, createdAt',
-  feedback: 'id, category, createdAt'
+  feedback: 'id, category, createdAt',
+  milestones: 'id, date, title, annual, createdAt',
+  practiceStats: 'id'
 }
 
 // Initialize the database
@@ -65,6 +68,28 @@ async function initDB() {
         const feedbackStore = db.createObjectStore('feedback', { keyPath: 'id' })
         feedbackStore.createIndex('category', 'category')
         feedbackStore.createIndex('createdAt', 'createdAt')
+      }
+
+      // Milestones store (annual personal milestones)
+      if (!db.objectStoreNames.contains('milestones')) {
+        const milestoneStore = db.createObjectStore('milestones', { keyPath: 'id' })
+        milestoneStore.createIndex('date', 'date')
+        milestoneStore.createIndex('annual', 'annual')
+        milestoneStore.createIndex('createdAt', 'createdAt')
+      }
+
+      // Practice stats store (streak tracking, bonus points, stored practices)
+      if (!db.objectStoreNames.contains('practiceStats')) {
+        db.createObjectStore('practiceStats', { keyPath: 'id' })
+      }
+
+      // Resources store (Google Drive files and manual links)
+      if (!db.objectStoreNames.contains('resources')) {
+        const resourceStore = db.createObjectStore('resources', { keyPath: 'id' })
+        resourceStore.createIndex('category', 'category')
+        resourceStore.createIndex('sourceType', 'sourceType') // 'drive' or 'manual'
+        resourceStore.createIndex('tags', 'tags', { multiEntry: true })
+        resourceStore.createIndex('createdAt', 'createdAt')
       }
     }
   })
@@ -151,7 +176,7 @@ export const db = {
 export const queries = {
   // Get today's daily log
   async getTodayLog() {
-    const today = new Date().toISOString().split('T')[0]
+    const today = getLocalDateString()
     const logs = await db.getByIndex('dailyLogs', 'date', today)
     return logs[0] || null
   },
@@ -192,16 +217,23 @@ export const queries = {
       .slice(0, limit)
   },
 
-  // Get practice streak
+  // Get practice streak (with stored practice support)
   async getPracticeStreak() {
     const database = await getDB()
     const logs = await database.getAll('dailyLogs')
+    const stats = await this.getPracticeStats()
 
-    if (logs.length === 0) return 0
+    // Get all dates with practices (including stored practice uses)
+    const practiceDates = new Set(logs.filter(l => l.practices?.length > 0).map(l => l.date))
 
-    const sortedDates = logs
-      .map(l => l.date)
-      .sort((a, b) => new Date(b) - new Date(a))
+    // Add dates where stored practices were used
+    if (stats.storedPracticeUses) {
+      stats.storedPracticeUses.forEach(date => practiceDates.add(date))
+    }
+
+    if (practiceDates.size === 0) return 0
+
+    const sortedDates = Array.from(practiceDates).sort((a, b) => new Date(b) - new Date(a))
 
     let streak = 0
     let currentDate = new Date()
@@ -222,6 +254,115 @@ export const queries = {
     }
 
     return streak
+  },
+
+  // Get practice stats (bonus points, stored practices, etc.)
+  async getPracticeStats() {
+    const database = await getDB()
+    let stats = await database.get('practiceStats', 'user-stats')
+
+    if (!stats) {
+      stats = {
+        id: 'user-stats',
+        longestStreak: 0,
+        bonusPoints: 0,
+        storedPractices: 1, // Start with 1
+        lastStoredPracticeRefresh: getLocalMonthString(), // YYYY-MM (local timezone)
+        storedPracticeUses: [], // dates where stored practices were used
+        lastCheckedDate: getLocalDateString() // Track last date app was used
+      }
+      await database.put('practiceStats', stats)
+    }
+
+    // Check if we need to refresh stored practice (monthly)
+    const currentMonth = getLocalMonthString()
+    if (stats.lastStoredPracticeRefresh !== currentMonth) {
+      stats.storedPractices = Math.min(stats.storedPractices + 1, 3) // Max 3 stored
+      stats.lastStoredPracticeRefresh = currentMonth
+      await database.put('practiceStats', stats)
+    }
+
+    return stats
+  },
+
+  // Update practice stats
+  async updatePracticeStats(updates) {
+    const database = await getDB()
+    const stats = await this.getPracticeStats()
+    const updatedStats = { ...stats, ...updates }
+    await database.put('practiceStats', updatedStats)
+    return updatedStats
+  },
+
+  // Calculate bonus points for a day
+  calculateBonusPoints(practiceCount) {
+    if (practiceCount < 2) return 0
+    // 2 practices = 1 point, 4 = 2, 6 = 3, 8 = 4, 10 = 5
+    return Math.min(Math.floor(practiceCount / 2), 5)
+  },
+
+  // Use a stored practice for a specific date
+  async useStoredPractice(dateString = null) {
+    const stats = await this.getPracticeStats()
+    if (stats.storedPractices <= 0) return false
+
+    const targetDate = dateString || getLocalDateString()
+    const uses = stats.storedPracticeUses || []
+
+    if (uses.includes(targetDate)) return false // Already used for this date
+
+    await this.updatePracticeStats({
+      storedPractices: stats.storedPractices - 1,
+      storedPracticeUses: [...uses, targetDate]
+    })
+    return true
+  },
+
+  // Check for missed days and auto-use stored practices
+  // Called on app load to maintain streak
+  async checkAndAutoUseStoredPractice() {
+    const stats = await this.getPracticeStats()
+    const today = getLocalDateString()
+    const yesterday = getYesterdayDateString()
+
+    // If we already checked today, skip
+    if (stats.lastCheckedDate === today) {
+      return { autoUsed: false, date: null }
+    }
+
+    // Update the last checked date
+    await this.updatePracticeStats({ lastCheckedDate: today })
+
+    // Check if yesterday had any practices
+    const database = await getDB()
+    const yesterdayLogs = await database.getAllFromIndex('dailyLogs', 'date', yesterday)
+    const yesterdayLog = yesterdayLogs[0]
+    const yesterdayHadPractices = yesterdayLog?.practices?.length > 0
+
+    // Check if stored practice was already used yesterday
+    const storedUsedYesterday = stats.storedPracticeUses?.includes(yesterday)
+
+    // If yesterday was missed and we have stored practices, auto-use one
+    if (!yesterdayHadPractices && !storedUsedYesterday && stats.storedPractices > 0) {
+      const success = await this.useStoredPractice(yesterday)
+      if (success) {
+        return { autoUsed: true, date: yesterday }
+      }
+    }
+
+    return { autoUsed: false, date: null }
+  },
+
+  // Convert bonus points to stored practice
+  async convertBonusToStored() {
+    const stats = await this.getPracticeStats()
+    if (stats.bonusPoints < 10) return false
+
+    await this.updatePracticeStats({
+      bonusPoints: stats.bonusPoints - 10,
+      storedPractices: stats.storedPractices + 1
+    })
+    return true
   }
 }
 
