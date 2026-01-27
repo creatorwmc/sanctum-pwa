@@ -712,6 +712,7 @@ function getChristianMoveableHolidays(year) {
 export const CALENDAR_TYPES = [
   { id: 'moon', name: 'Moon Phases', icon: '🌙', color: '#a8b4c4' },
   { id: 'moonSign', name: 'Moon Signs', icon: '♈', color: '#9b87b2' },
+  { id: 'dailyPractices', name: 'Daily Practices', icon: '☀', color: '#5cb85c' },
   { id: 'christian', name: 'Christian', icon: '✝', color: '#c9a227' },
   { id: 'buddhist', name: 'Buddhist', icon: '☸', color: '#ff9500' },
   { id: 'hindu', name: 'Hindu', icon: '🕉', color: '#ff6b35' },

@@ -132,6 +132,9 @@ function DailyLog() {
   const [detailPractice, setDetailPractice] = useState(null)
   const [showExamples, setShowExamples] = useState(false)
   const [lastTap, setLastTap] = useState({ id: null, time: 0 })
+  const [historyStats, setHistoryStats] = useState(null)
+  const [showHistory, setShowHistory] = useState(false)
+  const [selectedPeriod, setSelectedPeriod] = useState(30)
 
   const today = getLocalDateString()
   const displayDate = new Date().toLocaleDateString('en-US', {
@@ -152,9 +155,19 @@ function DailyLog() {
 
       await loadTodayLog()
       await loadStats()
+      await loadHistoryStats()
     }
     init()
   }, [])
+
+  async function loadHistoryStats() {
+    try {
+      const allStats = await queries.getPracticeCompletionStats([7, 30, 60, 180, 360])
+      setHistoryStats(allStats)
+    } catch (error) {
+      console.error('Error loading history stats:', error)
+    }
+  }
 
   async function loadTodayLog() {
     try {
@@ -468,6 +481,80 @@ function DailyLog() {
           </div>
         </section>
       )}
+
+      {/* Practice History Stats */}
+      <section className="history-section">
+        <button
+          className={`history-toggle ${showHistory ? 'history-toggle--active' : ''}`}
+          onClick={() => setShowHistory(!showHistory)}
+        >
+          <span className="history-toggle-icon">{showHistory ? '▼' : '▶'}</span>
+          <span>Practice History</span>
+        </button>
+
+        {showHistory && historyStats && (
+          <div className="history-content">
+            <div className="period-selector">
+              {[7, 30, 60, 180, 360].map(days => (
+                <button
+                  key={days}
+                  className={`period-btn ${selectedPeriod === days ? 'period-btn--active' : ''}`}
+                  onClick={() => setSelectedPeriod(days)}
+                >
+                  {days}d
+                </button>
+              ))}
+            </div>
+
+            {historyStats[selectedPeriod] && (
+              <>
+                <div className="history-summary">
+                  <div className="history-stat">
+                    <span className="history-stat-value">
+                      {historyStats[selectedPeriod].daysWithPractice}
+                    </span>
+                    <span className="history-stat-label">
+                      of {selectedPeriod} days practiced
+                    </span>
+                  </div>
+                  <div className="history-stat">
+                    <span className="history-stat-value">
+                      {Math.round((historyStats[selectedPeriod].daysWithPractice / selectedPeriod) * 100)}%
+                    </span>
+                    <span className="history-stat-label">
+                      completion rate
+                    </span>
+                  </div>
+                </div>
+
+                <div className="practice-history-grid">
+                  {PRACTICES.map(practice => {
+                    const count = historyStats[selectedPeriod].practiceCounts[practice.id] || 0
+                    const percentage = Math.round((count / selectedPeriod) * 100)
+                    return (
+                      <div key={practice.id} className="practice-history-item">
+                        <div className="practice-history-header">
+                          <span className="practice-history-icon">
+                            {practice.icon === 'shatkona' ? <ShaktonaIcon size={16} /> : practice.icon}
+                          </span>
+                          <span className="practice-history-label">{practice.label}</span>
+                        </div>
+                        <div className="practice-history-bar">
+                          <div
+                            className="practice-history-fill"
+                            style={{ width: `${percentage}%` }}
+                          />
+                        </div>
+                        <span className="practice-history-count">{count} days ({percentage}%)</span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+      </section>
 
       {/* Stored Practices Info */}
       <section className="info-section">

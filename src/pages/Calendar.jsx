@@ -13,6 +13,20 @@ const CEREMONY_TYPES = [
   { id: 'other', label: 'Other', color: '#8b7bb5' }
 ]
 
+// Practice types (mirrors DailyLog)
+const PRACTICE_TYPES = {
+  bath: { label: 'Ritual Bath', icon: '💧' },
+  meditation: { label: 'Meditation', icon: '🧘' },
+  vessel: { label: 'Vessel Work', icon: '⚱' },
+  breathwork: { label: 'Breathwork', icon: '🌬' },
+  study: { label: 'Study/Reading', icon: '📖' },
+  journaling: { label: 'Integration Journaling', icon: '✎' },
+  union: { label: 'Sacred Union', icon: '✡' },
+  tending: { label: 'Tending', icon: '🌱' },
+  tarot: { label: 'Tarot/Divination', icon: '🎴' },
+  ceremony: { label: 'Ceremonial Work', icon: '🕯' }
+}
+
 const CALENDAR_PREFS_KEY = 'sanctum-calendar-prefs'
 const DEFAULT_ENABLED = ['moon', 'moonSign']
 
@@ -69,6 +83,7 @@ function Calendar() {
   const [loading, setLoading] = useState(true)
   const [lunarData, setLunarData] = useState({})
   const [religiousHolidays, setReligiousHolidays] = useState([])
+  const [practiceLogsByDate, setPracticeLogsByDate] = useState({})
 
   // Calendar preferences
   const [enabledCalendars, setEnabledCalendars] = useState(() => {
@@ -92,6 +107,7 @@ function Calendar() {
     loadMilestones()
     loadLunarData()
     loadReligiousHolidays()
+    loadPracticeLogs()
   }, [currentDate, enabledCalendars])
 
   async function loadCeremonies() {
@@ -127,9 +143,31 @@ function Calendar() {
   function loadReligiousHolidays() {
     const year = currentDate.getFullYear()
     const month = currentDate.getMonth()
-    const religiousTypes = enabledCalendars.filter(c => !['moon', 'moonSign'].includes(c))
+    const religiousTypes = enabledCalendars.filter(c => !['moon', 'moonSign', 'dailyPractices'].includes(c))
     const holidays = getHolidaysForMonth(year, month, religiousTypes)
     setReligiousHolidays(holidays)
+  }
+
+  async function loadPracticeLogs() {
+    if (!enabledCalendars.includes('dailyPractices')) {
+      setPracticeLogsByDate({})
+      return
+    }
+
+    try {
+      const year = currentDate.getFullYear()
+      const month = currentDate.getMonth()
+      const logs = await queries.getPracticeLogsForMonth(year, month)
+
+      // Convert to map by date
+      const logMap = {}
+      logs.forEach(log => {
+        logMap[log.date] = log
+      })
+      setPracticeLogsByDate(logMap)
+    } catch (error) {
+      console.error('Error loading practice logs:', error)
+    }
   }
 
   function toggleCalendar(calendarId) {
@@ -175,12 +213,16 @@ function Calendar() {
       // Get religious holidays for this day
       const dayHolidays = religiousHolidays.filter(h => h.day === day)
 
+      // Get practice log for this day
+      const practiceLog = enabledCalendars.includes('dailyPractices') ? practiceLogsByDate[dateStr] : null
+
       days.push({
         day,
         date: dateStr,
         ceremonies: dayCeremonies,
         milestones: dayMilestones,
         holidays: dayHolidays,
+        practiceLog,
         lunar: enabledCalendars.includes('moon') ? (lunarData[dateStr] || null) : null,
         showMoonSign: enabledCalendars.includes('moonSign'),
         isToday: dateStr === todayStr
@@ -305,16 +347,18 @@ function Calendar() {
     return getDayLunarData(date)
   }
 
-  // Get ceremonies, milestones, and holidays for selected date
+  // Get ceremonies, milestones, holidays, and practices for selected date
   function getSelectedDayEvents() {
-    if (!selectedDate) return { ceremonies: [], milestones: [], holidays: [] }
+    if (!selectedDate) return { ceremonies: [], milestones: [], holidays: [], practices: [] }
     const monthDay = selectedDate.slice(5)
     const [year, month, day] = selectedDate.split('-').map(Number)
-    const religiousTypes = enabledCalendars.filter(c => !['moon', 'moonSign'].includes(c))
+    const religiousTypes = enabledCalendars.filter(c => !['moon', 'moonSign', 'dailyPractices'].includes(c))
+    const practiceLog = practiceLogsByDate[selectedDate]
     return {
       ceremonies: ceremonies.filter(c => c.date === selectedDate),
       milestones: milestones.filter(m => m.annual ? m.date.slice(5) === monthDay : m.date === selectedDate),
-      holidays: getHolidaysForDate(year, month - 1, day, religiousTypes)
+      holidays: getHolidaysForDate(year, month - 1, day, religiousTypes),
+      practices: practiceLog?.practices || []
     }
   }
 
@@ -399,6 +443,24 @@ function Calendar() {
                 {selectedDayEvents.holidays.map((holiday, idx) => (
                   <HolidayDetailCard key={idx} holiday={holiday} />
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* Daily Practices */}
+          {enabledCalendars.includes('dailyPractices') && selectedDayEvents.practices.length > 0 && (
+            <div className="day-practices-section">
+              <h3 className="section-title">Daily Practices Completed</h3>
+              <div className="practices-list">
+                {selectedDayEvents.practices.map(practiceId => {
+                  const practice = PRACTICE_TYPES[practiceId]
+                  return practice ? (
+                    <span key={practiceId} className="practice-chip">
+                      <span className="practice-chip-icon">{practice.icon}</span>
+                      <span className="practice-chip-label">{practice.label}</span>
+                    </span>
+                  ) : null
+                })}
               </div>
             </div>
           )}
@@ -605,6 +667,14 @@ function Calendar() {
                   )}
 
                   <div className="day-indicators">
+                    {dayInfo.practiceLog?.practices?.length > 0 && (
+                      <span
+                        className="indicator indicator--practice"
+                        title={`${dayInfo.practiceLog.practices.length} practices`}
+                      >
+                        {dayInfo.practiceLog.practices.length}
+                      </span>
+                    )}
                     {dayInfo.lunar?.eclipse && (
                       <span className="indicator indicator--eclipse" title={dayInfo.lunar.eclipse.name}>E</span>
                     )}

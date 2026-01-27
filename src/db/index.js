@@ -363,6 +363,67 @@ export const queries = {
       storedPractices: stats.storedPractices + 1
     })
     return true
+  },
+
+  // Get practice history for a time period (days back from today)
+  async getPracticeHistory(daysBack) {
+    const database = await getDB()
+    const logs = await database.getAll('dailyLogs')
+
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const startDate = new Date(today)
+    startDate.setDate(startDate.getDate() - daysBack)
+
+    // Filter logs within the date range
+    const filteredLogs = logs.filter(log => {
+      const logDate = new Date(log.date)
+      return logDate >= startDate && logDate <= today
+    })
+
+    // Count practices by ID
+    const practiceCounts = {}
+    let totalDaysWithPractice = 0
+
+    filteredLogs.forEach(log => {
+      if (log.practices && log.practices.length > 0) {
+        totalDaysWithPractice++
+        log.practices.forEach(practiceId => {
+          practiceCounts[practiceId] = (practiceCounts[practiceId] || 0) + 1
+        })
+      }
+    })
+
+    return {
+      daysBack,
+      totalDays: daysBack,
+      daysWithPractice: totalDaysWithPractice,
+      practiceCounts,
+      logs: filteredLogs
+    }
+  },
+
+  // Get all practice logs for calendar display (returns map of date -> practices)
+  async getPracticeLogsForMonth(year, month) {
+    const database = await getDB()
+    const logs = await database.getAll('dailyLogs')
+
+    // Filter to the specified month
+    return logs.filter(log => {
+      const [logYear, logMonth] = log.date.split('-').map(Number)
+      return logYear === year && logMonth === month + 1 // month is 0-indexed in JS
+    })
+  },
+
+  // Get practice completion stats for each practice type
+  async getPracticeCompletionStats(periods = [7, 30, 60, 180, 360]) {
+    const stats = {}
+
+    for (const days of periods) {
+      stats[days] = await this.getPracticeHistory(days)
+    }
+
+    return stats
   }
 }
 
