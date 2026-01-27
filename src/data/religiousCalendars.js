@@ -547,6 +547,167 @@ const ISLAMIC_FIXED = [
   }
 ]
 
+// ============ WICCAN/PAGAN HOLIDAYS (Wheel of the Year) ============
+const WICCAN_FIXED = [
+  {
+    month: 1, day: 1,
+    name: 'Imbolc',
+    type: 'wiccan',
+    description: 'Festival of light celebrating the first stirrings of spring. Sacred to Brigid, goddess of healing, poetry, and smithcraft.',
+    dateRule: 'Fixed: February 1-2 (Cross-quarter day)',
+    traditions: ['Wiccan', 'Celtic Reconstructionist', 'Druidry', 'Neopagan']
+  },
+  {
+    month: 1, day: 2,
+    name: 'Imbolc (Day 2)',
+    type: 'wiccan',
+    description: 'Second day of Imbolc celebrations. Candle lighting, milk offerings, and Brigid crosses.',
+    dateRule: 'Fixed: February 2',
+    traditions: ['Wiccan', 'Celtic Reconstructionist', 'Druidry']
+  },
+  {
+    month: 4, day: 1,
+    name: 'Beltane',
+    type: 'wiccan',
+    description: 'Fire festival celebrating fertility, passion, and the height of spring. Maypole dancing, bonfires, and handfasting.',
+    dateRule: 'Fixed: May 1 (Cross-quarter day)',
+    traditions: ['Wiccan', 'Celtic Reconstructionist', 'Druidry', 'Neopagan']
+  },
+  {
+    month: 7, day: 1,
+    name: 'Lughnasadh / Lammas',
+    type: 'wiccan',
+    description: 'First harvest festival honoring the grain harvest. Named for the god Lugh. Bread-making and games.',
+    dateRule: 'Fixed: August 1 (Cross-quarter day)',
+    traditions: ['Wiccan', 'Celtic Reconstructionist', 'Druidry', 'Neopagan']
+  },
+  {
+    month: 9, day: 31,
+    name: 'Samhain',
+    type: 'wiccan',
+    description: 'Festival marking the end of harvest and beginning of winter. The veil between worlds is thin. Honor ancestors.',
+    dateRule: 'Fixed: October 31 - November 1',
+    traditions: ['Wiccan', 'Celtic Reconstructionist', 'Druidry', 'Neopagan']
+  },
+  {
+    month: 10, day: 1,
+    name: 'Samhain (Day 2)',
+    type: 'wiccan',
+    description: 'Second day of Samhain. Traditional new year in Celtic calendars. Divination and ancestor communion.',
+    dateRule: 'Fixed: November 1',
+    traditions: ['Wiccan', 'Celtic Reconstructionist', 'Druidry']
+  }
+]
+
+// ============ DRUIDIC HOLIDAYS ============
+const DRUIDIC_FIXED = [
+  {
+    month: 1, day: 1,
+    name: 'Imbolc / Oimelc',
+    type: 'druidic',
+    description: "Druidic festival of Brigantia marking ewes' milk and the first signs of spring. Poetry contests and hearthfire rituals.",
+    dateRule: 'Fixed: February 1',
+    traditions: ['OBOD', 'ADF', 'Celtic Reconstructionist', 'Reformed Druids']
+  },
+  {
+    month: 4, day: 1,
+    name: 'Beltaine',
+    type: 'druidic',
+    description: 'Great fire festival marking summer beginning. Cattle driven between twin fires for purification. Sacred marriage rites.',
+    dateRule: 'Fixed: May 1',
+    traditions: ['OBOD', 'ADF', 'Celtic Reconstructionist', 'Reformed Druids']
+  },
+  {
+    month: 7, day: 1,
+    name: 'Lughnasadh',
+    type: 'druidic',
+    description: 'Festival of Lugh the Many-Skilled. Athletic games, craft competitions, and first fruits offerings.',
+    dateRule: 'Fixed: August 1',
+    traditions: ['OBOD', 'ADF', 'Celtic Reconstructionist', 'Reformed Druids']
+  },
+  {
+    month: 9, day: 31,
+    name: 'Samhuinn',
+    type: 'druidic',
+    description: 'Druidic new year and ancestor festival. Final harvest, cattle culling, and communion with the Otherworld.',
+    dateRule: 'Fixed: October 31',
+    traditions: ['OBOD', 'ADF', 'Celtic Reconstructionist', 'Reformed Druids']
+  }
+]
+
+// Function to calculate solstices and equinoxes (approximate)
+function getSolarFestivals(year) {
+  // Approximate dates - actual astronomical dates vary by 1-2 days
+  return [
+    // Wiccan solar festivals
+    {
+      month: 2, day: 20,
+      name: 'Ostara (Spring Equinox)',
+      type: 'wiccan',
+      description: 'Celebration of balance and renewal as day equals night. Eggs, rabbits, and planting seeds.',
+      dateRule: 'Moveable: Spring Equinox (March 19-22)',
+      traditions: ['Wiccan', 'Neopagan', 'Eclectic Pagan']
+    },
+    {
+      month: 5, day: 21,
+      name: 'Litha (Summer Solstice)',
+      type: 'wiccan',
+      description: 'Midsummer celebration of the sun at peak power. Bonfires, herbs, and honoring the Oak King.',
+      dateRule: 'Moveable: Summer Solstice (June 20-22)',
+      traditions: ['Wiccan', 'Neopagan', 'Eclectic Pagan']
+    },
+    {
+      month: 8, day: 22,
+      name: 'Mabon (Autumn Equinox)',
+      type: 'wiccan',
+      description: 'Second harvest festival of thanksgiving. Balance of light and dark before descent into winter.',
+      dateRule: 'Moveable: Autumn Equinox (September 21-24)',
+      traditions: ['Wiccan', 'Neopagan', 'Eclectic Pagan']
+    },
+    {
+      month: 11, day: 21,
+      name: 'Yule (Winter Solstice)',
+      type: 'wiccan',
+      description: 'Rebirth of the sun. Longest night gives way to returning light. Yule log, evergreens, and gift-giving.',
+      dateRule: 'Moveable: Winter Solstice (December 20-23)',
+      traditions: ['Wiccan', 'Neopagan', 'Eclectic Pagan']
+    },
+    // Druidic solar festivals
+    {
+      month: 2, day: 20,
+      name: 'Alban Eilir (Spring Equinox)',
+      type: 'druidic',
+      description: 'Light of the Earth - celebration of balance and the greening world. Egg rituals and nature walks.',
+      dateRule: 'Moveable: Spring Equinox (March 19-22)',
+      traditions: ['OBOD', 'ADF', 'Celtic Reconstructionist']
+    },
+    {
+      month: 5, day: 21,
+      name: 'Alban Hefin (Summer Solstice)',
+      type: 'druidic',
+      description: 'Light of the Shore - peak of solar power. Major gathering at stone circles. Oak and mistletoe rites.',
+      dateRule: 'Moveable: Summer Solstice (June 20-22)',
+      traditions: ['OBOD', 'ADF', 'Celtic Reconstructionist']
+    },
+    {
+      month: 8, day: 22,
+      name: 'Alban Elfed (Autumn Equinox)',
+      type: 'druidic',
+      description: 'Light of the Water - harvest thanksgiving and preparation for the dark half of the year.',
+      dateRule: 'Moveable: Autumn Equinox (September 21-24)',
+      traditions: ['OBOD', 'ADF', 'Celtic Reconstructionist']
+    },
+    {
+      month: 11, day: 21,
+      name: 'Alban Arthan (Winter Solstice)',
+      type: 'druidic',
+      description: 'Light of Arthur/the Bear - rebirth of the sun. Vigil through longest night. Holly and ivy rituals.',
+      dateRule: 'Moveable: Winter Solstice (December 20-23)',
+      traditions: ['OBOD', 'ADF', 'Celtic Reconstructionist']
+    }
+  ]
+}
+
 // ============ EASTER CALCULATION ============
 // Computus algorithm for Western Easter
 function calculateEaster(year) {
@@ -713,6 +874,8 @@ export const CALENDAR_TYPES = [
   { id: 'moon', name: 'Moon Phases', icon: '🌙', color: '#a8b4c4' },
   { id: 'moonSign', name: 'Moon Signs', icon: '♈', color: '#9b87b2' },
   { id: 'dailyPractices', name: 'Daily Practices', icon: '☀', color: '#5cb85c' },
+  { id: 'wiccan', name: 'Wiccan / Pagan', icon: '⛤', color: '#7b68ee' },
+  { id: 'druidic', name: 'Druidic', icon: '🌳', color: '#228b22' },
   { id: 'christian', name: 'Christian', icon: '✝', color: '#c9a227' },
   { id: 'buddhist', name: 'Buddhist', icon: '☸', color: '#ff9500' },
   { id: 'hindu', name: 'Hindu', icon: '🕉', color: '#ff6b35' },
@@ -728,7 +891,10 @@ export function getHolidaysForYear(year) {
     ...BUDDHIST_FIXED,
     ...HINDU_FIXED,
     ...JEWISH_FIXED,
-    ...ISLAMIC_FIXED
+    ...ISLAMIC_FIXED,
+    ...WICCAN_FIXED,
+    ...DRUIDIC_FIXED,
+    ...getSolarFestivals(year)
   ]
 
   return all
