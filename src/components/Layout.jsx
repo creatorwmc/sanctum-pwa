@@ -41,6 +41,7 @@ const ROUTE_TO_PAGE = {
   '/': 'home',
   '/timer': 'timer',
   '/daily': 'daily',
+  '/practice-history': 'daily',
   '/journal': 'journal',
   '/library': 'library',
   '/resources': 'resources',
@@ -444,6 +445,16 @@ function Layout({ children }) {
                   >
                     <span>📦</span>
                     <span>Data & Backup</span>
+                  </button>
+                  <button
+                    className="settings-drawer-link"
+                    onClick={() => {
+                      setSettingsOpen(false)
+                      navigate('/practice-history')
+                    }}
+                  >
+                    <span>📊</span>
+                    <span>Practice History</span>
                   </button>
                   <button
                     className="settings-drawer-link"

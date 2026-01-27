@@ -14,6 +14,7 @@ import Settings from './pages/Settings'
 import Guide from './pages/Guide'
 import EsotericTools from './pages/EsotericTools'
 import Play from './pages/Play'
+import PracticeHistory from './pages/PracticeHistory'
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
             <Route path="/links" element={<Links />} />
             <Route path="/resources" element={<Resources />} />
             <Route path="/daily" element={<DailyLog />} />
+            <Route path="/practice-history" element={<PracticeHistory />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/journal" element={<Journal />} />
             <Route path="/settings" element={<Settings />} />

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { db, queries } from '../db'
 import { getLocalDateString } from '../utils/dateUtils'
 import ShaktonaIcon from '../components/ShaktonaIcon'
@@ -361,6 +362,9 @@ function DailyLog() {
       <div className="log-header">
         <h2>{displayDate}</h2>
         <p className="log-subtitle">Track your daily practices</p>
+        <Link to="/practice-history" className="btn btn-secondary history-link">
+          View Practice History
+        </Link>
       </div>
 
       {/* 2. STATS SECTION */}
