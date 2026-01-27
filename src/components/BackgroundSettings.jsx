@@ -1,12 +1,12 @@
 import { useState } from 'react'
-import { useTheme, BACKGROUND_THEMES, PAGES } from '../contexts/ThemeContext'
+import { useTheme, BACKGROUND_THEMES, THEME_GROUPS, PAGES } from '../contexts/ThemeContext'
 import './BackgroundSettings.css'
 
 function BackgroundSettings() {
   const { themeSettings, setThemeForPage, clearPageTheme } = useTheme()
   const [selectedPage, setSelectedPage] = useState('global')
 
-  const currentTheme = themeSettings[selectedPage] || (selectedPage === 'global' ? 'dark' : null)
+  const currentTheme = themeSettings[selectedPage] || (selectedPage === 'global' ? 'dark-gray' : null)
   const isUsingGlobal = selectedPage !== 'global' && !themeSettings[selectedPage]
 
   function handleThemeSelect(themeId) {
@@ -46,7 +46,7 @@ function BackgroundSettings() {
                   handleUseGlobal()
                 } else {
                   // Set to current global theme
-                  setThemeForPage(selectedPage, themeSettings.global || 'dark')
+                  setThemeForPage(selectedPage, themeSettings.global || 'dark-gray')
                 }
               }}
             />
@@ -55,21 +55,31 @@ function BackgroundSettings() {
         </div>
       )}
 
-      <div className={`theme-grid ${isUsingGlobal && selectedPage !== 'global' ? 'theme-grid--disabled' : ''}`}>
-        {Object.values(BACKGROUND_THEMES).map(theme => (
-          <button
-            key={theme.id}
-            className={`theme-option ${currentTheme === theme.id ? 'theme-option--active' : ''}`}
-            onClick={() => handleThemeSelect(theme.id)}
-            disabled={isUsingGlobal && selectedPage !== 'global'}
-          >
-            <div
-              className="theme-preview"
-              style={{ background: theme.preview }}
-            />
-            <span className="theme-name">{theme.name}</span>
-            {currentTheme === theme.id && <span className="theme-check">✓</span>}
-          </button>
+      <div className={`theme-sections ${isUsingGlobal && selectedPage !== 'global' ? 'theme-sections--disabled' : ''}`}>
+        {Object.entries(THEME_GROUPS).map(([groupKey, group]) => (
+          <div key={groupKey} className="theme-section">
+            <h4 className="theme-section-title">{group.name}</h4>
+            <div className="theme-row">
+              {group.themes.map(themeId => {
+                const theme = BACKGROUND_THEMES[themeId]
+                return (
+                  <button
+                    key={theme.id}
+                    className={`theme-swatch ${currentTheme === theme.id ? 'theme-swatch--active' : ''}`}
+                    onClick={() => handleThemeSelect(theme.id)}
+                    disabled={isUsingGlobal && selectedPage !== 'global'}
+                    title={theme.name}
+                  >
+                    <div
+                      className="theme-swatch-color"
+                      style={{ background: theme.preview }}
+                    />
+                    {currentTheme === theme.id && <span className="theme-swatch-check">✓</span>}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
         ))}
       </div>
 
