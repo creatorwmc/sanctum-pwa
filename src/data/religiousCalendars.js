@@ -600,40 +600,52 @@ const WICCAN_FIXED = [
 ]
 
 // ============ DRUIDIC HOLIDAYS ============
+// Based on John Michael Greer's work and Traditional Druidry
+// Fire Festivals (Cross-Quarter Days)
 const DRUIDIC_FIXED = [
   {
-    month: 1, day: 1,
-    name: 'Imbolc / Oimelc',
+    month: 10, day: 1,
+    name: 'Samhain',
     type: 'druidic',
-    description: "Druidic festival of Brigantia marking ewes' milk and the first signs of spring. Poetry contests and hearthfire rituals.",
+    description: "Summer's End - The Druidic new year when the veil between worlds is thinnest. A time to honor ancestors, embrace endings, and commune with the Otherworld. Silent suppers, ancestor altars, and divination.",
+    dateRule: 'Fixed: November 1 (begins sunset Oct 31)',
+    traditions: ['OBOD', 'ADF', 'Celtic Reconstructionist', 'Reformed Druids', 'JMG Druidry'],
+    practices: ['Ancestor altar', 'Silent supper', 'Scrying', 'Final harvest', 'Otherworld communion'],
+    themes: ['Death', 'Endings', 'Ancestor honor', 'Divination', 'Veil thinning']
+  },
+  {
+    month: 1, day: 1,
+    name: 'Imbolc',
+    type: 'druidic',
+    description: "In the Belly - First stirrings of spring within the earth. Sacred to Brigid, goddess of healing, poetry, and smithcraft. Candle lighting, poetry, and purification rituals.",
     dateRule: 'Fixed: February 1',
-    traditions: ['OBOD', 'ADF', 'Celtic Reconstructionist', 'Reformed Druids']
+    traditions: ['OBOD', 'ADF', 'Celtic Reconstructionist', 'Reformed Druids', 'JMG Druidry'],
+    practices: ['Candle lighting for Brigid', 'Poetry and creativity', 'Spring cleaning', 'Hearthfire rituals', 'Seed blessing'],
+    themes: ['Purification', 'Inspiration', "Brigid's fire", 'First stirrings', 'Quickening']
   },
   {
     month: 4, day: 1,
-    name: 'Beltaine',
+    name: 'Beltane',
     type: 'druidic',
-    description: 'Great fire festival marking summer beginning. Cattle driven between twin fires for purification. Sacred marriage rites.',
+    description: "Bright Fire - The great fire festival celebrating fertility, passion, and the life force. Cattle driven between twin fires. May Day celebrations, flower crowns, and sacred marriage rites.",
     dateRule: 'Fixed: May 1',
-    traditions: ['OBOD', 'ADF', 'Celtic Reconstructionist', 'Reformed Druids']
+    traditions: ['OBOD', 'ADF', 'Celtic Reconstructionist', 'Reformed Druids', 'JMG Druidry'],
+    practices: ['Bonfire rituals', 'May Day celebration', 'Flower crowns', 'Sacred marriage rites', 'Dancing'],
+    themes: ['Fertility', 'Life force', 'Passion', 'Joy', 'Vitality']
   },
   {
     month: 7, day: 1,
     name: 'Lughnasadh',
     type: 'druidic',
-    description: 'Festival of Lugh the Many-Skilled. Athletic games, craft competitions, and first fruits offerings.',
+    description: "Lugh's Assembly - Festival of Lugh the Many-Skilled, celebrating the first grain harvest. Athletic games, craft competitions, bread baking, and honoring skill mastery.",
     dateRule: 'Fixed: August 1',
-    traditions: ['OBOD', 'ADF', 'Celtic Reconstructionist', 'Reformed Druids']
-  },
-  {
-    month: 9, day: 31,
-    name: 'Samhuinn',
-    type: 'druidic',
-    description: 'Druidic new year and ancestor festival. Final harvest, cattle culling, and communion with the Otherworld.',
-    dateRule: 'Fixed: October 31',
-    traditions: ['OBOD', 'ADF', 'Celtic Reconstructionist', 'Reformed Druids']
+    traditions: ['OBOD', 'ADF', 'Celtic Reconstructionist', 'Reformed Druids', 'JMG Druidry'],
+    practices: ['Bread baking', 'Games and competitions', 'First fruits gratitude', 'Skill honoring', 'Athletic activities'],
+    themes: ['First harvest', 'Skill mastery', 'Games', 'Sacrifice', 'Grain festival']
   }
 ]
+
+// Druidic Solar Festivals are in getSolarFestivals() function below
 
 // Function to calculate solstices and equinoxes (approximate)
 function getSolarFestivals(year) {
@@ -672,38 +684,46 @@ function getSolarFestivals(year) {
       dateRule: 'Moveable: Winter Solstice (December 20-23)',
       traditions: ['Wiccan', 'Neopagan', 'Eclectic Pagan']
     },
-    // Druidic solar festivals
+    // Druidic solar festivals (The Four Albans)
+    {
+      month: 11, day: 21,
+      name: 'Alban Arthan (Winter Solstice)',
+      type: 'druidic',
+      description: 'Light of Arthur/the Bear - Rebirth of the Sun after the longest night. A time of hope in darkness, inner light, and the turning point. Vigil through the longest night, candle lighting at dawn, holly and ivy rituals.',
+      dateRule: 'Moveable: Winter Solstice (December 20-23)',
+      traditions: ['OBOD', 'ADF', 'Celtic Reconstructionist', 'JMG Druidry'],
+      practices: ['Light candles at dawn', 'Vigil through longest night', 'Honor returning light', 'Holly and ivy rituals'],
+      themes: ['Hope in darkness', 'Turning point', 'Inner light', 'Sun rebirth']
+    },
     {
       month: 2, day: 20,
       name: 'Alban Eilir (Spring Equinox)',
       type: 'druidic',
-      description: 'Light of the Earth - celebration of balance and the greening world. Egg rituals and nature walks.',
+      description: 'Light of the Earth - Balance and renewal as day equals night. The earth awakens with new growth. Planting seeds (literal and metaphorical), dawn meditation, egg rituals, and nature walks.',
       dateRule: 'Moveable: Spring Equinox (March 19-22)',
-      traditions: ['OBOD', 'ADF', 'Celtic Reconstructionist']
+      traditions: ['OBOD', 'ADF', 'Celtic Reconstructionist', 'JMG Druidry'],
+      practices: ['Plant something', 'Clean sacred space', 'Dawn meditation', 'Egg rituals', 'Nature walks'],
+      themes: ['Balance', 'Renewal', 'New growth', 'Planting seeds', 'Equilibrium']
     },
     {
       month: 5, day: 21,
       name: 'Alban Hefin (Summer Solstice)',
       type: 'druidic',
-      description: 'Light of the Shore - peak of solar power. Major gathering at stone circles. Oak and mistletoe rites.',
+      description: 'Light of the Shore - Peak of solar power and abundance. The sun at its height, a time of full expression and celebration. All-day outdoor practice, solar meditation, oak and mistletoe rites, stone circle gatherings.',
       dateRule: 'Moveable: Summer Solstice (June 20-22)',
-      traditions: ['OBOD', 'ADF', 'Celtic Reconstructionist']
+      traditions: ['OBOD', 'ADF', 'Celtic Reconstructionist', 'JMG Druidry'],
+      practices: ['All-day outdoor practice', 'Solar meditation', 'Gratitude ceremonies', 'Oak and mistletoe rites'],
+      themes: ['Peak solar power', 'Abundance', 'Full expression', 'Celebration']
     },
     {
       month: 8, day: 22,
       name: 'Alban Elfed (Autumn Equinox)',
       type: 'druidic',
-      description: 'Light of the Water - harvest thanksgiving and preparation for the dark half of the year.',
+      description: 'Light of the Water - Harvest and balance as day again equals night. Time to reap what was sown and prepare for the coming darkness. Harvest rituals, thanksgiving offerings, preservation work.',
       dateRule: 'Moveable: Autumn Equinox (September 21-24)',
-      traditions: ['OBOD', 'ADF', 'Celtic Reconstructionist']
-    },
-    {
-      month: 11, day: 21,
-      name: 'Alban Arthan (Winter Solstice)',
-      type: 'druidic',
-      description: 'Light of Arthur/the Bear - rebirth of the sun. Vigil through longest night. Holly and ivy rituals.',
-      dateRule: 'Moveable: Winter Solstice (December 20-23)',
-      traditions: ['OBOD', 'ADF', 'Celtic Reconstructionist']
+      traditions: ['OBOD', 'ADF', 'Celtic Reconstructionist', 'JMG Druidry'],
+      practices: ['Harvest ritual', 'Thanksgiving offerings', 'Preservation work', 'Balance meditation'],
+      themes: ['Harvest', 'Balance', 'Gratitude', 'Reaping', 'Preparation']
     }
   ]
 }
