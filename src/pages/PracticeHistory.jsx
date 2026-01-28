@@ -5,25 +5,13 @@ import { getLocalDateString } from '../utils/dateUtils'
 import ShaktonaIcon from '../components/ShaktonaIcon'
 import './PracticeHistory.css'
 
-const PRACTICES = [
-  { id: 'bath', label: 'Ritual Bath', icon: '💧' },
-  { id: 'meditation', label: 'Meditation', icon: '🧘' },
-  { id: 'vessel', label: 'Vessel Work', icon: '⚱' },
-  { id: 'breathwork', label: 'Breathwork', icon: '🌬' },
-  { id: 'study', label: 'Study/Reading', icon: '📖' },
-  { id: 'journaling', label: 'Journaling', icon: '✎' },
-  { id: 'union', label: 'Sacred Union', icon: 'shatkona' },
-  { id: 'tending', label: 'Tending', icon: '🌱' },
-  { id: 'tarot', label: 'Tarot/Divination', icon: '🎴' },
-  { id: 'ceremony', label: 'Ceremonial Work', icon: '🕯' }
-]
-
 const DAYS_OF_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
 function PracticeHistory() {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('history')
   const [allLogs, setAllLogs] = useState([])
+  const [practices, setPractices] = useState([])
   const [stats, setStats] = useState(null)
   const [streak, setStreak] = useState(0)
   const [loading, setLoading] = useState(true)
@@ -44,10 +32,12 @@ function PracticeHistory() {
   async function loadAllData() {
     try {
       const logs = await db.getAll('dailyLogs')
+      const allPractices = await queries.getPractices()
       const practiceStats = await queries.getPracticeStats()
       const currentStreak = await queries.getPracticeStreak()
 
       setAllLogs(logs || [])
+      setPractices(allPractices)
       setStats(practiceStats)
       setStreak(currentStreak)
     } catch (error) {
@@ -70,7 +60,7 @@ function PracticeHistory() {
     let totalBonusPoints = 0
 
     DAYS_OF_WEEK.forEach(day => { dayOfWeekCounts[day] = 0 })
-    PRACTICES.forEach(p => { practiceCounts[p.id] = 0 })
+    practices.forEach(p => { practiceCounts[p.id] = 0 })
 
     allLogs.forEach(log => {
       const practices = log.practices || []
@@ -124,7 +114,7 @@ function PracticeHistory() {
 
     // Sort practices by count
     const sortedPractices = Object.entries(practiceCounts)
-      .map(([id, count]) => ({ id, count, ...PRACTICES.find(p => p.id === id) }))
+      .map(([id, count]) => ({ id, count, ...practices.find(p => p.id === id) }))
       .sort((a, b) => b.count - a.count)
 
     // Current month stats
@@ -253,7 +243,7 @@ function PracticeHistory() {
         // Search in practice names
         const practices = log.entries?.map(e => e.practiceId) || log.practices || []
         return practices.some(p => {
-          const practice = PRACTICES.find(pr => pr.id === p)
+          const practice = practices.find(pr => pr.id === p)
           return practice?.label.toLowerCase().includes(query)
         })
       })
@@ -281,7 +271,7 @@ function PracticeHistory() {
   }
 
   function getPracticeInfo(practiceId) {
-    return PRACTICES.find(p => p.id === practiceId) || { label: practiceId, icon: '?' }
+    return practices.find(p => p.id === practiceId) || { label: practiceId, icon: '?' }
   }
 
   function formatDate(dateStr) {
@@ -373,7 +363,7 @@ function PracticeHistory() {
               className="input"
             >
               <option value="all">All Practices</option>
-              {PRACTICES.map(p => (
+              {practices.map(p => (
                 <option key={p.id} value={p.id}>{p.label}</option>
               ))}
             </select>

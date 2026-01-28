@@ -18,6 +18,7 @@ import Play from './pages/Play'
 import PracticeHistory from './pages/PracticeHistory'
 import Onboarding from './pages/Onboarding'
 import DruidGuide from './pages/DruidGuide'
+import PracticeManager from './pages/PracticeManager'
 
 function AppContent() {
   const { isComplete } = useOnboarding()
@@ -58,6 +59,7 @@ function AppContent() {
         <Route path="/settings" element={<Settings />} />
         <Route path="/guide" element={<Guide />} />
         <Route path="/guide/druid" element={<DruidGuide />} />
+        <Route path="/practices" element={<PracticeManager />} />
         <Route path="/tools" element={<EsotericTools />} />
         <Route path="/play" element={<Play />} />
       </Routes>

@@ -161,6 +161,22 @@ function Settings() {
       </section>
 
       <section className="settings-section">
+        <h2 className="settings-section-title">Daily Practice</h2>
+        <div className="settings-list">
+          <Link to="/practices" className="settings-item">
+            <div className="settings-item-content">
+              <span className="settings-item-icon">🧘</span>
+              <div>
+                <span className="settings-item-label">Manage Practices</span>
+                <span className="settings-item-desc">Add, edit, or remove daily practices</span>
+              </div>
+            </div>
+            <span className="settings-item-arrow">→</span>
+          </Link>
+        </div>
+      </section>
+
+      <section className="settings-section">
         <h2 className="settings-section-title">Export & Backup</h2>
         <div className="settings-list">
           <button className="settings-item" onClick={handleExportJournal}>

@@ -123,11 +123,42 @@
   padding: 1rem;
 }
 
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.section-header .section-title {
+  margin: 0;
+}
+
 .section-title {
   font-size: 0.875rem;
   font-weight: 600;
   color: var(--text-primary);
   margin: 0 0 0.75rem;
+}
+
+.practices-settings-btn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-muted);
+  font-size: 1rem;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.practices-settings-btn:hover {
+  color: var(--accent);
+  border-color: var(--accent);
 }
 
 .practices-grid {

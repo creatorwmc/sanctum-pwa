@@ -5,80 +5,8 @@ import { getLocalDateString } from '../utils/dateUtils'
 import ShaktonaIcon from '../components/ShaktonaIcon'
 import './DailyLog.css'
 
-const PRACTICES = [
-  {
-    id: 'bath',
-    label: 'Ritual Bath',
-    icon: '💧',
-    description: 'Alchemical work, color therapy, integration',
-    examples: ['Salt bath with intention setting', 'Color therapy soak', 'Cold plunge']
-  },
-  {
-    id: 'meditation',
-    label: 'Meditation',
-    icon: '🧘',
-    description: 'Sitting, walking, visualization work',
-    examples: ['Silent sitting (10-30 min)', 'Guided visualization', 'Walking meditation']
-  },
-  {
-    id: 'vessel',
-    label: 'Vessel Work',
-    icon: '⚱',
-    description: 'Physical practices that fortify the body',
-    examples: ['Five Tibetan Rites', 'Yoga or stretching', 'Qigong or tai chi']
-  },
-  {
-    id: 'breathwork',
-    label: 'Breathwork',
-    icon: '🌬',
-    description: 'Pranayama, conscious breathing',
-    examples: ['Box breathing', 'Wim Hof rounds', 'Alternate nostril breathing']
-  },
-  {
-    id: 'study',
-    label: 'Study/Reading',
-    icon: '📖',
-    description: 'Library work, spiritual texts, philosophy',
-    examples: ['Sacred texts', 'Esoteric traditions', 'Spiritual teachings']
-  },
-  {
-    id: 'journaling',
-    label: 'Integration Journaling',
-    icon: '✎',
-    description: 'Documenting insights, stumbles, breakthroughs',
-    examples: ['Morning pages', 'Dream journaling', 'Reflecting on synchronicities']
-  },
-  {
-    id: 'union',
-    label: 'Sacred Union',
-    icon: 'shatkona',
-    description: 'Care for relationship, from gestures to intimacy',
-    examples: ['Quality time', 'Acts of service', 'Tantric practices']
-  },
-  {
-    id: 'tending',
-    label: 'Tending',
-    icon: '🌱',
-    description: 'Embodied service to others',
-    examples: ['Gardening', 'Preparing food', 'Caring for animals']
-  },
-  {
-    id: 'tarot',
-    label: 'Tarot/Divination',
-    icon: '🎴',
-    description: 'Guidance, symbol work',
-    examples: ['Daily card pull', 'Three-card spread', 'I Ching consultation']
-  },
-  {
-    id: 'ceremony',
-    label: 'Ceremonial Work',
-    icon: '🕯',
-    description: 'Rituals, moon ceremonies, magical operations',
-    examples: ['Moon ritual', 'Candle magic', 'Altar work']
-  }
-]
-
 function DailyLog() {
+  const [practices, setPractices] = useState([])
   const [todayLog, setTodayLog] = useState(null)
   const [selectedPractices, setSelectedPractices] = useState([])
   const [entryNotes, setEntryNotes] = useState('')
@@ -112,6 +40,10 @@ function DailyLog() {
 
   useEffect(() => {
     async function init() {
+      // Load practices first
+      const enabledPractices = await queries.getEnabledPractices()
+      setPractices(enabledPractices)
+
       const autoUseResult = await queries.checkAndAutoUseStoredPractice()
       if (autoUseResult.autoUsed) {
         setAutoUsedNotification(`Stored practice auto-used for ${new Date(autoUseResult.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} to maintain your streak!`)
@@ -344,7 +276,7 @@ function DailyLog() {
   }
 
   function getPracticeInfo(practiceId) {
-    return PRACTICES.find(p => p.id === practiceId) || { label: practiceId, icon: '?' }
+    return practices.find(p => p.id === practiceId) || { label: practiceId, icon: '?' }
   }
 
   if (loading) {
@@ -412,9 +344,14 @@ function DailyLog() {
 
       {/* 3. PRACTICE SELECTION SECTION */}
       <section className="practices-section">
-        <h3 className="section-title">Log Practice</h3>
+        <div className="section-header">
+          <h3 className="section-title">Log Practice</h3>
+          <Link to="/practices" className="practices-settings-btn" title="Manage Practices">
+            ⚙
+          </Link>
+        </div>
         <div className="practices-grid">
-          {PRACTICES.map(practice => (
+          {practices.map(practice => (
             <button
               key={practice.id}
               onClick={() => togglePractice(practice.id)}
@@ -556,7 +493,7 @@ function DailyLog() {
                 onChange={(e) => setEditPractice(e.target.value)}
                 className="input"
               >
-                {PRACTICES.map(p => (
+                {practices.map(p => (
                   <option key={p.id} value={p.id}>{p.label}</option>
                 ))}
               </select>

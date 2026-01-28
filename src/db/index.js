@@ -1,8 +1,9 @@
 import { openDB } from 'idb'
 import { getLocalDateString, getYesterdayDateString, getLocalMonthString } from '../utils/dateUtils'
+import { DEFAULT_PRACTICES } from '../data/defaultPractices'
 
 const DB_NAME = 'sanctum-db'
-const DB_VERSION = 5
+const DB_VERSION = 6
 
 // Database schema definition
 const stores = {
@@ -90,6 +91,13 @@ async function initDB() {
         resourceStore.createIndex('sourceType', 'sourceType') // 'drive' or 'manual'
         resourceStore.createIndex('tags', 'tags', { multiEntry: true })
         resourceStore.createIndex('createdAt', 'createdAt')
+      }
+
+      // Practices store (user's customized practice list)
+      if (!db.objectStoreNames.contains('practices')) {
+        const practiceStore = db.createObjectStore('practices', { keyPath: 'id' })
+        practiceStore.createIndex('order', 'order')
+        practiceStore.createIndex('enabled', 'enabled')
       }
     }
   })
@@ -424,6 +432,144 @@ export const queries = {
     }
 
     return stats
+  },
+
+  // Get all practices (merges defaults with user customizations)
+  async getPractices() {
+    const database = await getDB()
+    const userPractices = await database.getAll('practices')
+
+    // If user has no customizations, initialize from defaults
+    if (userPractices.length === 0) {
+      // Return defaults with enabled flag
+      return DEFAULT_PRACTICES.map(p => ({ ...p, enabled: true }))
+    }
+
+    // Return user's customized list, sorted by order
+    return userPractices.sort((a, b) => (a.order || 0) - (b.order || 0))
+  },
+
+  // Get only enabled practices
+  async getEnabledPractices() {
+    const practices = await this.getPractices()
+    return practices.filter(p => p.enabled !== false)
+  },
+
+  // Initialize practices from defaults (called when user first customizes)
+  async initializePractices() {
+    const database = await getDB()
+    const existing = await database.getAll('practices')
+
+    if (existing.length > 0) return existing
+
+    // Copy defaults to user's practice store
+    for (const practice of DEFAULT_PRACTICES) {
+      await database.put('practices', { ...practice, enabled: true })
+    }
+
+    return database.getAll('practices')
+  },
+
+  // Add a new practice
+  async addPractice(practice) {
+    await this.initializePractices() // Ensure practices are initialized
+
+    const database = await getDB()
+    const allPractices = await database.getAll('practices')
+    const maxOrder = Math.max(...allPractices.map(p => p.order || 0), -1)
+
+    const newPractice = {
+      id: `custom-${Date.now()}`,
+      ...practice,
+      isDefault: false,
+      enabled: true,
+      order: maxOrder + 1,
+      createdAt: new Date().toISOString()
+    }
+
+    await database.put('practices', newPractice)
+    return newPractice
+  },
+
+  // Update a practice
+  async updatePractice(id, updates) {
+    await this.initializePractices() // Ensure practices are initialized
+
+    const database = await getDB()
+    const practice = await database.get('practices', id)
+
+    if (!practice) return null
+
+    const updatedPractice = {
+      ...practice,
+      ...updates,
+      updatedAt: new Date().toISOString()
+    }
+
+    await database.put('practices', updatedPractice)
+    return updatedPractice
+  },
+
+  // Toggle practice enabled/disabled
+  async togglePractice(id) {
+    await this.initializePractices() // Ensure practices are initialized
+
+    const database = await getDB()
+    const practice = await database.get('practices', id)
+
+    if (!practice) return null
+
+    const updatedPractice = {
+      ...practice,
+      enabled: !practice.enabled,
+      updatedAt: new Date().toISOString()
+    }
+
+    await database.put('practices', updatedPractice)
+    return updatedPractice
+  },
+
+  // Delete a practice (only custom ones can be fully deleted)
+  async deletePractice(id) {
+    await this.initializePractices() // Ensure practices are initialized
+
+    const database = await getDB()
+    const practice = await database.get('practices', id)
+
+    if (!practice) return false
+
+    // If it's a default practice, just disable it instead
+    if (practice.isDefault) {
+      await this.togglePractice(id)
+      return true
+    }
+
+    // Delete custom practice
+    await database.delete('practices', id)
+    return true
+  },
+
+  // Reorder practices
+  async reorderPractices(orderedIds) {
+    await this.initializePractices() // Ensure practices are initialized
+
+    const database = await getDB()
+
+    for (let i = 0; i < orderedIds.length; i++) {
+      const practice = await database.get('practices', orderedIds[i])
+      if (practice) {
+        await database.put('practices', { ...practice, order: i })
+      }
+    }
+
+    return this.getPractices()
+  },
+
+  // Reset practices to defaults
+  async resetPractices() {
+    const database = await getDB()
+    await database.clear('practices')
+    return this.initializePractices()
   }
 }
 
