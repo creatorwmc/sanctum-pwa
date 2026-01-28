@@ -3,7 +3,7 @@ import { getLocalDateString, getYesterdayDateString, getLocalMonthString } from 
 import { DEFAULT_PRACTICES } from '../data/defaultPractices'
 
 const DB_NAME = 'sanctum-db'
-const DB_VERSION = 6
+const DB_VERSION = 7
 
 // Database schema definition
 const stores = {
@@ -98,6 +98,13 @@ async function initDB() {
         const practiceStore = db.createObjectStore('practices', { keyPath: 'id' })
         practiceStore.createIndex('order', 'order')
         practiceStore.createIndex('enabled', 'enabled')
+      }
+
+      // Meter readings store (MMR Test)
+      if (!db.objectStoreNames.contains('meterReadings')) {
+        const meterStore = db.createObjectStore('meterReadings', { keyPath: 'id' })
+        meterStore.createIndex('meterId', 'meterId')
+        meterStore.createIndex('timestamp', 'timestamp')
       }
     }
   })
@@ -241,21 +248,35 @@ export const queries = {
 
     if (practiceDates.size === 0) return 0
 
-    const sortedDates = Array.from(practiceDates).sort((a, b) => new Date(b) - new Date(a))
+    // Sort dates descending (most recent first)
+    const sortedDates = Array.from(practiceDates).sort((a, b) => b.localeCompare(a))
 
-    let streak = 0
-    let currentDate = new Date()
-    currentDate.setHours(0, 0, 0, 0)
+    // Helper to parse YYYY-MM-DD as local date (not UTC)
+    function parseLocalDate(dateStr) {
+      const [year, month, day] = dateStr.split('-').map(Number)
+      return new Date(year, month - 1, day)
+    }
 
-    for (const dateStr of sortedDates) {
-      const logDate = new Date(dateStr)
-      logDate.setHours(0, 0, 0, 0)
+    // Get today's date at local midnight
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
 
-      const diffDays = Math.round((currentDate - logDate) / (1000 * 60 * 60 * 24))
+    // Check if most recent log is today or yesterday
+    const mostRecentDate = parseLocalDate(sortedDates[0])
+    const daysSinceMostRecent = Math.round((today - mostRecentDate) / (1000 * 60 * 60 * 24))
 
-      if (diffDays === streak || diffDays === streak + 1) {
+    // If most recent log is more than 1 day ago, streak is broken
+    if (daysSinceMostRecent > 1) return 0
+
+    // Count consecutive days
+    let streak = 1
+    for (let i = 1; i < sortedDates.length; i++) {
+      const currentDate = parseLocalDate(sortedDates[i - 1])
+      const previousDate = parseLocalDate(sortedDates[i])
+      const daysBetween = Math.round((currentDate - previousDate) / (1000 * 60 * 60 * 24))
+
+      if (daysBetween === 1) {
         streak++
-        currentDate = logDate
       } else {
         break
       }

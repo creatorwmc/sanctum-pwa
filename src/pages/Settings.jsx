@@ -376,6 +376,22 @@ function Settings() {
       )}
 
       <section className="settings-section">
+        <h2 className="settings-section-title">Utilities</h2>
+        <div className="settings-list">
+          <Link to="/mmr-test" className="settings-item">
+            <div className="settings-item-content">
+              <span className="settings-item-icon">📊</span>
+              <div>
+                <span className="settings-item-label">MMR Test</span>
+                <span className="settings-item-desc">Meter reading tracker with camera</span>
+              </div>
+            </div>
+            <span className="settings-item-arrow">→</span>
+          </Link>
+        </div>
+      </section>
+
+      <section className="settings-section">
         <h2 className="settings-section-title">About</h2>
         <div className="settings-list">
           <div className="settings-item">
