@@ -1,0 +1,339 @@
+/* Tradition Settings Component Styles */
+
+.tradition-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Current Selection */
+.tradition-current {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: var(--surface-color-light, #252542);
+  border-radius: 12px;
+  border-left: 3px solid var(--accent-color, #228b22);
+}
+
+.tradition-current-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.tradition-icon {
+  font-size: 1.75rem;
+}
+
+.tradition-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.tradition-name {
+  color: var(--text-color, #e8e8e8);
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.tradition-status {
+  color: var(--text-secondary, #a0a0a0);
+  font-size: 0.8rem;
+}
+
+.tradition-current-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Empty State */
+.tradition-empty {
+  padding: 1.5rem;
+  background: var(--surface-color-light, #252542);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.tradition-empty p {
+  margin: 0;
+  color: var(--text-color, #e8e8e8);
+}
+
+.tradition-empty-hint {
+  color: var(--text-secondary, #a0a0a0) !important;
+  font-size: 0.85rem;
+  margin-top: 0.5rem !important;
+}
+
+/* Guide Link */
+.tradition-guide-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: var(--surface-color-light, #252542);
+  border-radius: 8px;
+  color: var(--text-color, #e8e8e8);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.tradition-guide-link:hover {
+  background: var(--accent-color, #228b22);
+  color: white;
+}
+
+.guide-icon {
+  font-size: 1.25rem;
+}
+
+.guide-arrow {
+  margin-left: auto;
+  opacity: 0.7;
+}
+
+/* Buttons */
+.tradition-select-btn,
+.tradition-clear-btn {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tradition-select-btn {
+  background: var(--accent-color, #228b22);
+  border: none;
+  color: white;
+}
+
+.tradition-select-btn:hover {
+  opacity: 0.9;
+}
+
+.tradition-clear-btn {
+  background: transparent;
+  border: 1px solid var(--border-color, #333);
+  color: var(--text-secondary, #a0a0a0);
+}
+
+.tradition-clear-btn:hover {
+  border-color: #e74c3c;
+  color: #e74c3c;
+}
+
+/* Tradition List */
+.tradition-list {
+  background: var(--surface-color-light, #252542);
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.tradition-list h4 {
+  margin: 0 0 1rem 0;
+  color: var(--text-color, #e8e8e8);
+  font-size: 1rem;
+}
+
+.tradition-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.5rem;
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.tradition-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.75rem 0.5rem;
+  background: var(--surface-color, #1a1a2e);
+  border: 1px solid var(--border-color, #333);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.tradition-option:hover {
+  border-color: var(--tradition-color, #228b22);
+  transform: translateY(-2px);
+}
+
+.tradition-option--selected {
+  border-color: var(--tradition-color, #228b22);
+  background: color-mix(in srgb, var(--tradition-color, #228b22) 15%, var(--surface-color, #1a1a2e));
+}
+
+.tradition-option--has-preset::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  background: var(--tradition-color, #228b22);
+  border-radius: 50%;
+}
+
+.tradition-option-icon {
+  font-size: 1.5rem;
+}
+
+.tradition-option-name {
+  font-size: 0.75rem;
+  color: var(--text-color, #e8e8e8);
+  text-align: center;
+  line-height: 1.2;
+}
+
+.tradition-option-badge {
+  font-size: 0.6rem;
+  padding: 0.15rem 0.35rem;
+  background: var(--tradition-color, #228b22);
+  color: white;
+  border-radius: 8px;
+  margin-top: 0.25rem;
+}
+
+/* Custom Tradition Input */
+.custom-tradition-input {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color, #333);
+}
+
+.custom-tradition-input label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--text-secondary, #a0a0a0);
+  font-size: 0.85rem;
+}
+
+.custom-tradition-input .input {
+  width: 100%;
+  padding: 0.75rem;
+  background: var(--surface-color, #1a1a2e);
+  border: 1px solid var(--border-color, #333);
+  border-radius: 8px;
+  color: var(--text-color, #e8e8e8);
+  font-size: 0.9rem;
+}
+
+.custom-tradition-input .input:focus {
+  outline: none;
+  border-color: var(--accent-color, #228b22);
+}
+
+/* Close Button */
+.tradition-list-close {
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: transparent;
+  border: 1px solid var(--border-color, #333);
+  border-radius: 8px;
+  color: var(--text-secondary, #a0a0a0);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tradition-list-close:hover {
+  border-color: var(--text-color, #e8e8e8);
+  color: var(--text-color, #e8e8e8);
+}
+
+/* Info Section */
+.tradition-info {
+  padding: 1rem;
+  background: var(--surface-color-light, #252542);
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+
+.tradition-info p {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-color, #e8e8e8);
+}
+
+.tradition-info ul {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.tradition-info li {
+  color: var(--text-secondary, #a0a0a0);
+  margin-bottom: 0.35rem;
+  line-height: 1.4;
+}
+
+/* Toggle Switch (matches existing app style) */
+.toggle-switch {
+  position: relative;
+  width: 48px;
+  height: 26px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--border-color, #333);
+  border-radius: 26px;
+  transition: 0.3s;
+}
+
+.toggle-slider::before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  border-radius: 50%;
+  transition: 0.3s;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  background-color: var(--accent-color, #228b22);
+}
+
+.toggle-switch input:checked + .toggle-slider::before {
+  transform: translateX(22px);
+}
+
+/* Mobile adjustments */
+@media (max-width: 480px) {
+  .tradition-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  }
+
+  .tradition-option {
+    padding: 0.5rem 0.35rem;
+  }
+
+  .tradition-option-icon {
+    font-size: 1.25rem;
+  }
+
+  .tradition-option-name {
+    font-size: 0.65rem;
+  }
+}

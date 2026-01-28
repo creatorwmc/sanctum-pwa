@@ -8,6 +8,7 @@ import AccountSettings from '../components/AccountSettings'
 import AuthModal from '../components/AuthModal'
 import BackgroundSettings from '../components/BackgroundSettings'
 import { isRatingDisabled, setRatingDisabled } from '../components/RatingPrompt'
+import TraditionSettings from '../components/TraditionSettings'
 import {
   isGoogleDriveConfigured,
   isConnected,
@@ -148,6 +149,11 @@ function Settings() {
       <section className="settings-section">
         <h2 className="settings-section-title">Background Theme</h2>
         <BackgroundSettings />
+      </section>
+
+      <section className="settings-section">
+        <h2 className="settings-section-title">Spiritual Tradition</h2>
+        <TraditionSettings />
       </section>
 
       <section className="settings-section">
