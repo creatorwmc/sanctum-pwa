@@ -308,6 +308,17 @@ function Settings() {
             <span className="settings-item-arrow">→</span>
           </Link>
 
+          <Link to="/guide/druid" className="settings-item">
+            <div className="settings-item-content">
+              <span className="settings-item-icon">🌳</span>
+              <div>
+                <span className="settings-item-label">Druid Practice Guide</span>
+                <span className="settings-item-desc">Traditional Druidry teachings</span>
+              </div>
+            </div>
+            <span className="settings-item-arrow">→</span>
+          </Link>
+
           <button className="settings-item" onClick={() => setFeedbackOpen(true)}>
             <div className="settings-item-content">
               <span className="settings-item-icon"><StoneIcon size={20} glow={false} /></span>
