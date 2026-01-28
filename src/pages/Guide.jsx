@@ -5,13 +5,13 @@ import './Guide.css'
 const SECTIONS = [
   {
     id: 'overview',
-    title: 'What is Sanctum?',
+    title: 'What is Practice Space?',
     icon: '🌳',
-    content: `Sanctum is your personal space for tracking spiritual practices. Think of it like a fitness app, but for your inner growth instead of your body.
+    content: `Practice Space is your sacred place for tracking spiritual practices. Think of it like a fitness app, but for your inner growth instead of your body.
 
 Everything you save stays on your device. Your private thoughts and practices are never sent to any server or company. Only you can see your data.
 
-You can use Sanctum to:
+You can use Practice Space to:
 - Time your meditation sessions
 - Track which practices you do each day
 - Write in a private journal
@@ -288,7 +288,7 @@ You can save copies of your information in different formats:
 - **Export Everything**: Creates one complete backup file with all your data
 
 **Cloud backup:**
-If Google Drive is set up, you can connect it to save your exports directly to a "Sanctum Exports" folder in your Drive.
+If Google Drive is set up, you can connect it to save your exports directly to a "Practice Space Exports" folder in your Drive.
 
 **Navigation settings:**
 In the main menu, you can hide pages you don't use. Hidden pages will appear in a "Hidden Pages" section in the menu so you can still access them when needed.
@@ -338,7 +338,7 @@ function Guide() {
       <div className="guide-header">
         <Link to="/settings" className="back-link">← Settings</Link>
         <h1 className="guide-title">App Guide</h1>
-        <p className="guide-subtitle">Learn how to use Sanctum</p>
+        <p className="guide-subtitle">Learn how to use Practice Space</p>
       </div>
 
       <div className="guide-sections">

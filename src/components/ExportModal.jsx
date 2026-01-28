@@ -127,7 +127,7 @@ function ExportModal({ isOpen, onClose, content, filename, title = 'Export' }) {
                     <span className="export-option-title">
                       {status === 'uploading' ? 'Uploading...' : 'Save to Google Drive'}
                     </span>
-                    <span className="export-option-desc">Save to Sanctum Exports folder</span>
+                    <span className="export-option-desc">Save to Practice Space Exports folder</span>
                   </div>
                 </button>
               ) : (

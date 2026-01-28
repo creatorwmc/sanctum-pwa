@@ -160,8 +160,8 @@ function RatingPrompt({ isOpen, onClose, onOpenFeedback }) {
 
   async function handleShare() {
     const shareData = {
-      title: 'Sanctum',
-      text: 'A sacred space for spiritual practice tracking',
+      title: 'Practice Space',
+      text: 'Your sacred place for spiritual practice tracking',
       url: 'https://sanctum-pwa-app.netlify.app'
     }
 
@@ -312,7 +312,7 @@ function RatingPrompt({ isOpen, onClose, onOpenFeedback }) {
                 <p className="followup-text">Tell others?</p>
                 <div className="followup-actions">
                   <button className="btn btn-primary" onClick={handleShare}>
-                    Share Sanctum
+                    Share Practice Space
                   </button>
                   <button className="btn btn-secondary" onClick={showThanks}>
                     Maybe Later

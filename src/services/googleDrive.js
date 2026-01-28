@@ -1,11 +1,11 @@
-// Google Drive API service for Sanctum PWA
+// Google Drive API service for Practice Space PWA
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || ''
 const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || ''
 // Extended scopes: file for exports, readonly for browsing
 const SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.readonly'
 const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'
-const FOLDER_NAME = 'Sanctum Exports'
+const FOLDER_NAME = 'Practice Space Exports'
 
 let tokenClient = null
 let gapiInited = false
@@ -195,7 +195,7 @@ export function disconnectGoogleDrive() {
 }
 
 /**
- * Get or create the Sanctum folder in Google Drive
+ * Get or create the Practice Space folder in Google Drive
  */
 async function getOrCreateFolder() {
   // Search for existing folder

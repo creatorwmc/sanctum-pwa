@@ -8,6 +8,8 @@ import AccountSettings from '../components/AccountSettings'
 import AuthModal from '../components/AuthModal'
 import BackgroundSettings from '../components/BackgroundSettings'
 import { isRatingDisabled, setRatingDisabled } from '../components/RatingPrompt'
+import { useOnboarding } from '../contexts/OnboardingContext'
+import { isFeatureEnabled } from '../config/featureFlags'
 import {
   isGoogleDriveConfigured,
   isConnected,
@@ -30,6 +32,8 @@ function Settings() {
   const [driveConfigured] = useState(isGoogleDriveConfigured())
   const [connecting, setConnecting] = useState(false)
   const [feedbackPromptsEnabled, setFeedbackPromptsEnabled] = useState(!isRatingDisabled())
+  const { resetOnboarding, getConfiguration } = useOnboarding()
+  const config = getConfiguration()
 
   // Export modal state
   const [exportModal, setExportModal] = useState({
@@ -211,7 +215,7 @@ function Settings() {
                     <div>
                       <span className="settings-item-label">Google Drive Connected</span>
                       <span className="settings-item-desc settings-item-desc--success">
-                        Exports will save to Sanctum Exports folder
+                        Exports will save to Practice Space Exports folder
                       </span>
                     </div>
                   </div>
@@ -292,7 +296,7 @@ function Settings() {
               <span className="settings-item-icon">📜</span>
               <div>
                 <span className="settings-item-label">App Guide</span>
-                <span className="settings-item-desc">Learn how to use Sanctum</span>
+                <span className="settings-item-desc">Learn how to use Practice Space</span>
               </div>
             </div>
             <span className="settings-item-arrow">→</span>
@@ -311,6 +315,33 @@ function Settings() {
         </div>
       </section>
 
+      {isFeatureEnabled('HELPER_SYSTEM_ENABLED') && (
+        <section className="settings-section">
+          <h2 className="settings-section-title">Personalization</h2>
+          <div className="settings-list">
+            <div className="settings-item">
+              <div className="settings-item-content">
+                <span className="settings-item-icon">🎨</span>
+                <div>
+                  <span className="settings-item-label">Style: {config.personality || 'Not set'}</span>
+                  <span className="settings-item-desc">Your visual personality preference</span>
+                </div>
+              </div>
+            </div>
+            <button className="settings-item" onClick={resetOnboarding}>
+              <div className="settings-item-content">
+                <span className="settings-item-icon">↺</span>
+                <div>
+                  <span className="settings-item-label">Redo Onboarding</span>
+                  <span className="settings-item-desc">Go through the welcome flow again</span>
+                </div>
+              </div>
+              <span className="settings-item-arrow">→</span>
+            </button>
+          </div>
+        </section>
+      )}
+
       <section className="settings-section">
         <h2 className="settings-section-title">About</h2>
         <div className="settings-list">
@@ -318,14 +349,14 @@ function Settings() {
             <div className="settings-item-content">
               <span className="settings-item-icon">🌳</span>
               <div>
-                <span className="settings-item-label">Sanctum</span>
+                <span className="settings-item-label">Practice Space</span>
                 <span className="settings-item-desc">Version 1.0.0</span>
               </div>
             </div>
           </div>
         </div>
         <p className="settings-footer">
-          A sacred space for spiritual practice tracking.
+          Your sacred place for spiritual practice tracking.
           <br />
           Your data stays local on your device.
         </p>

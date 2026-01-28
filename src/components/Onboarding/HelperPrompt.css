@@ -1,0 +1,107 @@
+/* Helper Prompt Styling */
+
+.helper-prompt {
+  margin-top: 16px;
+  padding: 12px 18px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: all 0.4s ease;
+  text-align: center;
+  max-width: 100%;
+}
+
+.helper-prompt.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Primary helper - more prominent */
+.helper-prompt.helper-primary {
+  background-color: rgba(104, 211, 145, 0.1);
+  border-left: 3px solid rgba(104, 211, 145, 0.5);
+  color: var(--text-primary, #e2e8f0);
+}
+
+/* Secondary helper - subtle, reassuring */
+.helper-prompt.helper-secondary {
+  background-color: rgba(160, 174, 192, 0.08);
+  color: var(--text-secondary, #a0aec0);
+  font-style: italic;
+  font-size: 0.9rem;
+  border-left: none;
+}
+
+/* Personality-specific styling */
+
+/* Warm - soft gradients, welcoming */
+.helper-prompt.personality-warm.helper-primary {
+  background: linear-gradient(135deg, rgba(255, 183, 138, 0.15), rgba(255, 150, 180, 0.1));
+  border-left-color: rgba(255, 183, 138, 0.6);
+}
+
+.helper-prompt.personality-warm.helper-secondary {
+  background-color: rgba(255, 183, 138, 0.08);
+  color: #d4a574;
+}
+
+/* Minimal - clean, understated */
+.helper-prompt.personality-minimal.helper-primary {
+  background-color: rgba(200, 200, 200, 0.08);
+  border-left-color: rgba(160, 174, 192, 0.5);
+  border-radius: 4px;
+}
+
+.helper-prompt.personality-minimal.helper-secondary {
+  background-color: transparent;
+  color: var(--text-secondary, #718096);
+}
+
+/* Mystical - deep purples, serif font */
+.helper-prompt.personality-mystical.helper-primary {
+  background: linear-gradient(135deg, rgba(138, 100, 180, 0.12), rgba(100, 80, 150, 0.08));
+  border-left-color: rgba(159, 122, 234, 0.6);
+  font-family: Georgia, serif;
+}
+
+.helper-prompt.personality-mystical.helper-secondary {
+  background-color: rgba(138, 100, 180, 0.06);
+  color: #b794f4;
+  font-family: Georgia, serif;
+}
+
+/* Academic - professional blues */
+.helper-prompt.personality-academic.helper-primary {
+  background-color: rgba(100, 150, 220, 0.1);
+  border-left-color: rgba(100, 150, 220, 0.6);
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.helper-prompt.personality-academic.helper-secondary {
+  background-color: rgba(100, 150, 220, 0.05);
+  color: #90cdf4;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* Container for helpers */
+.helper-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  min-height: 80px;
+}
+
+/* Mobile adjustments */
+@media (max-width: 480px) {
+  .helper-prompt {
+    padding: 10px 14px;
+    font-size: 0.9rem;
+  }
+
+  .helper-prompt.helper-secondary {
+    font-size: 0.85rem;
+  }
+}

@@ -1,0 +1,76 @@
+/* Grace Message Styling */
+
+.grace-message {
+  padding: 12px 20px;
+  margin: 12px 0;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
+}
+
+.grace-message.fade-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.grace-message.fade-out {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+/* Info style - default grace message */
+.grace-message.grace-info {
+  background-color: rgba(100, 150, 250, 0.1);
+  border-left: 3px solid rgba(100, 150, 250, 0.5);
+  color: var(--text-primary, #e2e8f0);
+}
+
+/* Encouragement style - for multiple back presses */
+.grace-message.grace-encouragement {
+  background-color: rgba(72, 187, 120, 0.1);
+  border-left: 3px solid rgba(72, 187, 120, 0.5);
+  color: var(--text-primary, #e2e8f0);
+}
+
+/* Warning style - if needed */
+.grace-message.grace-warning {
+  background-color: rgba(236, 201, 75, 0.1);
+  border-left: 3px solid rgba(236, 201, 75, 0.5);
+  color: var(--text-primary, #e2e8f0);
+}
+
+/* Grace message container */
+.grace-container {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  width: 90%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.grace-container .grace-message {
+  pointer-events: auto;
+}
+
+/* Mobile adjustments */
+@media (max-width: 480px) {
+  .grace-message {
+    padding: 10px 16px;
+    font-size: 0.9rem;
+  }
+
+  .grace-container {
+    top: 10px;
+    width: 95%;
+  }
+}

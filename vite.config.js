@@ -9,9 +9,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
       manifest: {
-        name: 'Sanctum - Spiritual Practice Tracker',
-        short_name: 'Sanctum',
-        description: 'Personal spiritual practice tracking application',
+        name: 'Practice Space - Your Sacred Place',
+        short_name: 'Practice Space',
+        description: 'Your sacred place for spiritual practice tracking',
         theme_color: '#0d1210',
         background_color: '#0d1210',
         display: 'standalone',

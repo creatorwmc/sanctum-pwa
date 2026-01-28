@@ -1,11 +1,11 @@
-// Export utility functions for Sanctum PWA
+// Export utility functions for Practice Space PWA
 
 /**
  * Generate a filename with timestamp
  */
 export function generateFilename(dataType, extension) {
   const date = new Date().toISOString().split('T')[0]
-  return `Sanctum_${dataType}_${date}.${extension}`
+  return `PracticeSpace_${dataType}_${date}.${extension}`
 }
 
 /**
@@ -57,7 +57,7 @@ export function journalEntryToMarkdown(entry) {
 ${entry.content}
 
 ---
-*Exported from Sanctum*
+*Exported from Practice Space*
 `
 }
 
@@ -69,7 +69,7 @@ export function allJournalEntriesToMarkdown(entries) {
     new Date(b.createdAt) - new Date(a.createdAt)
   )
 
-  let markdown = `# Sanctum Integration Journal
+  let markdown = `# Practice Space Integration Journal
 
 Exported on ${new Date().toLocaleDateString('en-US', {
   weekday: 'long',
@@ -124,7 +124,7 @@ ${session.notes}
 
   text += `
 ---
-Exported from Sanctum
+Exported from Practice Space
 `
 
   return text
@@ -204,7 +204,7 @@ export function exportAllToJSON(data) {
   return JSON.stringify({
     exportDate: new Date().toISOString(),
     version: '1.0',
-    appName: 'Sanctum',
+    appName: 'Practice Space',
     ...data
   }, null, 2)
 }

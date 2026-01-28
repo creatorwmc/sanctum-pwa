@@ -141,8 +141,8 @@ function Layout({ children }) {
   // Share the app
   async function handleShareApp() {
     const shareData = {
-      title: 'Sanctum',
-      text: 'A sacred space for spiritual practice tracking',
+      title: 'Practice Space',
+      text: 'Your sacred place for spiritual practice tracking',
       url: 'https://sanctum-pwa-app.netlify.app'
     }
 
@@ -214,7 +214,7 @@ function Layout({ children }) {
 
   // Get current page title
   const currentPage = ALL_NAV_ITEMS.find(item => item.path === location.pathname)
-  const pageTitle = currentPage ? getLabel(currentPage.id) : (location.pathname === '/settings' ? 'Settings' : 'Sanctum')
+  const pageTitle = currentPage ? getLabel(currentPage.id) : (location.pathname === '/settings' ? 'Settings' : 'Practice Space')
 
   // Filter nav items based on preferences
   const navItems = ALL_NAV_ITEMS.filter(item => visibleNavItems.includes(item.id))
@@ -326,7 +326,7 @@ function Layout({ children }) {
               </section>
 
               <section className="settings-drawer-section">
-                <h3>Support Sanctum</h3>
+                <h3>Support Practice Space</h3>
                 <div className="support-buttons">
                   <button
                     className="support-btn"
