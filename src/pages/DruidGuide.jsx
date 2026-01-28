@@ -26,15 +26,19 @@ function DruidGuide() {
         <p>Based on John Michael Greer's teachings and Traditional Druidry</p>
       </header>
 
+      <div className="druid-teaser">
+        Full integration coming soon...
+      </div>
+
       <nav className="guide-nav">
         {sections.map(section => (
           <button
             key={section.id}
-            className={`nav-btn ${activeSection === section.id ? 'nav-btn--active' : ''}`}
+            className={`druid-nav-btn ${activeSection === section.id ? 'druid-nav-btn--active' : ''}`}
             onClick={() => setActiveSection(section.id)}
           >
-            <span className="nav-icon">{section.icon}</span>
-            <span className="nav-label">{section.label}</span>
+            <span className="druid-nav-icon">{section.icon}</span>
+            <span className="druid-nav-label">{section.label}</span>
           </button>
         ))}
       </nav>
