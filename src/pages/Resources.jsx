@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { db } from '../db'
 import {
   isGoogleDriveConfigured,
@@ -10,9 +11,11 @@ import {
   getUserEmail,
   getFileTypeIcon
 } from '../services/googleDrive'
+import { getTraditionSettings } from '../components/TraditionSettings'
+import { AVAILABLE_TRADITIONS } from '../data/traditions'
 import './Resources.css'
 
-const CATEGORIES = [
+const DEFAULT_CATEGORIES = [
   { id: 'all', label: 'All' },
   { id: 'study', label: 'Study Materials' },
   { id: 'reference', label: 'Reference' },
@@ -21,7 +24,16 @@ const CATEGORIES = [
   { id: 'other', label: 'Other' }
 ]
 
+function getSelectedTraditionInfo() {
+  const settings = getTraditionSettings()
+  if (!settings.traditionId) return null
+  const tradition = AVAILABLE_TRADITIONS.find(t => t.id === settings.traditionId)
+  return tradition
+}
+
 function Resources() {
+  const navigate = useNavigate()
+
   // Resources state
   const [resources, setResources] = useState([])
   const [loading, setLoading] = useState(true)
@@ -29,6 +41,17 @@ function Resources() {
   const [sourceFilter, setSourceFilter] = useState('all') // 'all', 'drive', 'manual'
   const [searchTerm, setSearchTerm] = useState('')
   const [sortBy, setSortBy] = useState('date') // 'date', 'title', 'category'
+
+  // Tradition state
+  const [useTraditionCategories, setUseTraditionCategories] = useState(false)
+  const lastTraditionClickRef = useRef(0)
+  const selectedTradition = getSelectedTraditionInfo()
+  const traditionCategories = selectedTradition?.libraryCategories || []
+
+  // Build categories based on mode
+  const CATEGORIES = useTraditionCategories && traditionCategories.length > 0
+    ? [{ id: 'all', label: 'All' }, ...traditionCategories.map(cat => ({ id: cat, label: cat }))]
+    : DEFAULT_CATEGORIES
 
   // Google Drive state
   const [driveConfigured] = useState(isGoogleDriveConfigured())
@@ -72,6 +95,28 @@ function Resources() {
       const email = await getUserEmail()
       setUserEmail(email)
     }
+  }
+
+  function handleTraditionToggle() {
+    setUseTraditionCategories(!useTraditionCategories)
+    setFilter('all') // Reset filter when switching modes
+  }
+
+  function handleTraditionButtonClick() {
+    const now = Date.now()
+    const timeSinceLastClick = now - lastTraditionClickRef.current
+
+    if (timeSinceLastClick < 300) {
+      // Double-click: navigate to settings to change tradition
+      navigate('/settings')
+    } else {
+      // Single click: toggle tradition categories mode
+      if (selectedTradition?.libraryCategories?.length > 0) {
+        handleTraditionToggle()
+      }
+    }
+
+    lastTraditionClickRef.current = now
   }
 
   async function loadResources() {
@@ -478,7 +523,7 @@ function Resources() {
                   onChange={(e) => setDriveCategory(e.target.value)}
                   className="input"
                 >
-                  {CATEGORIES.filter(c => c.id !== 'all').map(c => (
+                  {DEFAULT_CATEGORIES.filter(c => c.id !== 'all').map(c => (
                     <option key={c.id} value={c.id}>{c.label}</option>
                   ))}
                 </select>
@@ -557,7 +602,7 @@ function Resources() {
               onChange={(e) => setFormCategory(e.target.value)}
               className="input"
             >
-              {CATEGORIES.filter(c => c.id !== 'all').map(c => (
+              {DEFAULT_CATEGORIES.filter(c => c.id !== 'all').map(c => (
                 <option key={c.id} value={c.id}>{c.label}</option>
               ))}
             </select>
@@ -621,6 +666,13 @@ function Resources() {
             📁 Browse Drive
           </button>
         )}
+        <button
+          onClick={selectedTradition ? handleTraditionButtonClick : () => navigate('/settings')}
+          className={`btn ${useTraditionCategories ? 'btn-primary' : 'btn-secondary'} tradition-btn`}
+          title={selectedTradition ? "Click to toggle categories, double-click to change tradition" : "Select a tradition"}
+        >
+          {selectedTradition ? `${selectedTradition.icon} ${selectedTradition.name}` : '✨ Select Tradition'}
+        </button>
       </div>
 
       {/* Drive Connection Status */}
@@ -757,7 +809,7 @@ function Resources() {
                     {resource.title}
                   </a>
                   <span className="resource-category">
-                    {CATEGORIES.find(c => c.id === resource.category)?.label || resource.category}
+                    {DEFAULT_CATEGORIES.find(c => c.id === resource.category)?.label || resource.category}
                   </span>
                   {resource.notes && (
                     <p className="resource-notes">{resource.notes}</p>

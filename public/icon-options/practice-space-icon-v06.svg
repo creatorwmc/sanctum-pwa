@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg6" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2d1b4e"/>
+      <stop offset="100%" style="stop-color:#4a1a6b"/>
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="512" height="512" fill="url(#bg6)"/>
+  <!-- Outer Circle -->
+  <circle cx="256" cy="256" r="200" fill="none" stroke="#ffffff" stroke-width="2"/>
+  <!-- Golden Ratio Spiral -->
+  <path d="M256 256
+           Q256 156 356 156
+           Q456 156 456 256
+           Q456 406 306 406
+           Q156 406 156 256
+           Q156 136 276 136
+           Q376 136 376 236
+           Q376 346 266 346
+           Q176 346 176 256
+           Q176 186 246 186
+           Q306 186 306 246
+           Q306 296 256 296
+           Q216 296 216 256
+           Q216 226 246 226
+           Q266 226 266 246
+           Q266 256 256 256"
+        fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Center Dot -->
+  <circle cx="256" cy="256" r="8" fill="#ffffff"/>
+</svg>

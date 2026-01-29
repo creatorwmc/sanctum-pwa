@@ -9,6 +9,22 @@
   padding: 1rem 0;
 }
 
+.app-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+
+.app-subtitle {
+  font-size: 0.9rem;
+  color: var(--accent);
+  margin: 0.25rem 0 1rem 0;
+  font-style: italic;
+  opacity: 0.9;
+}
+
 .greeting .date {
   color: var(--text-muted);
   font-size: 0.875rem;

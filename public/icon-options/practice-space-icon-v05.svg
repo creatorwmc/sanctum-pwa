@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg5" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a4e"/>
+      <stop offset="100%" style="stop-color:#2d1b4e"/>
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="512" height="512" fill="url(#bg5)"/>
+  <!-- Outer Circle -->
+  <circle cx="256" cy="256" r="200" fill="none" stroke="#d4af37" stroke-width="2"/>
+  <!-- 5 Lotus Petals -->
+  <path d="M256 80 Q320 180 256 256 Q192 180 256 80" fill="none" stroke="#ffffff" stroke-width="2"/>
+  <path d="M423 178 Q340 220 256 256 Q340 180 423 178" fill="none" stroke="#ffffff" stroke-width="2"/>
+  <path d="M365 400 Q300 320 256 256 Q340 340 365 400" fill="none" stroke="#ffffff" stroke-width="2"/>
+  <path d="M147 400 Q212 320 256 256 Q172 340 147 400" fill="none" stroke="#ffffff" stroke-width="2"/>
+  <path d="M89 178 Q172 220 256 256 Q172 180 89 178" fill="none" stroke="#ffffff" stroke-width="2"/>
+  <!-- Center Dot -->
+  <circle cx="256" cy="256" r="15" fill="#d4af37"/>
+</svg>

@@ -6,6 +6,7 @@ import FeedbackModal from './FeedbackModal'
 import RateModal from './RateModal'
 import PuzzleGame from './PuzzleGame'
 import AuthModal from './AuthModal'
+import ReinstallPrompt, { shouldShowReinstallPrompt } from './ReinstallPrompt'
 import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
 import versionInfo from '../version.json'
@@ -67,6 +68,18 @@ function Layout({ children }) {
   const [editingLabels, setEditingLabels] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [puzzleOpen, setPuzzleOpen] = useState(false)
+  const [reinstallPromptOpen, setReinstallPromptOpen] = useState(false)
+
+  // Check if we should show reinstall prompt on mount
+  useEffect(() => {
+    if (shouldShowReinstallPrompt()) {
+      // Small delay to let the app load first
+      const timer = setTimeout(() => {
+        setReinstallPromptOpen(true)
+      }, 1500)
+      return () => clearTimeout(timer)
+    }
+  }, [])
 
   // Apply theme based on current route
   useEffect(() => {
@@ -534,6 +547,7 @@ function Layout({ children }) {
       <RateModal isOpen={rateOpen} onClose={() => setRateOpen(false)} />
       <PuzzleGame isOpen={puzzleOpen} onClose={() => setPuzzleOpen(false)} />
       <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
+      <ReinstallPrompt isOpen={reinstallPromptOpen} onClose={() => setReinstallPromptOpen(false)} />
     </div>
   )
 }

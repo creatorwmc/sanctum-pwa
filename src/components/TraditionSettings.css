@@ -43,10 +43,72 @@
   font-size: 0.8rem;
 }
 
-.tradition-current-actions {
+/* Apply Level Section */
+.apply-level-section {
+  padding: 1rem;
+  background: var(--surface-color-light, #252542);
+  border-radius: 12px;
+}
+
+.apply-level-label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-secondary, #a0a0a0);
+  margin-bottom: 0.75rem;
+}
+
+.apply-level-options {
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
+  background: var(--surface-color, #1a1a2e);
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.apply-level-option {
+  flex: 1;
+  padding: 0.6rem 0.5rem;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: var(--text-secondary, #a0a0a0);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.apply-level-option:hover:not(.apply-level-option--disabled) {
+  background: var(--surface-color-light, #252542);
+  color: var(--text-color, #e8e8e8);
+}
+
+.apply-level-option--selected {
+  background: var(--accent-color, #228b22) !important;
+  color: white !important;
+}
+
+.apply-level-option--coming-soon {
+  font-style: italic;
+  opacity: 0.7;
+}
+
+.apply-level-option--coming-soon.apply-level-option--selected {
+  background: var(--accent-color, #228b22) !important;
+  opacity: 0.8;
+}
+
+.apply-level-description {
+  margin: 0.75rem 0 0 0;
+  font-size: 0.8rem;
+  color: var(--text-secondary, #a0a0a0);
+  font-style: italic;
+}
+
+.apply-level-note {
+  margin: 0.5rem 0 0 0;
+  font-size: 0.75rem;
+  color: var(--text-muted, #666);
 }
 
 /* Empty State */
@@ -203,6 +265,91 @@
   margin-top: 0.25rem;
 }
 
+/* Expand indicator for traditions with subgroups */
+.tradition-option-expand {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  font-size: 0.6rem;
+  color: var(--text-secondary, #a0a0a0);
+}
+
+.tradition-option--has-subgroups {
+  border-style: dashed;
+}
+
+.tradition-option--expanded {
+  border-color: var(--tradition-color, #228b22);
+  border-style: solid;
+}
+
+/* Wrapper for tradition + subgroups */
+.tradition-option-wrapper {
+  display: contents;
+}
+
+/* Subgroups Container */
+.tradition-subgroups {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 0.4rem;
+  padding: 0.75rem;
+  background: var(--surface-color, #1a1a2e);
+  border-radius: 8px;
+  margin-top: -0.25rem;
+  margin-bottom: 0.5rem;
+  border: 1px solid var(--border-color, #333);
+}
+
+.tradition-subgroup {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.6rem;
+  background: var(--surface-color-light, #252542);
+  border: 1px solid var(--border-color, #333);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.tradition-subgroup:hover {
+  border-color: var(--tradition-color, #228b22);
+  background: color-mix(in srgb, var(--tradition-color, #228b22) 10%, var(--surface-color-light, #252542));
+}
+
+.tradition-subgroup--selected {
+  border-color: var(--tradition-color, #228b22);
+  background: color-mix(in srgb, var(--tradition-color, #228b22) 20%, var(--surface-color-light, #252542));
+}
+
+.tradition-subgroup--has-preset {
+  border-left: 3px solid var(--tradition-color, #228b22);
+}
+
+.tradition-subgroup-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.tradition-subgroup-name {
+  font-size: 0.7rem;
+  color: var(--text-color, #e8e8e8);
+  line-height: 1.2;
+  flex: 1;
+}
+
+.tradition-subgroup-badge {
+  font-size: 0.5rem;
+  padding: 0.1rem 0.25rem;
+  background: var(--tradition-color, #228b22);
+  color: white;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
 /* Custom Tradition Input */
 .custom-tradition-input {
   margin-top: 1rem;
@@ -274,6 +421,17 @@
   line-height: 1.4;
 }
 
+.tradition-info li strong {
+  color: var(--text-color, #e8e8e8);
+}
+
+.tradition-info-note {
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
+  color: var(--text-muted, #666);
+  font-style: italic;
+}
+
 /* Toggle Switch (matches existing app style) */
 .toggle-switch {
   position: relative;
@@ -334,6 +492,23 @@
   }
 
   .tradition-option-name {
+    font-size: 0.65rem;
+  }
+
+  .tradition-subgroups {
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    padding: 0.5rem;
+  }
+
+  .tradition-subgroup {
+    padding: 0.4rem 0.5rem;
+  }
+
+  .tradition-subgroup-icon {
+    font-size: 0.9rem;
+  }
+
+  .tradition-subgroup-name {
     font-size: 0.65rem;
   }
 }

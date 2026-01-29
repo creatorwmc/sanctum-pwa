@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { db } from '../db'
+import { db, queries } from '../db'
 import { getLocalDateString } from '../utils/dateUtils'
 import { SOUNDS, playSoundRepeated, resumeAudio } from '../utils/sounds'
 import './Timer.css'
@@ -368,6 +368,12 @@ function Timer() {
 
     try {
       await db.add('sessions', session)
+
+      // Auto-log meditation practice to daily log
+      const durationMins = Math.round((duration - timeLeft) / 60)
+      const autoNotes = `${practiceType} session (${durationMins} min)${notes.trim() ? ': ' + notes.trim() : ''}`
+      await queries.autoLogPractice('meditation', autoNotes)
+
       handleFullReset()
     } catch (error) {
       console.error('Error saving session:', error)

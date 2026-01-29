@@ -7,8 +7,10 @@
 }
 
 .header {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 100;
   display: flex;
   align-items: center;
@@ -53,6 +55,7 @@
 .main-content {
   flex: 1;
   padding: 1rem;
+  padding-top: 4rem;
   padding-bottom: 5rem;
   overflow-y: auto;
 }
@@ -645,22 +648,8 @@
 
 /* Desktop adjustments */
 @media (min-width: 768px) {
-  .header {
-    display: none;
-  }
-
-  .bottom-nav {
-    position: static;
-    order: -1;
-    border-top: none;
-    border-bottom: 1px solid var(--border);
-    padding: 0;
-    justify-content: center;
-    gap: 0.5rem;
-  }
-
   .main-content {
-    padding-bottom: 2rem;
+    padding-bottom: 5rem;
     max-width: 1000px;
     margin: 0 auto;
     width: 100%;

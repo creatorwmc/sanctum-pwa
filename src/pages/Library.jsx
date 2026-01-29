@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useState, useEffect, useRef } from 'react'
+import { useSearchParams, useNavigate } from 'react-router-dom'
 import { db } from '../db'
+import { getTraditionSettings } from '../components/TraditionSettings'
+import { AVAILABLE_TRADITIONS } from '../data/traditions'
 import './Library.css'
 
 const DEFAULT_TRADITIONS = [
@@ -18,7 +20,15 @@ const DEFAULT_LABELS = DEFAULT_TRADITIONS.reduce((acc, t) => {
   return acc
 }, {})
 
+function getSelectedTraditionInfo() {
+  const settings = getTraditionSettings()
+  if (!settings.traditionId) return null
+  const tradition = AVAILABLE_TRADITIONS.find(t => t.id === settings.traditionId)
+  return tradition
+}
+
 function Library() {
+  const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const [documents, setDocuments] = useState([])
   const [filter, setFilter] = useState(searchParams.get('tradition') || 'all')
@@ -29,6 +39,18 @@ function Library() {
   // Custom labels state
   const [customLabels, setCustomLabels] = useState(DEFAULT_LABELS)
   const [editingLabels, setEditingLabels] = useState(false)
+  const [useTraditionCategories, setUseTraditionCategories] = useState(false)
+
+  // Double-click detection for tradition button
+  const lastTraditionClickRef = useRef(0)
+
+  const selectedTradition = getSelectedTraditionInfo()
+  const traditionCategories = selectedTradition?.libraryCategories || []
+
+  // Build categories based on mode
+  const activeCategories = useTraditionCategories && traditionCategories.length > 0
+    ? [{ id: 'all', label: 'All' }, ...traditionCategories.map(cat => ({ id: cat, label: cat }))]
+    : DEFAULT_TRADITIONS
 
   // Form state
   const [title, setTitle] = useState('')
@@ -74,7 +96,8 @@ function Library() {
     try {
       const docData = {
         title: title.trim(),
-        tradition,
+        tradition: useTraditionCategories ? selectedTradition?.id || 'custom' : tradition,
+        category: useTraditionCategories ? tradition : null,
         description: description.trim(),
         content: content.trim()
       }
@@ -147,7 +170,29 @@ function Library() {
 
   const filteredDocs = filter === 'all'
     ? documents
-    : documents.filter(d => d.tradition === filter)
+    : documents.filter(d => d.tradition === filter || d.category === filter)
+
+  function handleTraditionToggle() {
+    setUseTraditionCategories(!useTraditionCategories)
+    setFilter('all') // Reset filter when switching modes
+  }
+
+  function handleTraditionButtonClick() {
+    const now = Date.now()
+    const timeSinceLastClick = now - lastTraditionClickRef.current
+
+    if (timeSinceLastClick < 300) {
+      // Double-click: navigate to settings to change tradition
+      navigate('/settings')
+    } else {
+      // Single click: toggle tradition categories mode
+      if (selectedTradition?.libraryCategories?.length > 0) {
+        handleTraditionToggle()
+      }
+    }
+
+    lastTraditionClickRef.current = now
+  }
 
   if (loading) {
     return <div className="loading">Loading...</div>
@@ -164,12 +209,19 @@ function Library() {
             >
               + Add Document
             </button>
+            <button
+              onClick={selectedTradition ? handleTraditionButtonClick : () => navigate('/settings')}
+              className={`btn ${useTraditionCategories ? 'btn-primary' : 'btn-secondary'} tradition-btn`}
+              title={selectedTradition ? "Click to toggle categories, double-click to change tradition" : "Select a tradition"}
+            >
+              {selectedTradition ? `${selectedTradition.icon} ${selectedTradition.name}` : '✨ Select Tradition'}
+            </button>
           </div>
 
           <div className="tradition-header">
             <div className="tradition-tabs">
-              {DEFAULT_TRADITIONS.map(t => (
-                editingLabels && t.id !== 'all' ? (
+              {activeCategories.map(t => (
+                editingLabels && t.id !== 'all' && !useTraditionCategories ? (
                   <input
                     key={t.id}
                     type="text"
@@ -185,24 +237,26 @@ function Library() {
                     onClick={() => !editingLabels && handleFilterChange(t.id)}
                     className={`tab-btn ${filter === t.id ? 'tab-btn--active' : ''} ${editingLabels ? 'tab-btn--disabled' : ''}`}
                   >
-                    {getLabel(t.id)}
+                    {useTraditionCategories ? t.label : getLabel(t.id)}
                   </button>
                 )
               ))}
             </div>
-            <div className="tradition-actions">
-              {editingLabels && (
-                <button className="edit-btn" onClick={resetLabels}>
-                  Reset
+            {!useTraditionCategories && (
+              <div className="tradition-actions">
+                {editingLabels && (
+                  <button className="edit-btn" onClick={resetLabels}>
+                    Reset
+                  </button>
+                )}
+                <button
+                  className="edit-btn"
+                  onClick={() => setEditingLabels(!editingLabels)}
+                >
+                  {editingLabels ? 'Done' : 'Edit'}
                 </button>
-              )}
-              <button
-                className="edit-btn"
-                onClick={() => setEditingLabels(!editingLabels)}
-              >
-                {editingLabels ? 'Done' : 'Edit'}
-              </button>
-            </div>
+              </div>
+            )}
           </div>
 
           {filteredDocs.length === 0 ? (
@@ -254,14 +308,18 @@ function Library() {
           </div>
 
           <div className="form-group">
-            <label className="form-label">Tradition</label>
+            <label className="form-label">
+              {useTraditionCategories ? 'Category' : 'Tradition'}
+            </label>
             <select
               value={tradition}
               onChange={(e) => setTradition(e.target.value)}
               className="input"
             >
-              {DEFAULT_TRADITIONS.filter(t => t.id !== 'all').map(t => (
-                <option key={t.id} value={t.id}>{getLabel(t.id)}</option>
+              {activeCategories.filter(t => t.id !== 'all').map(t => (
+                <option key={t.id} value={t.id}>
+                  {useTraditionCategories ? t.label : getLabel(t.id)}
+                </option>
               ))}
             </select>
           </div>

@@ -7,7 +7,9 @@ import {
   fullSync,
   getLastSyncTime,
   uploadAllData,
-  downloadAllData
+  downloadAllData,
+  initAutoSync,
+  stopAutoSync
 } from '../services/syncService'
 import './AccountSettings.css'
 
@@ -22,14 +24,16 @@ function AccountSettings({ onSignInClick }) {
   async function handleToggleSync() {
     if (syncEnabled) {
       disableSync()
+      stopAutoSync()
       setSyncEnabled(false)
       setSyncMessage('Cloud sync disabled')
     } else {
       enableSync()
       setSyncEnabled(true)
-      setSyncMessage('Cloud sync enabled')
-      // Do initial sync
+      setSyncMessage('Cloud sync enabled - syncing automatically')
+      // Initialize auto-sync and do initial sync
       if (user) {
+        initAutoSync(user.uid)
         await handleSync()
       }
     }
@@ -143,6 +147,7 @@ function AccountSettings({ onSignInClick }) {
           <div className="user-details">
             {user.displayName && <span className="user-name">{user.displayName}</span>}
             <span className="user-email">{user.email}</span>
+            <span className="user-id">ID: {user.uid}</span>
           </div>
         </div>
         <button onClick={handleLogout} className="btn btn-secondary account-logout-btn">
@@ -212,6 +217,7 @@ function AccountSettings({ onSignInClick }) {
         <ul>
           <li>Data is always stored locally on your device</li>
           <li>Cloud sync is optional and can be disabled anytime</li>
+          {syncEnabled && <li>Changes sync automatically across devices</li>}
           <li>Disabling sync keeps your local data intact</li>
         </ul>
       </div>

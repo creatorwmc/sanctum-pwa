@@ -125,6 +125,33 @@ function generateId() {
   return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
 }
 
+// Lazy-load sync functions to avoid circular dependencies
+let syncModule = null
+async function getSyncModule() {
+  if (!syncModule) {
+    syncModule = await import('../services/syncService')
+  }
+  return syncModule
+}
+
+// Queue a change for auto-sync (non-blocking)
+function triggerSync(storeName, itemId) {
+  getSyncModule().then(sync => {
+    sync.queueSync(storeName, itemId)
+  }).catch(() => {
+    // Sync not available, ignore
+  })
+}
+
+// Queue a deletion for auto-sync (non-blocking)
+function triggerDelete(storeName, itemId) {
+  getSyncModule().then(sync => {
+    sync.queueDelete(storeName, itemId)
+  }).catch(() => {
+    // Sync not available, ignore
+  })
+}
+
 // Generic CRUD operations
 export const db = {
   // Create
@@ -136,6 +163,7 @@ export const db = {
       createdAt: data.createdAt || new Date().toISOString()
     }
     await database.add(storeName, item)
+    triggerSync(storeName, item.id)
     return item
   },
 
@@ -165,6 +193,7 @@ export const db = {
       updatedAt: new Date().toISOString()
     }
     await database.put(storeName, item)
+    triggerSync(storeName, item.id)
     return item
   },
 
@@ -172,6 +201,7 @@ export const db = {
   async delete(storeName, id) {
     const database = await getDB()
     await database.delete(storeName, id)
+    triggerDelete(storeName, id)
   },
 
   // Clear store
@@ -476,16 +506,28 @@ export const queries = {
     return practices.filter(p => p.enabled !== false)
   },
 
-  // Initialize practices from defaults (called when user first customizes)
-  async initializePractices() {
+  // Initialize practices from defaults or custom list (called when user first customizes or selects a tradition)
+  async initializePractices(customPractices = null) {
     const database = await getDB()
     const existing = await database.getAll('practices')
 
-    if (existing.length > 0) return existing
+    // If no custom practices provided and we have existing ones, return them
+    if (!customPractices && existing.length > 0) return existing
 
-    // Copy defaults to user's practice store
-    for (const practice of DEFAULT_PRACTICES) {
-      await database.put('practices', { ...practice, enabled: true })
+    // Use custom practices if provided, otherwise use defaults
+    const practicesToLoad = customPractices || DEFAULT_PRACTICES
+
+    // Copy practices to user's practice store
+    for (let i = 0; i < practicesToLoad.length; i++) {
+      const practice = practicesToLoad[i]
+      const practiceData = {
+        ...practice,
+        enabled: true,
+        isDefault: !customPractices, // Mark as default only if using DEFAULT_PRACTICES
+        order: practice.order ?? i
+      }
+      await database.put('practices', practiceData)
+      triggerSync('practices', practiceData.id)
     }
 
     return database.getAll('practices')
@@ -509,6 +551,7 @@ export const queries = {
     }
 
     await database.put('practices', newPractice)
+    triggerSync('practices', newPractice.id)
     return newPractice
   },
 
@@ -528,6 +571,7 @@ export const queries = {
     }
 
     await database.put('practices', updatedPractice)
+    triggerSync('practices', updatedPractice.id)
     return updatedPractice
   },
 
@@ -547,6 +591,7 @@ export const queries = {
     }
 
     await database.put('practices', updatedPractice)
+    triggerSync('practices', updatedPractice.id)
     return updatedPractice
   },
 
@@ -567,6 +612,7 @@ export const queries = {
 
     // Delete custom practice
     await database.delete('practices', id)
+    triggerDelete('practices', id)
     return true
   },
 
@@ -580,17 +626,95 @@ export const queries = {
       const practice = await database.get('practices', orderedIds[i])
       if (practice) {
         await database.put('practices', { ...practice, order: i })
+        triggerSync('practices', practice.id)
       }
     }
 
     return this.getPractices()
   },
 
-  // Reset practices to defaults
-  async resetPractices() {
+  // Reset practices to defaults or load tradition-specific practices
+  async resetPractices(customPractices = null) {
     const database = await getDB()
+
+    // Get existing practice IDs to delete from cloud
+    const existingPractices = await database.getAll('practices')
+
+    // Clear local practices
     await database.clear('practices')
-    return this.initializePractices()
+
+    // Delete each practice from cloud sync
+    for (const practice of existingPractices) {
+      triggerDelete('practices', practice.id)
+    }
+
+    // Initialize with new practices (which will sync)
+    return this.initializePractices(customPractices)
+  },
+
+  // Auto-log a practice to today's daily log (used by Timer and Journal)
+  async autoLogPractice(practiceId, notes = '') {
+    const database = await getDB()
+    const today = getLocalDateString()
+    const timestamp = new Date().toISOString()
+
+    // Get or create today's log
+    let todayLog = await this.getTodayLog()
+
+    const newEntry = {
+      id: `auto-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      practiceId,
+      timestamp,
+      notes: notes.trim(),
+      autoLogged: true
+    }
+
+    if (todayLog) {
+      // Add to existing log
+      const existingEntries = todayLog.entries || []
+      const allEntries = [...existingEntries, newEntry]
+
+      const logData = {
+        ...todayLog,
+        entries: allEntries,
+        practices: [...new Set(allEntries.map(e => e.practiceId))],
+        updatedAt: timestamp
+      }
+
+      await database.put('dailyLogs', logData)
+      triggerSync('dailyLogs', logData.id)
+    } else {
+      // Create new log
+      const logData = {
+        id: `log-${today}-${Date.now()}`,
+        date: today,
+        entries: [newEntry],
+        practices: [practiceId],
+        createdAt: timestamp,
+        updatedAt: timestamp
+      }
+
+      await database.put('dailyLogs', logData)
+      triggerSync('dailyLogs', logData.id)
+    }
+
+    // Update bonus points if needed
+    const updatedLog = await this.getTodayLog()
+    const uniquePractices = [...new Set(updatedLog.entries.map(e => e.practiceId))]
+    const bonusPoints = uniquePractices.length >= 2 ? Math.min(Math.floor(uniquePractices.length / 2), 5) : 0
+
+    // Get current stats and update if bonus changed
+    const stats = await this.getPracticeStats()
+    const previousUnique = todayLog ? [...new Set((todayLog.entries || []).map(e => e.practiceId))].length : 0
+    const previousBonus = previousUnique >= 2 ? Math.min(Math.floor(previousUnique / 2), 5) : 0
+
+    if (bonusPoints > previousBonus) {
+      await this.updatePracticeStats({
+        bonusPoints: stats.bonusPoints + (bonusPoints - previousBonus)
+      })
+    }
+
+    return newEntry
   }
 }
 

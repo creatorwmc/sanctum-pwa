@@ -7,6 +7,7 @@ import {
   updateProfile
 } from 'firebase/auth'
 import { auth, isFirebaseConfigured } from '../config/firebase'
+import { initAutoSync, stopAutoSync, isSyncEnabled } from '../services/syncService'
 
 const AuthContext = createContext(null)
 
@@ -35,9 +36,19 @@ export function AuthProvider({ children }) {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user)
       setLoading(false)
+
+      // Initialize or stop auto-sync based on auth state
+      if (user && isSyncEnabled()) {
+        initAutoSync(user.uid)
+      } else {
+        stopAutoSync()
+      }
     })
 
-    return unsubscribe
+    return () => {
+      unsubscribe()
+      stopAutoSync()
+    }
   }, [firebaseAvailable])
 
   async function signUp(email, password, displayName) {

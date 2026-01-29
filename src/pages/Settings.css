@@ -215,3 +215,65 @@
   font-size: 1.125rem;
   color: var(--accent);
 }
+
+/* Practice Guides List */
+.settings-item--expanded {
+  background: var(--bg-secondary);
+}
+
+.practice-guides-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+}
+
+.practice-guide-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  color: var(--text-primary);
+  text-decoration: none;
+  font-size: 0.8rem;
+  transition: all 0.15s ease;
+}
+
+.practice-guide-item:hover:not(.practice-guide-item--coming-soon) {
+  border-color: var(--tradition-color, var(--accent));
+  background: color-mix(in srgb, var(--tradition-color, var(--accent)) 10%, var(--bg-card));
+}
+
+.practice-guide-item--coming-soon {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.practice-guide-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.practice-guide-name {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.practice-guide-arrow {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.practice-guide-status {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  font-style: italic;
+  white-space: nowrap;
+}

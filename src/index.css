@@ -6,16 +6,16 @@
 
 :root {
   /* Theme variables (can be overridden by ThemeContext) */
-  --theme-bg-primary: #0d1210;
-  --theme-bg-secondary: #141c18;
-  --theme-bg-card: #1a241f;
-  --theme-border: #2d3a32;
-  --theme-border-warm: #3d3428;
+  --theme-bg-primary: #1a1a2e;
+  --theme-bg-secondary: #1f1f3a;
+  --theme-bg-card: #252547;
+  --theme-border: #3a3a5c;
+  --theme-border-warm: #4a3a5c;
   --theme-text-primary: #e8e0d4;
-  --theme-text-secondary: #b8a992;
-  --theme-text-muted: #7a6f5f;
-  --theme-accent: #d4a259;
-  --theme-bg-gradient: radial-gradient(ellipse at center, rgba(212, 162, 89, 0.08) 0%, transparent 70%);
+  --theme-text-secondary: #b8a892;
+  --theme-text-muted: #7a6f7f;
+  --theme-accent: #d4af37;
+  --theme-bg-gradient: radial-gradient(ellipse at center, rgba(212, 175, 55, 0.08) 0%, transparent 70%);
 
   /* Map theme variables to app variables */
   --bg-primary: var(--theme-bg-primary);
@@ -46,7 +46,7 @@
   --danger: #a65d57;
 
   /* Special surfaces */
-  --bg-tree: linear-gradient(180deg, #1a241f 0%, #141c18 50%, #0d1210 100%);
+  --bg-tree: linear-gradient(180deg, #252547 0%, #1f1f3a 50%, #1a1a2e 100%);
   --bg-glow: var(--theme-bg-gradient);
 }
 

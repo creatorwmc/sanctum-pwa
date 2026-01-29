@@ -13,6 +13,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { isFeatureEnabled } from '../config/featureFlags'
 import { isUserAdmin, getUnreadWhisperCount } from '../services/adminService'
 import TraditionSettings from '../components/TraditionSettings'
+import { AVAILABLE_TRADITIONS } from '../data/traditions'
 import {
   isGoogleDriveConfigured,
   isConnected,
@@ -38,6 +39,7 @@ function Settings() {
   const [driveConfigured] = useState(isGoogleDriveConfigured())
   const [connecting, setConnecting] = useState(false)
   const [feedbackPromptsEnabled, setFeedbackPromptsEnabled] = useState(!isRatingDisabled())
+  const [showPracticeGuides, setShowPracticeGuides] = useState(false)
   const { resetOnboarding, getConfiguration } = useOnboarding()
   const config = getConfiguration()
 
@@ -347,16 +349,50 @@ function Settings() {
             <span className="settings-item-arrow">→</span>
           </Link>
 
-          <Link to="/guide/druid" className="settings-item">
+          <button
+            className={`settings-item ${showPracticeGuides ? 'settings-item--expanded' : ''}`}
+            onClick={() => setShowPracticeGuides(!showPracticeGuides)}
+          >
             <div className="settings-item-content">
-              <span className="settings-item-icon">🌳</span>
+              <span className="settings-item-icon">📖</span>
               <div>
-                <span className="settings-item-label">Druid Practice Guide</span>
-                <span className="settings-item-desc">Traditional Druidry teachings</span>
+                <span className="settings-item-label">Practice Guides</span>
+                <span className="settings-item-desc">Tradition-specific practice teachings</span>
               </div>
             </div>
-            <span className="settings-item-arrow">→</span>
-          </Link>
+            <span className="settings-item-arrow">{showPracticeGuides ? '▼' : '▶'}</span>
+          </button>
+
+          {showPracticeGuides && (
+            <div className="practice-guides-list">
+              {AVAILABLE_TRADITIONS.filter(t =>
+                !['unsure', 'none', 'custom'].includes(t.id)
+              ).map(tradition => (
+                tradition.hasPreset ? (
+                  <Link
+                    key={tradition.id}
+                    to={`/guide/${tradition.id}`}
+                    className="practice-guide-item"
+                    style={{ '--tradition-color': tradition.color }}
+                  >
+                    <span className="practice-guide-icon">{tradition.icon}</span>
+                    <span className="practice-guide-name">{tradition.name}</span>
+                    <span className="practice-guide-arrow">→</span>
+                  </Link>
+                ) : (
+                  <div
+                    key={tradition.id}
+                    className="practice-guide-item practice-guide-item--coming-soon"
+                    style={{ '--tradition-color': tradition.color }}
+                  >
+                    <span className="practice-guide-icon">{tradition.icon}</span>
+                    <span className="practice-guide-name">{tradition.name}</span>
+                    <span className="practice-guide-status">Coming Soon</span>
+                  </div>
+                )
+              ))}
+            </div>
+          )}
 
           <button className="settings-item" onClick={() => setFeedbackOpen(true)}>
             <div className="settings-item-content">
@@ -398,7 +434,7 @@ function Settings() {
         </section>
       )}
 
-      {isAdmin && (
+      {user && (
         <section className="settings-section">
           <h2 className="settings-section-title">Admin</h2>
           <div className="settings-list">
@@ -412,7 +448,9 @@ function Settings() {
                       <span className="settings-badge">{unreadWhispers}</span>
                     )}
                   </span>
-                  <span className="settings-item-desc">View user feedback</span>
+                  <span className="settings-item-desc">
+                    {isAdmin ? 'View user feedback' : 'Admin access required'}
+                  </span>
                 </div>
               </div>
               <span className="settings-item-arrow">→</span>

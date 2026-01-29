@@ -11,6 +11,12 @@
   flex-wrap: wrap;
 }
 
+.tradition-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 /* Drive Status */
 .drive-status {
   display: flex;

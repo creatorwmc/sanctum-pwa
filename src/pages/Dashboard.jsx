@@ -76,6 +76,8 @@ function Dashboard() {
   return (
     <div className="dashboard">
       <div className="greeting">
+        <h1 className="app-title">Practice Space</h1>
+        <p className="app-subtitle">Your Sacred Place</p>
         <p className="date">{today}</p>
         <h2>Welcome back</h2>
       </div>

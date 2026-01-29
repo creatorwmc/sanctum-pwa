@@ -7,6 +7,7 @@ function AuthModal({ isOpen, onClose }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [displayName, setDisplayName] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [localError, setLocalError] = useState('')
 
@@ -109,16 +110,26 @@ function AuthModal({ isOpen, onClose }) {
 
           <div className="form-group">
             <label htmlFor="auth-password">Password</label>
-            <input
-              type="password"
-              id="auth-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder={mode === 'signup' ? 'At least 6 characters' : 'Your password'}
-              className="input"
-              autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
-              required
-            />
+            <div className="password-input-wrapper">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                id="auth-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder={mode === 'signup' ? 'At least 6 characters' : 'Your password'}
+                className="input"
+                autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
+                required
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? '🙈' : '👁'}
+              </button>
+            </div>
           </div>
 
           {displayError && (
