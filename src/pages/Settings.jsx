@@ -9,7 +9,9 @@ import AuthModal from '../components/AuthModal'
 import BackgroundSettings from '../components/BackgroundSettings'
 import { isRatingDisabled, setRatingDisabled } from '../components/RatingPrompt'
 import { useOnboarding } from '../contexts/OnboardingContext'
+import { useAuth } from '../contexts/AuthContext'
 import { isFeatureEnabled } from '../config/featureFlags'
+import { isUserAdmin, getUnreadWhisperCount } from '../services/adminService'
 import TraditionSettings from '../components/TraditionSettings'
 import {
   isGoogleDriveConfigured,
@@ -27,7 +29,10 @@ import {
 import './Settings.css'
 
 function Settings() {
+  const { user } = useAuth()
   const [feedbackOpen, setFeedbackOpen] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [unreadWhispers, setUnreadWhispers] = useState(0)
   const [authModalOpen, setAuthModalOpen] = useState(false)
   const [driveConnected, setDriveConnected] = useState(false)
   const [driveConfigured] = useState(isGoogleDriveConfigured())
@@ -48,6 +53,24 @@ function Settings() {
   useEffect(() => {
     setDriveConnected(isConnected())
   }, [])
+
+  // Check admin status
+  useEffect(() => {
+    async function checkAdmin() {
+      if (user) {
+        const adminStatus = await isUserAdmin(user.uid)
+        setIsAdmin(adminStatus)
+        if (adminStatus) {
+          const count = await getUnreadWhisperCount()
+          setUnreadWhispers(count)
+        }
+      } else {
+        setIsAdmin(false)
+        setUnreadWhispers(0)
+      }
+    }
+    checkAdmin()
+  }, [user])
 
   async function handleConnectDrive() {
     setConnecting(true)
@@ -375,21 +398,28 @@ function Settings() {
         </section>
       )}
 
-      <section className="settings-section">
-        <h2 className="settings-section-title">Utilities</h2>
-        <div className="settings-list">
-          <Link to="/mmr-test" className="settings-item">
-            <div className="settings-item-content">
-              <span className="settings-item-icon">📊</span>
-              <div>
-                <span className="settings-item-label">MMR Test</span>
-                <span className="settings-item-desc">Meter reading tracker with camera</span>
+      {isAdmin && (
+        <section className="settings-section">
+          <h2 className="settings-section-title">Admin</h2>
+          <div className="settings-list">
+            <Link to="/admin/whispers" className="settings-item">
+              <div className="settings-item-content">
+                <span className="settings-item-icon">💬</span>
+                <div>
+                  <span className="settings-item-label">
+                    Whispers
+                    {unreadWhispers > 0 && (
+                      <span className="settings-badge">{unreadWhispers}</span>
+                    )}
+                  </span>
+                  <span className="settings-item-desc">View user feedback</span>
+                </div>
               </div>
-            </div>
-            <span className="settings-item-arrow">→</span>
-          </Link>
-        </div>
-      </section>
+              <span className="settings-item-arrow">→</span>
+            </Link>
+          </div>
+        </section>
+      )}
 
       <section className="settings-section">
         <h2 className="settings-section-title">About</h2>

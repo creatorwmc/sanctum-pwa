@@ -1,0 +1,220 @@
+/* Admin Whispers Page */
+
+.admin-page {
+  padding: 1rem;
+  max-width: 600px;
+  margin: 0 auto;
+  padding-bottom: 100px;
+}
+
+.admin-header {
+  margin-bottom: 1.5rem;
+}
+
+.admin-back {
+  color: var(--accent-primary, #68d391);
+  text-decoration: none;
+  font-size: 0.9rem;
+  display: inline-block;
+  margin-bottom: 0.5rem;
+}
+
+.admin-back:hover {
+  text-decoration: underline;
+}
+
+.admin-header h1 {
+  color: var(--text-primary, #e2e8f0);
+  font-size: 1.5rem;
+  margin: 0 0 0.25rem 0;
+}
+
+.admin-subtitle {
+  color: var(--text-secondary, #a0aec0);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* Access Messages */
+.admin-message {
+  text-align: center;
+  padding: 2rem;
+  background: var(--surface-color, rgba(45, 55, 72, 0.5));
+  border-radius: 12px;
+}
+
+.admin-message p {
+  color: var(--text-secondary, #a0aec0);
+  margin: 0 0 1rem 0;
+}
+
+.admin-hint {
+  font-size: 0.85rem;
+}
+
+.user-id {
+  display: block;
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: var(--bg-primary, #0d1210);
+  border-radius: 6px;
+  color: var(--accent-primary, #68d391);
+  font-size: 0.75rem;
+  word-break: break-all;
+}
+
+/* Filters */
+.admin-filters {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.filter-btn {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid var(--border-color, #4a5568);
+  background: transparent;
+  color: var(--text-secondary, #a0aec0);
+  border-radius: 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-btn:hover {
+  border-color: var(--text-secondary, #a0aec0);
+}
+
+.filter-btn--active {
+  background: var(--accent-primary, #68d391);
+  color: var(--bg-primary, #0d1210);
+  border-color: var(--accent-primary, #68d391);
+}
+
+/* Empty State */
+.admin-empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-secondary, #a0aec0);
+}
+
+/* Whispers List */
+.whispers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.whisper-card {
+  background: var(--surface-color, rgba(45, 55, 72, 0.5));
+  border-radius: 12px;
+  padding: 1rem;
+  border-left: 3px solid var(--border-color, #4a5568);
+}
+
+.whisper-card--unread {
+  border-left-color: var(--accent-primary, #68d391);
+  background: rgba(104, 211, 145, 0.05);
+}
+
+.whisper-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.whisper-from {
+  color: var(--text-primary, #e2e8f0);
+  font-weight: 600;
+}
+
+.whisper-section {
+  background: var(--border-color, #4a5568);
+  color: var(--text-secondary, #a0aec0);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+}
+
+.whisper-message {
+  color: var(--text-primary, #e2e8f0);
+  line-height: 1.6;
+  white-space: pre-wrap;
+  margin-bottom: 0.75rem;
+}
+
+.whisper-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  color: var(--text-secondary, #a0aec0);
+  font-size: 0.8rem;
+  margin-bottom: 0.75rem;
+}
+
+.whisper-time {
+  opacity: 0.8;
+}
+
+.whisper-email {
+  opacity: 0.6;
+}
+
+.whisper-actions {
+  display: flex;
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-color, #4a5568);
+}
+
+.whisper-action {
+  padding: 0.4rem 0.75rem;
+  background: transparent;
+  border: 1px solid var(--border-color, #4a5568);
+  color: var(--text-secondary, #a0aec0);
+  border-radius: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.whisper-action:hover {
+  border-color: var(--text-secondary, #a0aec0);
+  color: var(--text-primary, #e2e8f0);
+}
+
+.whisper-action--delete:hover {
+  border-color: #fc8181;
+  color: #fc8181;
+}
+
+/* Refresh Button */
+.admin-refresh {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.admin-refresh .btn {
+  padding: 0.75rem 2rem;
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .admin-page {
+    padding: 0.75rem;
+  }
+
+  .filter-btn {
+    padding: 0.4rem;
+    font-size: 0.75rem;
+  }
+
+  .whisper-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}

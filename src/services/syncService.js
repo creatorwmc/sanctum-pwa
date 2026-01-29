@@ -23,7 +23,9 @@ const SYNCABLE_STORES = [
   'journal',
   'ceremonies',
   'milestones',
-  'practiceStats'
+  'practiceStats',
+  'practices',
+  'feedback'
 ]
 
 // Get sync preferences

@@ -3,6 +3,8 @@ import emailjs from '@emailjs/browser'
 import { db, queries } from '../db'
 import { getLocalDateString } from '../utils/dateUtils'
 import { EMAILJS_CONFIG } from '../config/emailjs'
+import { submitWhisper } from '../services/adminService'
+import { useAuth } from '../contexts/AuthContext'
 import StoneIcon from './StoneIcon'
 import './FeedbackModal.css'
 
@@ -21,6 +23,7 @@ const FEEDBACK_CATEGORIES = [
 ]
 
 function FeedbackModal({ isOpen, onClose }) {
+  const { user } = useAuth()
   const [name, setName] = useState('')
   const [message, setMessage] = useState('')
   const [section, setSection] = useState('')
@@ -42,8 +45,25 @@ function FeedbackModal({ isOpen, onClose }) {
     const sectionName = section || 'general'
 
     let emailSent = false
+    let firebaseSent = false
 
-    // Try EmailJS if configured
+    // Try Firebase first (primary method now)
+    try {
+      const result = await submitWhisper({
+        name: senderName,
+        message: message.trim(),
+        section: sectionName,
+        userEmail: user?.email || null,
+        userId: user?.uid || null,
+        userName: user?.displayName || null,
+        userAgent: navigator.userAgent
+      })
+      firebaseSent = result.success
+    } catch (err) {
+      console.error('Firebase whisper error:', err)
+    }
+
+    // Try EmailJS as backup if configured
     if (EMAILJS_CONFIG.ENABLED) {
       try {
         await emailjs.send(

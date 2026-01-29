@@ -19,7 +19,7 @@ import PracticeHistory from './pages/PracticeHistory'
 import Onboarding from './pages/Onboarding'
 import DruidGuide from './pages/DruidGuide'
 import PracticeManager from './pages/PracticeManager'
-import MMRTest from './pages/MMRTest'
+import AdminWhispers from './pages/AdminWhispers'
 
 function AppContent() {
   const { isComplete } = useOnboarding()
@@ -61,7 +61,7 @@ function AppContent() {
         <Route path="/guide" element={<Guide />} />
         <Route path="/guide/druid" element={<DruidGuide />} />
         <Route path="/practices" element={<PracticeManager />} />
-        <Route path="/mmr-test" element={<MMRTest />} />
+        <Route path="/admin/whispers" element={<AdminWhispers />} />
         <Route path="/tools" element={<EsotericTools />} />
         <Route path="/play" element={<Play />} />
       </Routes>
