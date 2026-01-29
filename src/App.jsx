@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
-import { Routes, Route } from 'react-router-dom'
-import { AuthProvider } from './contexts/AuthContext'
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
+import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { OnboardingProvider, useOnboarding } from './contexts/OnboardingContext'
 import Layout from './components/Layout'
+import AuthModal from './components/AuthModal'
 import Dashboard from './pages/Dashboard'
 import Timer from './pages/Timer'
 import Library from './pages/Library'
@@ -29,7 +30,7 @@ function isPWA() {
          document.referrer.includes('android-app://')
 }
 
-function SplashScreen({ isQuick }) {
+function SplashScreen({ isQuick, showAuthButtons, onSignUpClick, onSignInClick, onSkip }) {
   return (
     <>
       <style>{`
@@ -48,6 +49,10 @@ function SplashScreen({ isQuick }) {
         @keyframes quickFadeIn {
           0% { opacity: 0; }
           100% { opacity: 1; }
+        }
+        @keyframes fadeInAuthButtons {
+          0% { opacity: 0; transform: translateY(15px); }
+          100% { opacity: 1; transform: translateY(0); }
         }
         .splash-logo {
           width: 120px;
@@ -89,6 +94,65 @@ function SplashScreen({ isQuick }) {
         .splash-subtitle--quick {
           animation: quickFadeIn 0.3s ease-out 0.2s forwards;
         }
+        .splash-auth-buttons {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 0.75rem;
+          margin-top: 1rem;
+          opacity: 0;
+          animation: fadeInAuthButtons 0.8s ease-out forwards;
+          animation-delay: ${isQuick ? '0.4s' : '4.5s'};
+        }
+        .splash-signup-btn {
+          background: linear-gradient(135deg, #d4af37 0%, #c9a227 100%);
+          color: #1a1a2e;
+          border: none;
+          padding: 0.875rem 2.5rem;
+          border-radius: 12px;
+          font-size: 1rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: transform 0.2s, box-shadow 0.2s;
+          box-shadow: 0 4px 16px rgba(212, 175, 55, 0.3);
+          min-width: 200px;
+        }
+        .splash-signup-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+        }
+        .splash-signup-btn:active {
+          transform: translateY(0);
+        }
+        .splash-signin-btn {
+          background: transparent;
+          color: #e8e8e8;
+          border: 1px solid rgba(232, 232, 232, 0.3);
+          padding: 0.75rem 2.5rem;
+          border-radius: 12px;
+          font-size: 0.9rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: border-color 0.2s, background 0.2s;
+          min-width: 200px;
+        }
+        .splash-signin-btn:hover {
+          border-color: rgba(232, 232, 232, 0.5);
+          background: rgba(255, 255, 255, 0.05);
+        }
+        .splash-skip-link {
+          background: none;
+          border: none;
+          color: rgba(232, 232, 232, 0.5);
+          font-size: 0.85rem;
+          cursor: pointer;
+          padding: 0.5rem 1rem;
+          margin-top: 0.5rem;
+          transition: color 0.2s;
+        }
+        .splash-skip-link:hover {
+          color: rgba(232, 232, 232, 0.8);
+        }
       `}</style>
       <div style={{
         minHeight: '100vh',
@@ -112,6 +176,19 @@ function SplashScreen({ isQuick }) {
             Your Sacred Place
           </p>
         </div>
+        {showAuthButtons && (
+          <div className="splash-auth-buttons">
+            <button className="splash-signup-btn" onClick={onSignUpClick}>
+              Create Account
+            </button>
+            <button className="splash-signin-btn" onClick={onSignInClick}>
+              Sign In
+            </button>
+            <button className="splash-skip-link" onClick={onSkip}>
+              Skip for now
+            </button>
+          </div>
+        )}
       </div>
     </>
   )
@@ -119,21 +196,82 @@ function SplashScreen({ isQuick }) {
 
 function AppContent() {
   const { isComplete } = useOnboarding()
+  const { isAuthenticated } = useAuth()
   const [showSplash, setShowSplash] = useState(true)
   const [isInstalledApp] = useState(() => isPWA())
+  const navigate = useNavigate()
+  const location = useLocation()
+  const [hasRedirected, setHasRedirected] = useState(false)
+  const [authModalOpen, setAuthModalOpen] = useState(false)
+  const [authModalMode, setAuthModalMode] = useState('signin')
 
-  // Show splash screen - 1 second for PWA, 5 seconds for web
+  // Show splash screen - auto-dismiss only for authenticated users
   useEffect(() => {
-    const splashDuration = isInstalledApp ? 1000 : 5000
-    const timer = setTimeout(() => {
+    // Only auto-dismiss if user is authenticated
+    if (isAuthenticated) {
+      const splashDuration = isInstalledApp ? 1000 : 5000
+      const timer = setTimeout(() => {
+        setShowSplash(false)
+      }, splashDuration)
+      return () => clearTimeout(timer)
+    }
+    // For non-authenticated users, splash stays until they take action
+  }, [isInstalledApp, isAuthenticated])
+
+  // Dismiss splash when user successfully authenticates
+  useEffect(() => {
+    if (isAuthenticated && showSplash) {
       setShowSplash(false)
-    }, splashDuration)
-    return () => clearTimeout(timer)
-  }, [isInstalledApp])
+    }
+  }, [isAuthenticated, showSplash])
+
+  // Always navigate to home on app startup (after splash)
+  useEffect(() => {
+    if (!showSplash && isComplete && !hasRedirected && location.pathname !== '/') {
+      navigate('/', { replace: true })
+      setHasRedirected(true)
+    } else if (!showSplash && isComplete && !hasRedirected) {
+      setHasRedirected(true)
+    }
+  }, [showSplash, isComplete, hasRedirected, location.pathname, navigate])
+
+  // Auth button handlers
+  function handleSignUpClick() {
+    setAuthModalMode('signup')
+    setAuthModalOpen(true)
+  }
+
+  function handleSignInClick() {
+    setAuthModalMode('signin')
+    setAuthModalOpen(true)
+  }
+
+  function handleSkipAuth() {
+    setShowSplash(false)
+  }
+
+  function handleAuthModalClose() {
+    setAuthModalOpen(false)
+  }
 
   // Show splash screen while loading or during minimum display time
   if (isComplete === null || showSplash) {
-    return <SplashScreen isQuick={isInstalledApp} />
+    return (
+      <>
+        <SplashScreen
+          isQuick={isInstalledApp}
+          showAuthButtons={!isAuthenticated}
+          onSignUpClick={handleSignUpClick}
+          onSignInClick={handleSignInClick}
+          onSkip={handleSkipAuth}
+        />
+        <AuthModal
+          isOpen={authModalOpen}
+          onClose={handleAuthModalClose}
+          initialMode={authModalMode}
+        />
+      </>
+    )
   }
 
   // Show onboarding if not complete

@@ -1,9 +1,16 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import './AuthModal.css'
 
-function AuthModal({ isOpen, onClose }) {
-  const [mode, setMode] = useState('signin') // 'signin' or 'signup'
+function AuthModal({ isOpen, onClose, initialMode = 'signin' }) {
+  const [mode, setMode] = useState(initialMode) // 'signin' or 'signup'
+
+  // Reset mode when modal opens with specified initialMode
+  useEffect(() => {
+    if (isOpen) {
+      setMode(initialMode)
+    }
+  }, [isOpen, initialMode])
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [displayName, setDisplayName] = useState('')
