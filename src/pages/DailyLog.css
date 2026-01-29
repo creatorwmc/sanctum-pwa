@@ -161,6 +161,32 @@
   border-color: var(--accent);
 }
 
+.section-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tradition-btn-small {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.625rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tradition-btn-small:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
 .practices-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);

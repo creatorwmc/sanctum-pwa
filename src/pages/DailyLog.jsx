@@ -1,11 +1,20 @@
-import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useEffect, useRef } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { db, queries } from '../db'
 import { getLocalDateString } from '../utils/dateUtils'
+import { getTraditionSettings } from '../components/TraditionSettings'
+import { AVAILABLE_TRADITIONS } from '../data/traditions'
 import ShaktonaIcon from '../components/ShaktonaIcon'
 import './DailyLog.css'
 
+function getSelectedTraditionInfo() {
+  const settings = getTraditionSettings()
+  if (!settings.traditionId) return null
+  return AVAILABLE_TRADITIONS.find(t => t.id === settings.traditionId)
+}
+
 function DailyLog() {
+  const navigate = useNavigate()
   const [practices, setPractices] = useState([])
   const [todayLog, setTodayLog] = useState(null)
   const [selectedPractices, setSelectedPractices] = useState([])
@@ -27,6 +36,10 @@ function DailyLog() {
 
   // Convert modal
   const [showConvertModal, setShowConvertModal] = useState(false)
+
+  // Tradition
+  const selectedTradition = getSelectedTraditionInfo()
+  const lastTraditionClickRef = useRef(0)
 
   // Practice detail modal
   const [detailPractice, setDetailPractice] = useState(null)
@@ -279,6 +292,19 @@ function DailyLog() {
     return practices.find(p => p.id === practiceId) || { label: practiceId, icon: '?' }
   }
 
+  function handleTraditionClick() {
+    const now = Date.now()
+    const timeSinceLastClick = now - lastTraditionClickRef.current
+
+    if (timeSinceLastClick < 300) {
+      // Double-click: navigate to settings to change tradition
+      navigate('/settings')
+    }
+    // Single click does nothing special on Daily page
+
+    lastTraditionClickRef.current = now
+  }
+
   if (loading) {
     return <div className="loading">Loading...</div>
   }
@@ -346,9 +372,18 @@ function DailyLog() {
       <section className="practices-section">
         <div className="section-header">
           <h3 className="section-title">Log Practice</h3>
-          <Link to="/practices" className="practices-settings-btn" title="Manage Practices">
-            ⚙
-          </Link>
+          <div className="section-header-actions">
+            <button
+              onClick={selectedTradition ? handleTraditionClick : () => navigate('/settings')}
+              className="tradition-btn-small"
+              title={selectedTradition ? "Double-click to change tradition" : "Select a tradition"}
+            >
+              {selectedTradition ? `${selectedTradition.icon} ${selectedTradition.name}` : '✨ Select Tradition'}
+            </button>
+            <Link to="/practices" className="practices-settings-btn" title="Manage Practices">
+              ⚙
+            </Link>
+          </div>
         </div>
         <div className="practices-grid">
           {practices.map(practice => (
