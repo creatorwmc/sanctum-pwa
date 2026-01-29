@@ -1,0 +1,39 @@
+name: Nightly Production Deploy
+
+on:
+  # Runs at 12:15 AM Eastern Time (5:15 AM UTC)
+  # Adjust the cron time for your timezone:
+  # - EST/EDT: 5:15 or 4:15 (depending on daylight saving)
+  # - CST/CDT: 6:15 or 5:15
+  # - PST/PDT: 8:15 or 7:15
+  schedule:
+    - cron: '15 5 * * *'
+
+  # Also allow manual trigger from GitHub UI
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Deploy to Netlify Production
+        run: npx netlify deploy --prod --dir=dist
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
