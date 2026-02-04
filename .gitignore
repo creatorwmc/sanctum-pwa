@@ -28,3 +28,6 @@ dev-dist/
 
 # Local Netlify folder
 .netlify
+
+service-account.json
+.env.localfn
