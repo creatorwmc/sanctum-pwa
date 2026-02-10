@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "680334710150",
+    "project_id": "sanctum-user-support",
+    "storage_bucket": "sanctum-user-support.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:680334710150:android:3afc2a9d3ad433e8054807",
+        "android_client_info": {
+          "package_name": "com.sanctum.wear"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD0KnQr5bt3aX2TBodQzBk8GPPvdsyvvIE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

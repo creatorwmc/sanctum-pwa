@@ -3,9 +3,9 @@
 
 export const featureFlags = {
   // Helper System (Onboarding Flow)
-  // Set to false to skip onboarding and go straight to main app
-  // Set to true to enable the onboarding experience
-  HELPER_SYSTEM_ENABLED: false,
+  // Now account-based - triggers after sign-up for new users
+  // This flag controls whether the "Redo Onboarding" option appears in Settings
+  HELPER_SYSTEM_ENABLED: true,
 
   // Future feature flags can be added here
   // SOME_OTHER_FEATURE: true,

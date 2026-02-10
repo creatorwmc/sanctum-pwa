@@ -3,6 +3,8 @@ import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { OnboardingProvider, useOnboarding } from './contexts/OnboardingContext'
+import { PrivacyProvider } from './contexts/PrivacyContext'
+import PanicButton from './components/PanicButton'
 import Layout from './components/Layout'
 import AuthModal from './components/AuthModal'
 import Dashboard from './pages/Dashboard'
@@ -14,6 +16,10 @@ import DailyLog from './pages/DailyLog'
 import Calendar from './pages/Calendar'
 import Journal from './pages/Journal'
 import Settings from './pages/Settings'
+import AllSettings from './pages/AllSettings'
+import LayoutSettings from './pages/LayoutSettings'
+import TraditionSettingsPage from './pages/TraditionSettingsPage'
+import ManageAccount from './pages/ManageAccount'
 import Guide from './pages/Guide'
 import EsotericTools from './pages/EsotericTools'
 import Play from './pages/Play'
@@ -22,6 +28,7 @@ import Onboarding from './pages/Onboarding'
 import DruidGuide from './pages/DruidGuide'
 import PracticeManager from './pages/PracticeManager'
 import AdminWhispers from './pages/AdminWhispers'
+import AdminTraditionFeedback from './pages/AdminTraditionFeedback'
 
 // Check if running as installed PWA
 function isPWA() {
@@ -153,6 +160,22 @@ function SplashScreen({ isQuick, showAuthButtons, onSignUpClick, onSignInClick, 
         .splash-skip-link:hover {
           color: rgba(232, 232, 232, 0.8);
         }
+        .splash-privacy-notice {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          color: rgba(232, 232, 232, 0.5);
+          font-size: 0.75rem;
+          margin-top: 0.25rem;
+          opacity: 0;
+          animation: fadeInSubtitle 0.8s ease-out forwards;
+          animation-delay: ${isQuick ? '0.5s' : '5s'};
+        }
+        .splash-privacy-notice svg {
+          width: 12px;
+          height: 12px;
+          opacity: 0.7;
+        }
       `}</style>
       <div style={{
         minHeight: '100vh',
@@ -177,17 +200,26 @@ function SplashScreen({ isQuick, showAuthButtons, onSignUpClick, onSignInClick, 
           </p>
         </div>
         {showAuthButtons && (
-          <div className="splash-auth-buttons">
-            <button className="splash-signup-btn" onClick={onSignUpClick}>
-              Create Account
-            </button>
-            <button className="splash-signin-btn" onClick={onSignInClick}>
-              Sign In
-            </button>
-            <button className="splash-skip-link" onClick={onSkip}>
-              Skip for now
-            </button>
-          </div>
+          <>
+            <div className="splash-auth-buttons">
+              <button className="splash-signup-btn" onClick={onSignUpClick}>
+                Create Account
+              </button>
+              <button className="splash-signin-btn" onClick={onSignInClick}>
+                Sign In
+              </button>
+              <button className="splash-skip-link" onClick={onSkip}>
+                Skip for now
+              </button>
+            </div>
+            <div className="splash-privacy-notice">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+              <span>Your data stays on your device</span>
+            </div>
+          </>
         )}
       </div>
     </>
@@ -195,7 +227,7 @@ function SplashScreen({ isQuick, showAuthButtons, onSignUpClick, onSignInClick, 
 }
 
 function AppContent() {
-  const { isComplete } = useOnboarding()
+  const { showOnboarding, isComplete } = useOnboarding()
   const { isAuthenticated } = useAuth()
   const [showSplash, setShowSplash] = useState(true)
   const [isInstalledApp] = useState(() => isPWA())
@@ -274,8 +306,8 @@ function AppContent() {
     )
   }
 
-  // Show onboarding if not complete
-  if (!isComplete) {
+  // Show onboarding if needed (account-based, triggered after sign-up)
+  if (showOnboarding) {
     return <Onboarding />
   }
 
@@ -293,10 +325,15 @@ function AppContent() {
         <Route path="/calendar" element={<Calendar />} />
         <Route path="/journal" element={<Journal />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="/settings/all" element={<AllSettings />} />
+        <Route path="/settings/layout" element={<LayoutSettings />} />
+        <Route path="/settings/tradition" element={<TraditionSettingsPage />} />
+        <Route path="/settings/account" element={<ManageAccount />} />
         <Route path="/guide" element={<Guide />} />
         <Route path="/guide/druid" element={<DruidGuide />} />
         <Route path="/practices" element={<PracticeManager />} />
         <Route path="/admin/whispers" element={<AdminWhispers />} />
+        <Route path="/admin/tradition-feedback" element={<AdminTraditionFeedback />} />
         <Route path="/tools" element={<EsotericTools />} />
         <Route path="/play" element={<Play />} />
       </Routes>
@@ -309,7 +346,10 @@ function App() {
     <AuthProvider>
       <ThemeProvider>
         <OnboardingProvider>
-          <AppContent />
+          <PrivacyProvider>
+            <AppContent />
+            <PanicButton />
+          </PrivacyProvider>
         </OnboardingProvider>
       </ThemeProvider>
     </AuthProvider>

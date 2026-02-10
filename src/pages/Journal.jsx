@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { db, queries } from '../db'
 import { getLocalDateString } from '../utils/dateUtils'
-import { getTraditionSettings } from '../components/TraditionSettings'
-import { AVAILABLE_TRADITIONS } from '../data/traditions'
+import { getTraditionSettings, shouldApplyBranding } from '../components/TraditionSettings'
+import { AVAILABLE_TRADITIONS, translateTerm } from '../data/traditions'
 import './Journal.css'
 
 const DEFAULT_ENTRY_TYPES = [
@@ -38,6 +38,17 @@ function getTraditionInfo() {
   if (!settings.traditionId) return null
   const tradition = AVAILABLE_TRADITIONS.find(t => t.id === settings.traditionId)
   return tradition
+}
+
+// Translate a term if branding is enabled
+function getTranslatedTerm(term) {
+  if (shouldApplyBranding()) {
+    const settings = getTraditionSettings()
+    if (settings.traditionId) {
+      return translateTerm(term, settings.traditionId)
+    }
+  }
+  return term
 }
 
 function Journal() {

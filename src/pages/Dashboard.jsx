@@ -3,7 +3,21 @@ import { Link } from 'react-router-dom'
 import { db, queries } from '../db'
 import RatingPrompt, { shouldShowRatingPrompt, markRatingShown } from '../components/RatingPrompt'
 import FeedbackModal from '../components/FeedbackModal'
+import { getStreakSettings } from '../utils/streakSettings'
+import { getTraditionSettings, shouldApplyBranding } from '../components/TraditionSettings'
+import { translateTerm } from '../data/traditions'
 import './Dashboard.css'
+
+// Translate a term if branding is enabled
+function getTranslatedTerm(term) {
+  if (shouldApplyBranding()) {
+    const settings = getTraditionSettings()
+    if (settings.traditionId) {
+      return translateTerm(term, settings.traditionId)
+    }
+  }
+  return term
+}
 
 function Dashboard() {
   const [stats, setStats] = useState({
@@ -19,9 +33,17 @@ function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [showRating, setShowRating] = useState(false)
   const [showFeedback, setShowFeedback] = useState(false)
+  const [streakEnabled, setStreakEnabled] = useState(getStreakSettings().enabled)
 
   useEffect(() => {
     loadDashboardData()
+
+    // Listen for streak settings changes
+    function handleStreakChange(e) {
+      setStreakEnabled(e.detail.enabled)
+    }
+    window.addEventListener('streak-settings-changed', handleStreakChange)
+    return () => window.removeEventListener('streak-settings-changed', handleStreakChange)
   }, [])
 
   // Check if we should show rating prompt after data loads
@@ -85,7 +107,7 @@ function Dashboard() {
       <div className="quick-actions">
         <Link to="/timer" className="action-card action-card--primary">
           <span className="action-icon">◷</span>
-          <span className="action-label">Start Practice</span>
+          <span className="action-label">{getTranslatedTerm('Start Practice')}</span>
         </Link>
         <Link to="/daily" className="action-card">
           <span className="action-icon">☀</span>
@@ -101,16 +123,20 @@ function Dashboard() {
 
       {/* Main Stats */}
       <div className="stats-grid">
-        <div className="stat-card stat-card--streak">
-          <span className="stat-icon">🔥</span>
-          <span className="stat-value">{stats.streak}</span>
-          <span className="stat-label">Day Streak</span>
-        </div>
-        <div className="stat-card">
-          <span className="stat-icon">🏆</span>
-          <span className="stat-value">{stats.longestStreak}</span>
-          <span className="stat-label">Best Streak</span>
-        </div>
+        {streakEnabled === true && (
+          <>
+            <div className="stat-card stat-card--streak">
+              <span className="stat-icon">🔥</span>
+              <span className="stat-value">{stats.streak}</span>
+              <span className="stat-label">Day Streak</span>
+            </div>
+            <div className="stat-card">
+              <span className="stat-icon">🏆</span>
+              <span className="stat-value">{stats.longestStreak}</span>
+              <span className="stat-label">Best Streak</span>
+            </div>
+          </>
+        )}
         <div className="stat-card">
           <span className={`stat-indicator ${stats.todayLogged ? 'stat-indicator--complete' : ''}`}>
             {stats.todayLogged ? '✓' : '○'}

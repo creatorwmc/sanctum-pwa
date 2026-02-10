@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { AVAILABLE_TRADITIONS, getTraditionPreset, hasSubgroups, getSubgroups, getSubgroup } from '../data/traditions'
+import { AVAILABLE_TRADITIONS, getTraditionPreset, hasSubgroups, getSubgroups, getSubgroup, getTraditionCalendars } from '../data/traditions'
+import { queries } from '../db'
 import './TraditionSettings.css'
 
 const STORAGE_KEY = 'sanctum-tradition-settings'
+const CALENDAR_PREFS_KEY = 'sanctum-calendar-prefs'
 
 // Apply levels for tradition settings
 export const APPLY_LEVELS = {
@@ -89,13 +91,40 @@ function TraditionSettings() {
   const selectedSubgroup = settings.subgroupId ? getSubgroup(settings.traditionId, settings.subgroupId) : null
   const hasPreset = selectedSubgroup?.hasPreset || selectedTradition?.hasPreset
 
-  function handleApplyLevelChange(level) {
+  async function handleApplyLevelChange(level) {
     const newSettings = {
       ...settings,
       applyLevel: level
     }
     setSettings(newSettings)
     saveTraditionSettings(newSettings)
+
+    // If "full" level is selected and tradition has a preset, apply calendars and practices
+    if (level === 'full' && settings.traditionId) {
+      const preset = getTraditionPreset(settings.traditionId)
+      if (preset) {
+        // Enable tradition's calendars
+        if (preset.enabledCalendars) {
+          try {
+            const currentCalendars = JSON.parse(localStorage.getItem(CALENDAR_PREFS_KEY) || '["moon"]')
+            // Merge tradition calendars with current (don't remove existing ones)
+            const mergedCalendars = [...new Set([...currentCalendars, ...preset.enabledCalendars])]
+            localStorage.setItem(CALENDAR_PREFS_KEY, JSON.stringify(mergedCalendars))
+          } catch (e) {
+            console.error('Error updating calendar preferences:', e)
+          }
+        }
+
+        // Initialize tradition's practices
+        if (preset.practices) {
+          try {
+            await queries.initializePractices(preset.practices)
+          } catch (e) {
+            console.error('Error initializing tradition practices:', e)
+          }
+        }
+      }
+    }
   }
 
   function handleSelectTradition(traditionId) {
@@ -134,6 +163,25 @@ function TraditionSettings() {
       subgroupId,
       // Default to 'full' if has preset, otherwise 'identity'
       applyLevel: settings.applyLevel || (subgroupHasPreset ? 'full' : 'identity'),
+      customName: ''
+    }
+    setSettings(newSettings)
+    saveTraditionSettings(newSettings)
+    setShowTraditionList(false)
+    setShowSubgroups(null)
+  }
+
+  function handleSelectGenericTradition(traditionId) {
+    // Select the parent tradition without a subgroup
+    const tradition = AVAILABLE_TRADITIONS.find(t => t.id === traditionId)
+    const traditionHasPreset = tradition?.hasPreset
+
+    const newSettings = {
+      ...settings,
+      traditionId,
+      subgroupId: null,
+      // Default to 'full' if has preset, otherwise 'identity'
+      applyLevel: settings.applyLevel || (traditionHasPreset ? 'full' : 'identity'),
       customName: ''
     }
     setSettings(newSettings)
@@ -276,6 +324,15 @@ function TraditionSettings() {
                 {/* Subgroups */}
                 {showSubgroups === tradition.id && (
                   <div className="tradition-subgroups">
+                    {/* Option to select the generic parent tradition */}
+                    <button
+                      className={`tradition-subgroup tradition-subgroup--general ${settings.traditionId === tradition.id && !settings.subgroupId ? 'tradition-subgroup--selected' : ''}`}
+                      onClick={() => handleSelectGenericTradition(tradition.id)}
+                      style={{ '--tradition-color': tradition.color }}
+                    >
+                      <span className="tradition-subgroup-icon">{tradition.icon}</span>
+                      <span className="tradition-subgroup-name">{tradition.name} (General)</span>
+                    </button>
                     {getSubgroups(tradition.id).map(subgroup => (
                       <button
                         key={subgroup.id}

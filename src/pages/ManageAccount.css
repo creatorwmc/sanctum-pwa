@@ -1,0 +1,107 @@
+/* Account Card */
+.account-card {
+  cursor: default;
+  gap: 1rem;
+}
+
+.account-card-avatar {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 70%, #000));
+  color: var(--bg-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.account-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.account-card-name {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.account-card-email {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.account-card-id {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-family: monospace;
+  opacity: 0.7;
+}
+
+/* Sign In Card */
+.account-signin-card {
+  cursor: default;
+}
+
+.account-signin-content {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+}
+
+.account-signin-icon {
+  font-size: 1.5rem;
+}
+
+.account-signin-title {
+  display: block;
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
+.account-signin-desc {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* Auth Buttons */
+.account-auth-buttons {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0 1rem 1rem;
+}
+
+.account-auth-buttons .btn {
+  flex: 1;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.account-auth-buttons .btn-primary {
+  background: var(--accent);
+  color: var(--bg-primary);
+  border: none;
+}
+
+.account-auth-buttons .btn-primary:hover {
+  opacity: 0.9;
+}
+
+.account-auth-buttons .btn-secondary {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+}
+
+.account-auth-buttons .btn-secondary:hover {
+  background: var(--bg-secondary);
+  border-color: var(--accent);
+}

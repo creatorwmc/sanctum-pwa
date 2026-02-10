@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import {
   getSyncPrefs,
@@ -19,16 +19,24 @@ function AccountSettings({ onSignInClick }) {
   const [syncMessage, setSyncMessage] = useState('')
   const [syncEnabled, setSyncEnabled] = useState(() => getSyncPrefs().enabled)
 
+  // Re-read sync preferences when authentication state changes
+  // This ensures the checkbox reflects the correct state after sign-in
+  useEffect(() => {
+    if (isAuthenticated) {
+      setSyncEnabled(getSyncPrefs().enabled)
+    }
+  }, [isAuthenticated])
+
   const lastSync = getLastSyncTime()
 
   async function handleToggleSync() {
     if (syncEnabled) {
-      disableSync()
+      disableSync(user?.uid)
       stopAutoSync()
       setSyncEnabled(false)
       setSyncMessage('Cloud sync disabled')
     } else {
-      enableSync()
+      enableSync(user?.uid)
       setSyncEnabled(true)
       setSyncMessage('Cloud sync enabled - syncing automatically')
       // Initialize auto-sync and do initial sync

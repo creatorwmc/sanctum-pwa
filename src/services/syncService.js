@@ -3,6 +3,7 @@ import {
   collection,
   doc,
   setDoc,
+  getDoc,
   getDocs,
   deleteDoc,
   writeBatch,
@@ -57,14 +58,52 @@ export function isSyncEnabled() {
   return prefs.enabled
 }
 
-// Enable sync
-export function enableSync() {
+// Enable sync (also saves preference to Firestore)
+export function enableSync(userId = null) {
   setSyncPrefs({ ...getSyncPrefs(), enabled: true })
+  // Save to Firestore so preference syncs across devices
+  if (userId && firestore) {
+    saveSyncPreferenceToCloud(userId, true)
+  }
 }
 
-// Disable sync
-export function disableSync() {
+// Disable sync (also saves preference to Firestore)
+export function disableSync(userId = null) {
   setSyncPrefs({ ...getSyncPrefs(), enabled: false })
+  // Save to Firestore so preference syncs across devices
+  if (userId && firestore) {
+    saveSyncPreferenceToCloud(userId, false)
+  }
+}
+
+// Save sync preference to Firestore
+async function saveSyncPreferenceToCloud(userId, enabled) {
+  if (!firestore || !userId) return
+  try {
+    const prefDoc = doc(firestore, 'users', userId, 'settings', 'syncPreference')
+    await setDoc(prefDoc, {
+      enabled,
+      updatedAt: serverTimestamp()
+    }, { merge: true })
+  } catch (error) {
+    console.error('Error saving sync preference to cloud:', error)
+  }
+}
+
+// Check if user has sync enabled in Firestore (for cross-device sync preference)
+export async function getCloudSyncPreference(userId) {
+  if (!firestore || !userId) return null
+  try {
+    const prefDoc = doc(firestore, 'users', userId, 'settings', 'syncPreference')
+    const snapshot = await getDoc(prefDoc)
+    if (snapshot.exists()) {
+      return snapshot.data().enabled
+    }
+    return null // No preference saved yet
+  } catch (error) {
+    console.error('Error getting cloud sync preference:', error)
+    return null
+  }
 }
 
 // Get user's Firestore collection path
@@ -72,7 +111,7 @@ function getUserCollection(userId, storeName) {
   return collection(firestore, 'users', userId, storeName)
 }
 
-// Upload all local data to Firestore
+// Upload all local data to Firestore (with timestamp comparison)
 export async function uploadAllData(userId) {
   if (!firestore || !userId) return { success: false, error: 'Not available' }
 
@@ -81,19 +120,39 @@ export async function uploadAllData(userId) {
       const items = await localDb.getAll(storeName)
       const collectionRef = getUserCollection(userId, storeName)
 
+      // Get existing cloud data to compare timestamps
+      const snapshot = await getDocs(collectionRef)
+      const cloudData = new Map()
+      snapshot.docs.forEach(docSnap => {
+        const data = docSnap.data()
+        cloudData.set(docSnap.id, data)
+      })
+
       // Use batched writes for efficiency
       const batch = writeBatch(firestore)
+      let hasChanges = false
 
       for (const item of items) {
-        const docRef = doc(collectionRef, item.id)
-        batch.set(docRef, {
-          ...item,
-          _syncedAt: serverTimestamp(),
-          _userId: userId
-        })
+        const cloudItem = cloudData.get(item.id)
+
+        // Only upload if local is newer than cloud (or cloud doesn't exist)
+        const localUpdatedAt = item.updatedAt ? new Date(item.updatedAt).getTime() : 0
+        const cloudUpdatedAt = cloudItem?.updatedAt ? new Date(cloudItem.updatedAt).getTime() : 0
+
+        if (!cloudItem || localUpdatedAt > cloudUpdatedAt) {
+          const docRef = doc(collectionRef, item.id)
+          batch.set(docRef, {
+            ...item,
+            _syncedAt: serverTimestamp(),
+            _userId: userId
+          })
+          hasChanges = true
+        }
       }
 
-      await batch.commit()
+      if (hasChanges) {
+        await batch.commit()
+      }
     }
 
     // Update last sync time
@@ -134,11 +193,73 @@ export async function downloadAllData(userId) {
         if (storeName === 'practices') {
           const database = await getLocalDatabase()
           await database.put(storeName, data)
+        } else if (storeName === 'dailyLogs') {
+          // Special handling for dailyLogs - they have a unique index on 'date'
+          // Need to check by date, not just by ID, and merge entries if both exist
+          const database = await getLocalDatabase()
+          const existingById = await localDb.get(storeName, data.id)
+
+          if (existingById) {
+            // Same ID exists - compare timestamps and update if cloud is newer
+            const cloudUpdatedAt = data.updatedAt ? new Date(data.updatedAt).getTime() : 0
+            const localUpdatedAt = existingById.updatedAt ? new Date(existingById.updatedAt).getTime() : 0
+
+            if (cloudUpdatedAt > localUpdatedAt) {
+              await database.put(storeName, data)
+            }
+          } else {
+            // Different ID - check if a log for this date already exists
+            const existingByDate = await database.getFromIndex(storeName, 'date', data.date)
+
+            if (existingByDate) {
+              // Merge entries from both logs
+              const localEntries = existingByDate.entries || []
+              const cloudEntries = data.entries || []
+
+              // Combine entries, avoiding duplicates by entry ID
+              const entryMap = new Map()
+              localEntries.forEach(e => entryMap.set(e.id, e))
+              cloudEntries.forEach(e => {
+                // Cloud entry wins if same ID (it's likely newer if we're downloading)
+                entryMap.set(e.id, e)
+              })
+
+              const mergedEntries = Array.from(entryMap.values())
+              const mergedPractices = [...new Set(mergedEntries.map(e => e.practiceId))]
+
+              // Use the newer timestamp
+              const cloudUpdatedAt = data.updatedAt ? new Date(data.updatedAt).getTime() : 0
+              const localUpdatedAt = existingByDate.updatedAt ? new Date(existingByDate.updatedAt).getTime() : 0
+
+              const mergedLog = {
+                ...existingByDate,
+                entries: mergedEntries,
+                practices: mergedPractices,
+                updatedAt: cloudUpdatedAt > localUpdatedAt ? data.updatedAt : existingByDate.updatedAt
+              }
+
+              await database.put(storeName, mergedLog)
+            } else {
+              // No existing log for this date - safe to add
+              await database.put(storeName, data)
+            }
+          }
         } else {
-          // Check if item exists locally
+          // Standard handling for other stores
           const existing = await localDb.get(storeName, data.id)
           if (existing) {
-            await localDb.update(storeName, data)
+            // Compare timestamps - only update if cloud data is newer
+            const cloudUpdatedAt = data.updatedAt ? new Date(data.updatedAt).getTime() : 0
+            const localUpdatedAt = existing.updatedAt ? new Date(existing.updatedAt).getTime() : 0
+
+            // Only overwrite if cloud is definitively newer
+            // If timestamps are equal or cloud is older, keep local data
+            if (cloudUpdatedAt > localUpdatedAt) {
+              // Use direct put to preserve cloud timestamp and avoid triggering re-sync
+              const database = await getLocalDatabase()
+              await database.put(storeName, data)
+            }
+            // If local is newer or equal, skip - local data wins
           } else {
             // Add without generating new ID
             const database = await getLocalDatabase()
@@ -161,10 +282,89 @@ export async function downloadAllData(userId) {
 }
 
 // Helper to get raw database instance
+// IMPORTANT: This must match the schema in db/index.js exactly
 async function getLocalDatabase() {
   const { openDB } = await import('idb')
-  // Match the version in db/index.js
-  return openDB('sanctum-db', 7)
+  const DB_NAME = 'sanctum-db'
+  const DB_VERSION = 7
+
+  return openDB(DB_NAME, DB_VERSION, {
+    upgrade(db) {
+      // Sessions store
+      if (!db.objectStoreNames.contains('sessions')) {
+        const sessionStore = db.createObjectStore('sessions', { keyPath: 'id' })
+        sessionStore.createIndex('date', 'date')
+        sessionStore.createIndex('type', 'type')
+      }
+      // Documents store
+      if (!db.objectStoreNames.contains('documents')) {
+        const docStore = db.createObjectStore('documents', { keyPath: 'id' })
+        docStore.createIndex('tradition', 'tradition')
+        docStore.createIndex('createdAt', 'createdAt')
+      }
+      // Links store
+      if (!db.objectStoreNames.contains('links')) {
+        const linkStore = db.createObjectStore('links', { keyPath: 'id' })
+        linkStore.createIndex('tags', 'tags', { multiEntry: true })
+        linkStore.createIndex('createdAt', 'createdAt')
+      }
+      // Daily logs store
+      if (!db.objectStoreNames.contains('dailyLogs')) {
+        const logStore = db.createObjectStore('dailyLogs', { keyPath: 'id' })
+        logStore.createIndex('date', 'date', { unique: true })
+      }
+      // Ceremonies store
+      if (!db.objectStoreNames.contains('ceremonies')) {
+        const ceremonyStore = db.createObjectStore('ceremonies', { keyPath: 'id' })
+        ceremonyStore.createIndex('date', 'date')
+        ceremonyStore.createIndex('type', 'type')
+      }
+      // Journal store
+      if (!db.objectStoreNames.contains('journal')) {
+        const journalStore = db.createObjectStore('journal', { keyPath: 'id' })
+        journalStore.createIndex('date', 'date')
+        journalStore.createIndex('type', 'type')
+        journalStore.createIndex('createdAt', 'createdAt')
+      }
+      // Feedback store
+      if (!db.objectStoreNames.contains('feedback')) {
+        const feedbackStore = db.createObjectStore('feedback', { keyPath: 'id' })
+        feedbackStore.createIndex('category', 'category')
+        feedbackStore.createIndex('createdAt', 'createdAt')
+      }
+      // Milestones store
+      if (!db.objectStoreNames.contains('milestones')) {
+        const milestoneStore = db.createObjectStore('milestones', { keyPath: 'id' })
+        milestoneStore.createIndex('date', 'date')
+        milestoneStore.createIndex('annual', 'annual')
+        milestoneStore.createIndex('createdAt', 'createdAt')
+      }
+      // Practice stats store
+      if (!db.objectStoreNames.contains('practiceStats')) {
+        db.createObjectStore('practiceStats', { keyPath: 'id' })
+      }
+      // Resources store
+      if (!db.objectStoreNames.contains('resources')) {
+        const resourceStore = db.createObjectStore('resources', { keyPath: 'id' })
+        resourceStore.createIndex('category', 'category')
+        resourceStore.createIndex('sourceType', 'sourceType')
+        resourceStore.createIndex('tags', 'tags', { multiEntry: true })
+        resourceStore.createIndex('createdAt', 'createdAt')
+      }
+      // Practices store
+      if (!db.objectStoreNames.contains('practices')) {
+        const practiceStore = db.createObjectStore('practices', { keyPath: 'id' })
+        practiceStore.createIndex('order', 'order')
+        practiceStore.createIndex('enabled', 'enabled')
+      }
+      // Meter readings store
+      if (!db.objectStoreNames.contains('meterReadings')) {
+        const meterStore = db.createObjectStore('meterReadings', { keyPath: 'id' })
+        meterStore.createIndex('meterId', 'meterId')
+        meterStore.createIndex('timestamp', 'timestamp')
+      }
+    }
+  })
 }
 
 // Sync a single item (for real-time sync)
@@ -202,10 +402,11 @@ export async function fullSync(userId) {
   if (!firestore || !userId) return { success: false, error: 'Not available' }
 
   try {
-    // First upload local data
-    await uploadAllData(userId)
-    // Then download any cloud-only data
+    // Download first to get latest cloud data
+    // (only overwrites local if cloud is newer)
     await downloadAllData(userId)
+    // Then upload local changes that are newer than cloud
+    await uploadAllData(userId)
 
     return { success: true }
   } catch (error) {

@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { queries } from '../db'
 import ShaktonaIcon from '../components/ShaktonaIcon'
-import { AVAILABLE_TRADITIONS, getTraditionPractices } from '../data/traditions'
 import './PracticeManager.css'
 
 // Common emoji options for practice icons
@@ -17,7 +16,6 @@ function PracticeManager() {
   const [loading, setLoading] = useState(true)
   const [editingPractice, setEditingPractice] = useState(null)
   const [showAddModal, setShowAddModal] = useState(false)
-  const [showTraditionModal, setShowTraditionModal] = useState(false)
   const [draggedItem, setDraggedItem] = useState(null)
 
   // Form state
@@ -142,30 +140,6 @@ function PracticeManager() {
     }
   }
 
-  async function handleSelectTradition(traditionId) {
-    const traditionPractices = getTraditionPractices(traditionId)
-
-    if (!traditionPractices) {
-      alert('This tradition does not have a practice preset yet. More traditions coming soon!')
-      return
-    }
-
-    const tradition = AVAILABLE_TRADITIONS.find(t => t.id === traditionId)
-    const confirmMsg = `Load ${tradition?.name || traditionId} practices? This will replace your current practices with tradition-specific ones.`
-
-    if (!confirm(confirmMsg)) return
-
-    try {
-      // Clear existing practices and load tradition ones
-      await queries.resetPractices(traditionPractices)
-      await loadPractices()
-      setShowTraditionModal(false)
-    } catch (error) {
-      console.error('Error loading tradition practices:', error)
-      alert('Failed to load tradition practices')
-    }
-  }
-
   // Drag and drop handlers
   function handleDragStart(e, practice) {
     setDraggedItem(practice)
@@ -221,9 +195,6 @@ function PracticeManager() {
       <div className="pm-actions">
         <button className="btn btn-primary" onClick={openAddModal}>
           + Add Practice
-        </button>
-        <button className="btn btn-secondary" onClick={() => setShowTraditionModal(true)}>
-          Select Tradition
         </button>
         <button className="btn btn-secondary" onClick={handleReset}>
           Reset to Defaults
@@ -359,42 +330,6 @@ function PracticeManager() {
         </div>
       )}
 
-      {/* Tradition Selector Modal */}
-      {showTraditionModal && (
-        <div className="modal-overlay" onClick={() => setShowTraditionModal(false)}>
-          <div className="modal-content pm-tradition-modal" onClick={e => e.stopPropagation()}>
-            <h3>Select Tradition</h3>
-            <p className="pm-tradition-desc">
-              Choose a spiritual tradition to load its recommended practices.
-            </p>
-
-            <div className="pm-tradition-grid">
-              {AVAILABLE_TRADITIONS.filter(t => t.id !== 'custom' && t.id !== 'unsure' && t.id !== 'none').map(tradition => (
-                <button
-                  key={tradition.id}
-                  className={`pm-tradition-option ${tradition.hasPreset ? 'pm-tradition-option--available' : 'pm-tradition-option--coming'}`}
-                  onClick={() => handleSelectTradition(tradition.id)}
-                  style={{ '--tradition-color': tradition.color }}
-                >
-                  <span className="pm-tradition-icon">{tradition.icon}</span>
-                  <span className="pm-tradition-name">{tradition.name}</span>
-                  {tradition.hasPreset ? (
-                    <span className="pm-tradition-badge">Available</span>
-                  ) : (
-                    <span className="pm-tradition-badge pm-tradition-badge--soon">Coming Soon</span>
-                  )}
-                </button>
-              ))}
-            </div>
-
-            <div className="modal-actions">
-              <button className="btn btn-secondary" onClick={() => setShowTraditionModal(false)}>
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

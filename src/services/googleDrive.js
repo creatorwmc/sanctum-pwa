@@ -6,6 +6,15 @@ const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || ''
 const SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.readonly'
 const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'
 const FOLDER_NAME = 'Practice Space Exports'
+const LIBRARY_FOLDER_NAME = 'Practice Space Library'
+
+// File upload constraints
+export const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
+export const ALLOWED_MIME_TYPES = {
+  'application/pdf': 'pdf',
+  'application/msword': 'doc',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx'
+}
 
 let tokenClient = null
 let gapiInited = false
@@ -458,4 +467,157 @@ export function getFileTypeIcon(fileType) {
     file: '📎'
   }
   return icons[fileType] || icons.file
+}
+
+/**
+ * Get or create the Practice Space Library folder in Google Drive
+ */
+async function getOrCreateLibraryFolder() {
+  // Search for existing folder
+  const searchResponse = await window.gapi.client.drive.files.list({
+    q: `name='${LIBRARY_FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false`,
+    fields: 'files(id, name)',
+    spaces: 'drive'
+  })
+
+  if (searchResponse.result.files && searchResponse.result.files.length > 0) {
+    return searchResponse.result.files[0].id
+  }
+
+  // Create new folder
+  const createResponse = await window.gapi.client.drive.files.create({
+    resource: {
+      name: LIBRARY_FOLDER_NAME,
+      mimeType: 'application/vnd.google-apps.folder'
+    },
+    fields: 'id'
+  })
+
+  return createResponse.result.id
+}
+
+/**
+ * Upload a binary file (PDF/Word) to Google Drive
+ * @param {File} file - The file to upload
+ * @returns {Object} - { id, name, webViewLink }
+ */
+export async function uploadBinaryToGoogleDrive(file) {
+  if (!isConnected()) {
+    throw new Error('Not connected to Google Drive')
+  }
+
+  // Validate file type
+  const fileType = ALLOWED_MIME_TYPES[file.type]
+  if (!fileType) {
+    throw new Error('Only PDF and Word documents are supported')
+  }
+
+  // Validate file size
+  if (file.size > MAX_FILE_SIZE) {
+    throw new Error('File exceeds 5MB limit')
+  }
+
+  const token = getAccessToken()
+  if (!token) {
+    throw new Error('No access token available')
+  }
+
+  // Make sure gapi client has the token
+  if (!window.gapi.client.getToken()) {
+    window.gapi.client.setToken({ access_token: token })
+  }
+
+  // Get or create the library folder
+  const folderId = await getOrCreateLibraryFolder()
+
+  // Create file metadata
+  const metadata = {
+    name: file.name,
+    mimeType: file.type,
+    parents: [folderId]
+  }
+
+  // Read file as ArrayBuffer
+  const arrayBuffer = await file.arrayBuffer()
+  const uint8Array = new Uint8Array(arrayBuffer)
+
+  // Convert to base64
+  let binary = ''
+  for (let i = 0; i < uint8Array.length; i++) {
+    binary += String.fromCharCode(uint8Array[i])
+  }
+  const base64Data = btoa(binary)
+
+  // Create multipart request body
+  const boundary = '-------314159265358979323846'
+  const delimiter = '\r\n--' + boundary + '\r\n'
+  const closeDelimiter = '\r\n--' + boundary + '--'
+
+  const multipartBody =
+    delimiter +
+    'Content-Type: application/json; charset=UTF-8\r\n\r\n' +
+    JSON.stringify(metadata) +
+    delimiter +
+    'Content-Type: ' + file.type + '\r\n' +
+    'Content-Transfer-Encoding: base64\r\n\r\n' +
+    base64Data +
+    closeDelimiter
+
+  // Upload file
+  const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink', {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer ' + token,
+      'Content-Type': 'multipart/related; boundary=' + boundary
+    },
+    body: multipartBody
+  })
+
+  if (!response.ok) {
+    const error = await response.json()
+    throw new Error(error.error?.message || 'Upload failed')
+  }
+
+  const result = await response.json()
+
+  return {
+    id: result.id,
+    name: result.name,
+    webViewLink: result.webViewLink || `https://drive.google.com/file/d/${result.id}/view`
+  }
+}
+
+/**
+ * Delete a file from Google Drive
+ * @param {string} fileId - The Drive file ID to delete
+ */
+export async function deleteFromGoogleDrive(fileId) {
+  if (!isConnected()) {
+    throw new Error('Not connected to Google Drive')
+  }
+
+  const token = getAccessToken()
+  if (!token) {
+    throw new Error('No access token available')
+  }
+
+  // Make sure gapi client has the token
+  if (!window.gapi.client.getToken()) {
+    window.gapi.client.setToken({ access_token: token })
+  }
+
+  const response = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': 'Bearer ' + token
+    }
+  })
+
+  // 204 No Content is success for DELETE
+  if (!response.ok && response.status !== 204) {
+    const error = await response.json().catch(() => ({}))
+    throw new Error(error.error?.message || 'Failed to delete file')
+  }
+
+  return true
 }

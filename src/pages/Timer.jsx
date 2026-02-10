@@ -2,9 +2,11 @@ import { useState, useEffect, useRef } from 'react'
 import { db, queries } from '../db'
 import { getLocalDateString } from '../utils/dateUtils'
 import { SOUNDS, playSoundRepeated, resumeAudio } from '../utils/sounds'
+import { getTraditionSettings, shouldApplyBranding } from '../components/TraditionSettings'
+import { translateTerm } from '../data/traditions'
 import './Timer.css'
 
-const PRACTICE_TYPES = [
+const BASE_PRACTICE_TYPES = [
   'Meditation',
   'Breathwork',
   'Visualization',
@@ -13,6 +15,25 @@ const PRACTICE_TYPES = [
   'Contemplation',
   'Other'
 ]
+
+// Translate a term if branding is enabled
+function getTranslatedTerm(term) {
+  if (shouldApplyBranding()) {
+    const settings = getTraditionSettings()
+    if (settings.traditionId) {
+      return translateTerm(term, settings.traditionId)
+    }
+  }
+  return term
+}
+
+// Get practice types with tradition-specific translations
+function getPracticeTypes() {
+  return BASE_PRACTICE_TYPES.map(type => ({
+    value: type,
+    label: getTranslatedTerm(type)
+  }))
+}
 
 const MAX_MINUTES = 90
 
@@ -354,6 +375,34 @@ function Timer() {
     startTimeRef.current = null
   }
 
+  async function handleShareSession() {
+    const durationMins = Math.round(duration / 60)
+    const shareText = `I just completed a ${durationMins} minute ${practiceType.toLowerCase()} session with Practice Space! 🧘✨`
+    const shareData = {
+      title: 'My Practice Session',
+      text: shareText,
+      url: 'https://sanctum-pwa-app.netlify.app'
+    }
+
+    try {
+      if (navigator.share && navigator.canShare(shareData)) {
+        await navigator.share(shareData)
+      } else {
+        await navigator.clipboard.writeText(shareText + ' ' + shareData.url)
+        alert('Session details copied to clipboard!')
+      }
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        try {
+          await navigator.clipboard.writeText(shareText + ' ' + shareData.url)
+          alert('Session details copied to clipboard!')
+        } catch {
+          alert(shareText)
+        }
+      }
+    }
+  }
+
   async function handleSaveSession() {
     const session = {
       type: practiceType,
@@ -528,8 +577,8 @@ function Timer() {
               className="input"
               disabled={isRunning}
             >
-              {PRACTICE_TYPES.map(type => (
-                <option key={type} value={type}>{type}</option>
+              {getPracticeTypes().map(({ value, label }) => (
+                <option key={value} value={value}>{label}</option>
               ))}
             </select>
           </div>
@@ -872,9 +921,9 @@ function Timer() {
       ) : (
         <div className="completion-screen">
           <div className="completion-icon">✓</div>
-          <h2>Practice Complete</h2>
+          <h2>{getTranslatedTerm('Practice')} Complete</h2>
           <p className="completion-duration">
-            {formatTime(duration)} of {practiceType}
+            {formatTime(duration)} of {getTranslatedTerm(practiceType)}
           </p>
 
           <div className="notes-section">
@@ -896,6 +945,14 @@ function Timer() {
               Skip
             </button>
           </div>
+
+          <button
+            onClick={() => handleShareSession()}
+            className="share-session-btn"
+          >
+            <span className="share-session-icon">↗</span>
+            Share My Session
+          </button>
         </div>
       )}
     </div>

@@ -695,3 +695,161 @@
   padding: 3rem;
   color: var(--text-muted);
 }
+
+/* Tradition Picker Modal */
+.tradition-picker-modal {
+  max-width: 400px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.tradition-picker-modal h3 {
+  margin: 0 0 1rem;
+  font-size: 1.125rem;
+  text-align: center;
+}
+
+.tradition-picker-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.tradition-picker-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.tradition-picker-option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  text-align: left;
+  width: 100%;
+}
+
+.tradition-picker-option:hover {
+  border-color: var(--tradition-color, var(--accent));
+  background: color-mix(in srgb, var(--tradition-color, var(--accent)) 10%, var(--bg-elevated));
+}
+
+.tradition-picker-option--selected {
+  border-color: var(--tradition-color, var(--accent));
+  background: color-mix(in srgb, var(--tradition-color, var(--accent)) 15%, var(--bg-elevated));
+}
+
+.tradition-picker-option--expandable {
+  border-style: dashed;
+}
+
+.tradition-picker-option--expanded {
+  border-style: solid;
+  border-color: var(--tradition-color, var(--accent));
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.tradition-picker-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.tradition-picker-name {
+  flex: 1;
+}
+
+.tradition-picker-expand {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.tradition-picker-subgroups {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.5rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 0.5rem 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.tradition-picker-subgroup {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--text-primary);
+  font-size: 0.8rem;
+  text-align: left;
+  width: 100%;
+}
+
+.tradition-picker-subgroup:hover {
+  border-color: var(--tradition-color, var(--accent));
+  background: color-mix(in srgb, var(--tradition-color, var(--accent)) 10%, var(--bg-elevated));
+}
+
+.tradition-picker-subgroup--selected {
+  border-color: var(--tradition-color, var(--accent));
+  background: color-mix(in srgb, var(--tradition-color, var(--accent)) 15%, var(--bg-elevated));
+}
+
+.tradition-picker-subgroup--general {
+  background: var(--bg-card);
+  border-style: dashed;
+  font-style: italic;
+}
+
+.tradition-picker-subgroup--general:hover {
+  border-style: solid;
+}
+
+.tradition-picker-subicon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.tradition-picker-hint {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin: 0.5rem 0;
+  font-style: italic;
+}
+
+.tradition-picker-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.tradition-picker-reset {
+  flex: 1;
+  color: var(--text-muted);
+  border-color: var(--border);
+}
+
+.tradition-picker-reset:hover {
+  color: #e74c3c;
+  border-color: #e74c3c;
+}
+
+.tradition-picker-close {
+  flex: 1;
+}

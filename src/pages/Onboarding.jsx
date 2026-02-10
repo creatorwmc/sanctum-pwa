@@ -1,15 +1,8 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { useOnboarding } from '../contexts/OnboardingContext'
 import { questions, totalQuestions } from '../data/onboardingQuestions'
-import {
-  HelperPersonality,
-  UserPaceTracker,
-  HesitationAnalyzer,
-  OnboardingAnalytics,
-  BackButtonGrace
-} from '../services/onboarding'
+import { HelperPersonality } from '../services/onboarding'
 import HelperPrompt from '../components/Onboarding/HelperPrompt'
-import GraceMessage from '../components/Onboarding/GraceMessage'
 import './Onboarding.css'
 
 function Onboarding() {
@@ -32,12 +25,6 @@ function Onboarding() {
   // Helper state
   const [showPrimaryHelper, setShowPrimaryHelper] = useState(false)
   const [showSecondaryHelper, setShowSecondaryHelper] = useState(false)
-  const [questionStartTime, setQuestionStartTime] = useState(null)
-
-  // Grace message state
-  const [graceMessage, setGraceMessage] = useState(null)
-  const [graceType, setGraceType] = useState('info')
-  const [showGrace, setShowGrace] = useState(false)
 
   // Completion state
   const [showCompletion, setShowCompletion] = useState(false)
@@ -46,26 +33,12 @@ function Onboarding() {
   const primaryTimerRef = useRef(null)
   const secondaryTimerRef = useRef(null)
 
-  // Service instances (persist across renders)
-  const paceTrackerRef = useRef(new UserPaceTracker())
-  const hesitationAnalyzerRef = useRef(new HesitationAnalyzer())
-  const analyticsRef = useRef(new OnboardingAnalytics())
-  const graceSystemRef = useRef(new BackButtonGrace())
-
   const question = questions[currentQuestion]
 
   // Create personality helper (memoized based on personality)
   const helperPersonality = useMemo(() => {
-    const hp = new HelperPersonality(personality)
-    // Update grace system personality when it changes
-    graceSystemRef.current.setPersonality(personality || 'minimal')
-    return hp
+    return new HelperPersonality(personality)
   }, [personality])
-
-  // Get adapted delays based on user pace
-  const getAdaptedDelay = (baseDelay) => {
-    return paceTrackerRef.current.getAdaptedDelay(baseDelay)
-  }
 
   // Get helper texts
   const primaryHelperText = useMemo(() => {
@@ -96,23 +69,17 @@ function Onboarding() {
     setShowPrimaryHelper(false)
     setShowSecondaryHelper(false)
 
-    const basePrimaryDelay = question.helpers?.primary?.delay || 4000
-    const baseSecondaryDelay = question.helpers?.secondary?.delay || 2000
-
-    // Apply adaptive timing
-    const primaryDelay = getAdaptedDelay(basePrimaryDelay)
-    const secondaryDelay = getAdaptedDelay(baseSecondaryDelay)
+    const primaryDelay = question.helpers?.primary?.delay || 4000
+    const secondaryDelay = question.helpers?.secondary?.delay || 2000
 
     // Primary helper timer
     primaryTimerRef.current = setTimeout(() => {
       setShowPrimaryHelper(true)
-      analyticsRef.current.trackHelperShown(currentQuestion, 'primary', primaryDelay)
     }, primaryDelay)
 
     // Secondary helper timer (after primary)
     secondaryTimerRef.current = setTimeout(() => {
       setShowSecondaryHelper(true)
-      analyticsRef.current.trackHelperShown(currentQuestion, 'secondary', primaryDelay + secondaryDelay)
     }, primaryDelay + secondaryDelay)
   }
 
@@ -122,9 +89,6 @@ function Onboarding() {
     setShowPrimaryHelper(false)
     setShowSecondaryHelper(false)
     clearHelperTimers()
-
-    // Track question start
-    analyticsRef.current.trackQuestionStart(currentQuestion)
 
     if (currentQuestion === 1 && question.preamble) {
       // Reset state
@@ -147,7 +111,6 @@ function Onboarding() {
         setShowPreamble(false)
         setPreambleFading(false)
         setShowQuestion(true)
-        setQuestionStartTime(Date.now())
         setupHelperTimers()
       }, question.preamble.fadeInDuration + question.preamble.fadeOutDuration + 500)
 
@@ -162,7 +125,6 @@ function Onboarding() {
       setShowPreamble(false)
       setPreambleFading(false)
       setShowQuestion(true)
-      setQuestionStartTime(Date.now())
       setupHelperTimers()
 
       return () => {
@@ -185,14 +147,6 @@ function Onboarding() {
   function handleContinue() {
     if (!selectedOption) return
 
-    // Calculate response time
-    const responseTime = Date.now() - questionStartTime
-
-    // Track in all systems
-    analyticsRef.current.trackQuestionAnswer(currentQuestion, selectedOption, responseTime)
-    paceTrackerRef.current.recordResponse(currentQuestion, responseTime)
-    hesitationAnalyzerRef.current.recordHesitation(currentQuestion, responseTime)
-
     // Clear helpers before transitioning
     setShowPrimaryHelper(false)
     setShowSecondaryHelper(false)
@@ -209,26 +163,6 @@ function Onboarding() {
 
   function handleBack() {
     if (currentQuestion > 1) {
-      // Track back press
-      analyticsRef.current.trackBackPress(currentQuestion, currentQuestion - 1)
-      graceSystemRef.current.recordBackPress(currentQuestion)
-
-      // Show grace message
-      const graceMsg = graceSystemRef.current.getGraceMessage(currentQuestion)
-      setGraceMessage(graceMsg)
-      setGraceType('info')
-      setShowGrace(true)
-
-      // Show encouragement if needed (after a delay)
-      if (graceSystemRef.current.shouldShowEncouragement()) {
-        setTimeout(() => {
-          const encouragement = graceSystemRef.current.getEncouragementMessage()
-          setGraceMessage(encouragement)
-          setGraceType('encouragement')
-          setShowGrace(true)
-        }, 3500)
-      }
-
       // Clear helpers before going back
       setShowPrimaryHelper(false)
       setShowSecondaryHelper(false)
@@ -238,20 +172,6 @@ function Onboarding() {
   }
 
   function handleComplete() {
-    // Get analytics summary
-    const summary = analyticsRef.current.getSummary()
-    const paceInsight = paceTrackerRef.current.getInsight()
-    const hesitationInsight = hesitationAnalyzerRef.current.getQuestionInsights()
-
-    // Store analytics
-    const analyticsData = {
-      ...analyticsRef.current.exportForAnalysis(),
-      pacePattern: paceTrackerRef.current.getUserPattern(),
-      paceInsight,
-      hesitationInsight
-    }
-    localStorage.setItem('practice-space-onboarding-analytics', JSON.stringify(analyticsData))
-
     // Show completion ceremony
     setShowCompletion(true)
 
@@ -259,10 +179,6 @@ function Onboarding() {
     setTimeout(() => {
       completeOnboarding()
     }, 2500)
-  }
-
-  function handleGraceHide() {
-    setShowGrace(false)
   }
 
   // Get personality-specific styling class
@@ -284,17 +200,6 @@ function Onboarding() {
 
   return (
     <div className={`onboarding-page ${getPersonalityClass()}`}>
-      {/* Grace messages */}
-      <div className="grace-container">
-        <GraceMessage
-          message={graceMessage}
-          type={graceType}
-          show={showGrace}
-          duration={4000}
-          onHide={handleGraceHide}
-        />
-      </div>
-
       {/* Preamble for Q1 */}
       {currentQuestion === 1 && (showPreamble || preambleFading) && (
         <div className={`preamble ${showPreamble && !preambleFading ? 'fade-in' : ''} ${preambleFading ? 'fade-out' : ''}`}>

@@ -1,14 +1,19 @@
 import { useState, useEffect } from 'react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import StoneIcon from './StoneIcon'
+import HomeIcon from './HomeIcon'
 import AstragalusIcon from './AstragalusIcon'
 import FeedbackModal from './FeedbackModal'
 import RateModal from './RateModal'
 import PuzzleGame from './PuzzleGame'
 import AuthModal from './AuthModal'
 import ReinstallPrompt, { shouldShowReinstallPrompt } from './ReinstallPrompt'
+import SecurityAnswerBanner from './SecurityAnswerBanner'
+import DataPrivacyBanner from './DataPrivacyBanner'
 import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
+import { getTraditionSettings, shouldApplyBranding } from './TraditionSettings'
+import { translateTerm } from '../data/traditions'
 import versionInfo from '../version.json'
 import './Layout.css'
 
@@ -140,8 +145,25 @@ function Layout({ children }) {
     localStorage.setItem('sanctum-nav-labels', JSON.stringify(updated))
   }
 
-  // Get label for an item (custom or default)
+  // Get label for an item (custom, tradition-specific, or default)
   function getLabel(id) {
+    // Check for custom label first
+    if (customLabels[id] && customLabels[id] !== DEFAULT_LABELS[id]) {
+      return customLabels[id]
+    }
+
+    // Check for tradition-specific terminology
+    if (shouldApplyBranding()) {
+      const settings = getTraditionSettings()
+      if (settings.traditionId) {
+        const defaultLabel = DEFAULT_LABELS[id]
+        const translatedLabel = translateTerm(defaultLabel, settings.traditionId)
+        if (translatedLabel !== defaultLabel) {
+          return translatedLabel
+        }
+      }
+    }
+
     return customLabels[id] || DEFAULT_LABELS[id]
   }
 
@@ -235,6 +257,13 @@ function Layout({ children }) {
   return (
     <div className="layout">
       <header className="header">
+        <button
+          className="header-home-btn"
+          onClick={() => navigate('/')}
+          aria-label="Home"
+        >
+          <HomeIcon size={28} />
+        </button>
         <h1 className="header-title">{pageTitle}</h1>
         <button
           className="header-settings-btn"
@@ -244,6 +273,9 @@ function Layout({ children }) {
           ⚙
         </button>
       </header>
+
+      {isAuthenticated && <SecurityAnswerBanner />}
+      <DataPrivacyBanner />
 
       <main className="main-content">
         {children}
@@ -298,44 +330,68 @@ function Layout({ children }) {
 
             <div className="settings-drawer-content">
               <section className="settings-drawer-section">
-                <h3>Account</h3>
-                {isAuthenticated ? (
-                  <div className="account-summary">
-                    <div className="account-summary-avatar">
-                      {user?.displayName?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || '?'}
-                    </div>
-                    <div className="account-summary-info">
-                      {user?.displayName && <span className="account-summary-name">{user.displayName}</span>}
-                      <span className="account-summary-email">{user?.email}</span>
-                    </div>
-                    <button
-                      className="account-manage-btn"
-                      onClick={() => {
-                        setSettingsOpen(false)
-                        navigate('/settings')
-                      }}
-                    >
-                      Manage
-                    </button>
+                <button
+                  className="settings-drawer-link settings-drawer-link--primary"
+                  onClick={() => {
+                    setSettingsOpen(false)
+                    navigate('/settings/account')
+                  }}
+                >
+                  <span>👤</span>
+                  <div className="settings-drawer-link-content">
+                    <span className="settings-drawer-link-title">Manage Account</span>
+                    <span className="settings-drawer-link-desc">
+                      {isAuthenticated ? user?.email : 'Sign in, sync & backup'}
+                    </span>
                   </div>
-                ) : (
-                  <div className="account-signin-prompt">
-                    <p>Sign in to sync your practice across devices</p>
-                    {firebaseAvailable ? (
-                      <button
-                        className="btn btn-primary account-signin-btn-small"
-                        onClick={() => {
-                          setSettingsOpen(false)
-                          setAuthModalOpen(true)
-                        }}
-                      >
-                        Sign In
-                      </button>
-                    ) : (
-                      <p className="account-not-configured-small">Cloud sync not configured</p>
-                    )}
-                  </div>
-                )}
+                  <span className="settings-drawer-link-arrow">→</span>
+                </button>
+              </section>
+
+              <section className="settings-drawer-section">
+                <h3>Quick Links</h3>
+                <div className="settings-drawer-links">
+                  <button
+                    className="settings-drawer-link"
+                    onClick={() => {
+                      setSettingsOpen(false)
+                      navigate('/settings')
+                    }}
+                  >
+                    <span>⚙</span>
+                    <span>All Settings</span>
+                  </button>
+                  <button
+                    className="settings-drawer-link"
+                    onClick={() => {
+                      setSettingsOpen(false)
+                      navigate('/practice-history')
+                    }}
+                  >
+                    <span>📊</span>
+                    <span>Practice History</span>
+                  </button>
+                  <button
+                    className="settings-drawer-link"
+                    onClick={() => {
+                      setSettingsOpen(false)
+                      navigate('/tools')
+                    }}
+                  >
+                    <span>✡</span>
+                    <span>Esoteric Tools</span>
+                  </button>
+                  <button
+                    className="settings-drawer-link"
+                    onClick={() => {
+                      setSettingsOpen(false)
+                      navigate('/play')
+                    }}
+                  >
+                    <span><AstragalusIcon size={18} /></span>
+                    <span>Play</span>
+                  </button>
+                </div>
               </section>
 
               <section className="settings-drawer-section">
@@ -357,147 +413,6 @@ function Layout({ children }) {
                   >
                     <span className="support-btn-icon">↗</span>
                     <span>Share</span>
-                  </button>
-                </div>
-              </section>
-
-              <section className="settings-drawer-section">
-                <div className="settings-section-header">
-                  <h3>Navigation</h3>
-                  <div className="settings-section-actions">
-                    {editingLabels && (
-                      <button
-                        className="reset-labels-btn"
-                        onClick={resetLabels}
-                      >
-                        Reset
-                      </button>
-                    )}
-                    <button
-                      className="edit-labels-btn"
-                      onClick={() => setEditingLabels(!editingLabels)}
-                    >
-                      {editingLabels ? 'Done' : 'Edit Names'}
-                    </button>
-                  </div>
-                </div>
-                <p className="settings-drawer-hint">
-                  {editingLabels
-                    ? 'Tap a name to customize it'
-                    : 'Uncheck to hide from menu'}
-                </p>
-                <div className="nav-toggles">
-                  {ALL_NAV_ITEMS.filter(item => visibleNavItems.includes(item.id)).map(item => (
-                    <label key={item.id} className="nav-toggle">
-                      <input
-                        type="checkbox"
-                        checked={true}
-                        onChange={() => toggleNavItem(item.id)}
-                        disabled={item.id === 'home' || editingLabels}
-                      />
-                      <span className="nav-toggle-icon">{item.icon}</span>
-                      {editingLabels ? (
-                        <input
-                          type="text"
-                          className="nav-label-input"
-                          value={getLabel(item.id)}
-                          onChange={(e) => updateLabel(item.id, e.target.value)}
-                          placeholder={DEFAULT_LABELS[item.id]}
-                          maxLength={12}
-                        />
-                      ) : (
-                        <span className="nav-toggle-label">{getLabel(item.id)}</span>
-                      )}
-                      {item.id === 'home' && !editingLabels && <span className="nav-toggle-required">Required</span>}
-                    </label>
-                  ))}
-                </div>
-              </section>
-
-              {/* Hidden Pages - show navigation for pages not in bottom nav */}
-              {ALL_NAV_ITEMS.filter(item => !visibleNavItems.includes(item.id)).length > 0 && (
-                <section className="settings-drawer-section">
-                  <h3>Hidden Pages</h3>
-                  <p className="settings-drawer-hint">Check to restore to menu, or tap to visit</p>
-                  <div className="nav-toggles">
-                    {ALL_NAV_ITEMS.filter(item => !visibleNavItems.includes(item.id)).map(item => (
-                      <label key={item.id} className="nav-toggle nav-toggle--hidden">
-                        <input
-                          type="checkbox"
-                          checked={false}
-                          onChange={() => toggleNavItem(item.id)}
-                        />
-                        <span className="nav-toggle-icon">{item.icon}</span>
-                        <span className="nav-toggle-label">{getLabel(item.id)}</span>
-                        <button
-                          className="nav-toggle-visit"
-                          onClick={(e) => {
-                            e.preventDefault()
-                            e.stopPropagation()
-                            setSettingsOpen(false)
-                            navigate(item.path)
-                          }}
-                        >
-                          Go
-                        </button>
-                      </label>
-                    ))}
-                  </div>
-                </section>
-              )}
-
-              <section className="settings-drawer-section">
-                <h3>More Options</h3>
-                <div className="settings-drawer-links">
-                  <button
-                    className="settings-drawer-link"
-                    onClick={() => {
-                      setSettingsOpen(false)
-                      navigate('/settings')
-                    }}
-                  >
-                    <span>📦</span>
-                    <span>Data & Backup</span>
-                  </button>
-                  <button
-                    className="settings-drawer-link"
-                    onClick={() => {
-                      setSettingsOpen(false)
-                      navigate('/practice-history')
-                    }}
-                  >
-                    <span>📊</span>
-                    <span>Practice History</span>
-                  </button>
-                  <button
-                    className="settings-drawer-link"
-                    onClick={() => {
-                      setSettingsOpen(false)
-                      setFeedbackOpen(true)
-                    }}
-                  >
-                    <span><StoneIcon size={18} glow={false} /></span>
-                    <span>Whisper to the Oracle</span>
-                  </button>
-                  <button
-                    className="settings-drawer-link"
-                    onClick={() => {
-                      setSettingsOpen(false)
-                      navigate('/tools')
-                    }}
-                  >
-                    <span>✡</span>
-                    <span>Esoteric Tools</span>
-                  </button>
-                  <button
-                    className="settings-drawer-link"
-                    onClick={() => {
-                      setSettingsOpen(false)
-                      navigate('/play')
-                    }}
-                  >
-                    <span><AstragalusIcon size={18} /></span>
-                    <span>Play</span>
                   </button>
                 </div>
               </section>
