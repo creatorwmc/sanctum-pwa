@@ -3,6 +3,7 @@ import PuzzleGame from '../components/PuzzleGame'
 import TicTacToe from '../components/TicTacToe'
 import OracleGame from '../components/OracleGame'
 import PegSolitaire from '../components/PegSolitaire'
+import SolitairePlus from '../components/SolitairePlus'
 import './Play.css'
 
 function Play() {
@@ -21,9 +22,21 @@ function Play() {
       <div className="games-list">
         <button
           className="game-card"
+          onClick={() => setActiveGame('solitaire')}
+        >
+          <span className="game-icon game-icon--cards">🃏</span>
+          <div className="game-info">
+            <h3>Solitaire</h3>
+            <p>Klondike and Spider card games</p>
+          </div>
+          <span className="game-arrow">→</span>
+        </button>
+
+        <button
+          className="game-card"
           onClick={() => setActiveGame('puzzle')}
         >
-          <span className="game-icon">✧</span>
+          <span className="game-icon game-icon--puzzle">🏝️</span>
           <div className="game-info">
             <h3>Mindful Puzzle</h3>
             <p>A meditative sliding puzzle to calm the mind</p>
@@ -35,7 +48,7 @@ function Play() {
           className="game-card"
           onClick={() => setActiveGame('tictactoe')}
         >
-          <span className="game-icon">⊞</span>
+          <span className="game-icon game-icon--tictactoe">⭕</span>
           <div className="game-info">
             <h3>Tic Tac Toe</h3>
             <p>Classic game of strategy and patience</p>
@@ -47,7 +60,7 @@ function Play() {
           className="game-card"
           onClick={() => setActiveGame('oracle')}
         >
-          <span className="game-icon">🔮</span>
+          <span className="game-icon game-icon--oracle">🔮</span>
           <div className="game-info">
             <h3>Oracle's Game</h3>
             <p>An ancient game of strategy and wisdom</p>
@@ -59,7 +72,7 @@ function Play() {
           className="game-card"
           onClick={() => setActiveGame('peg')}
         >
-          <span className="game-icon">◆</span>
+          <span className="game-icon game-icon--peg">⛳</span>
           <div className="game-info">
             <h3>Peg Solitaire</h3>
             <p>Jump pegs until only one remains</p>
@@ -82,6 +95,10 @@ function Play() {
 
       {activeGame === 'peg' && (
         <PegSolitaire isOpen={true} onClose={closeGame} />
+      )}
+
+      {activeGame === 'solitaire' && (
+        <SolitairePlus isOpen={true} onClose={closeGame} />
       )}
     </div>
   )

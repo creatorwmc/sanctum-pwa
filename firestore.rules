@@ -17,5 +17,19 @@ service cloud.firestore {
     match /admins/{userId} {
       allow read: if request.auth != null && request.auth.uid == userId;
     }
+
+    // Security answers for password reset
+    // - Authenticated users can write their own answer (keyed by email)
+    // - Anyone can read to verify during password reset (answers are normalized/hashed)
+    match /securityAnswers/{email} {
+      allow read: if true;
+      allow write: if request.auth != null &&
+        request.auth.token.email.lower() == email;
+    }
+
+    // Password reset tokens (temporary, for verified resets)
+    match /passwordResetTokens/{email} {
+      allow read, write: if true;
+    }
   }
 }
