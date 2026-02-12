@@ -62,6 +62,7 @@ const ROUTE_TO_PAGE = {
 function Layout({ children }) {
   const location = useLocation()
   const navigate = useNavigate()
+  const { isAuthenticated } = useAuth()
   const { getThemeForPage, applyTheme } = useTheme()
   const [feedbackOpen, setFeedbackOpen] = useState(false)
   const [rateOpen, setRateOpen] = useState(false)
@@ -196,8 +197,10 @@ function Layout({ children }) {
         </button>
       </header>
 
+      {/* Banners temporarily disabled
       {isAuthenticated && <SecurityAnswerBanner />}
       <DataPrivacyBanner />
+      */}
 
       <main className="main-content">
         {children}

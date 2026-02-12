@@ -43,8 +43,9 @@ export const handler = async (event) => {
     // Find user by email
     const userRecord = await admin.auth().getUserByEmail(email.toLowerCase());
 
-    // Get security answer from Firestore
-    const securityDoc = await db.collection('securityAnswers').doc(userRecord.uid).get();
+    // Get security answer from Firestore (stored by email, not UID)
+    const normalizedEmail = email.toLowerCase().trim();
+    const securityDoc = await db.collection('securityAnswers').doc(normalizedEmail).get();
 
     if (!securityDoc.exists) {
       return {

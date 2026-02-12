@@ -474,8 +474,8 @@ function Timer() {
               {inputMode === 'dial' && !isSessionActive && (
                 <circle
                   className="timer-dial-handle"
-                  cx={50 + 45 * Math.sin((dialAngle * Math.PI) / 180)}
-                  cy={50 - 45 * Math.cos((dialAngle * Math.PI) / 180)}
+                  cx={50 + 45 * Math.cos((dialAngle * Math.PI) / 180)}
+                  cy={50 + 45 * Math.sin((dialAngle * Math.PI) / 180)}
                   r="4"
                 />
               )}

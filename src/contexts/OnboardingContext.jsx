@@ -11,6 +11,9 @@ export function OnboardingProvider({ children }) {
   const { user, isAuthenticated, loading: authLoading } = useAuth()
   const [isComplete, setIsComplete] = useState(true) // Default to true (skip onboarding) until we know
   const [showOnboarding, setShowOnboarding] = useState(false) // Controls whether to show onboarding UI
+
+  // TEMPORARILY DISABLED: Onboarding questions need adjustment before deployment
+  const ONBOARDING_DISABLED = true
   const [currentQuestion, setCurrentQuestion] = useState(1)
   const [answers, setAnswers] = useState({})
   const [personality, setPersonality] = useState(null)
@@ -18,6 +21,13 @@ export function OnboardingProvider({ children }) {
   // Check onboarding status when user changes
   useEffect(() => {
     async function checkOnboardingStatus() {
+      // TEMPORARILY DISABLED: Skip onboarding entirely
+      if (ONBOARDING_DISABLED) {
+        setIsComplete(true)
+        setShowOnboarding(false)
+        return
+      }
+
       // Wait for auth to finish loading
       if (authLoading) {
         return

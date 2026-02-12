@@ -176,7 +176,7 @@ export function AuthProvider({ children }) {
         },
         body: JSON.stringify({
           email: email,
-          securityAnswer: answer,
+          answer: answer,
           newPassword: newPassword
         })
       })
