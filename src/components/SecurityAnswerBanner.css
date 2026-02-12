@@ -1,7 +1,13 @@
 .security-banner {
-  background: var(--surface-elevated, #1e1e3f);
-  border-bottom: 1px solid var(--border-color, #333);
+  position: fixed;
+  top: 3.5rem; /* Below the fixed header */
+  left: 0;
+  right: 0;
+  z-index: 99;
+  background: linear-gradient(135deg, rgba(30, 30, 63, 0.98), rgba(45, 35, 70, 0.98));
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
   padding: 0.75rem 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .security-banner-content {

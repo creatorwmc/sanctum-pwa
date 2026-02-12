@@ -23,7 +23,7 @@ export const DEFAULT_PRACTICES = [
   {
     id: 'vessel',
     label: 'Vessel Work',
-    icon: '⚱',
+    icon: '🏺',
     description: 'Physical practices that fortify the body',
     examples: ['Five Tibetan Rites', 'Yoga or stretching', 'Qigong or tai chi'],
     isDefault: true,
@@ -32,7 +32,7 @@ export const DEFAULT_PRACTICES = [
   {
     id: 'breathwork',
     label: 'Breathwork',
-    icon: '🌬',
+    icon: '💨',
     description: 'Pranayama, conscious breathing',
     examples: ['Box breathing', 'Wim Hof rounds', 'Alternate nostril breathing'],
     isDefault: true,
@@ -50,7 +50,7 @@ export const DEFAULT_PRACTICES = [
   {
     id: 'journaling',
     label: 'Integration Journaling',
-    icon: '✎',
+    icon: '📝',
     description: 'Documenting insights, stumbles, breakthroughs',
     examples: ['Morning pages', 'Dream journaling', 'Reflecting on synchronicities'],
     isDefault: true,

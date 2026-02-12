@@ -1,7 +1,13 @@
 .privacy-banner {
-  background: linear-gradient(135deg, rgba(26, 26, 26, 0.98), rgba(35, 35, 35, 0.98));
+  position: fixed;
+  top: 3.5rem; /* Below the fixed header */
+  left: 0;
+  right: 0;
+  z-index: 98;
+  background: linear-gradient(135deg, rgba(26, 26, 46, 0.98), rgba(35, 35, 55, 0.98));
   border-bottom: 1px solid rgba(212, 175, 55, 0.2);
   padding: 12px 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   animation: slideDown 0.3s ease-out;
 }
 

@@ -197,10 +197,8 @@ function Layout({ children }) {
         </button>
       </header>
 
-      {/* Banners temporarily disabled
       {isAuthenticated && <SecurityAnswerBanner />}
       <DataPrivacyBanner />
-      */}
 
       <main className="main-content">
         {children}
