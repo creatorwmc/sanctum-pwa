@@ -319,6 +319,7 @@ export const queries = {
   async getPracticeStats() {
     const database = await getDB()
     let stats = await database.get('practiceStats', 'user-stats')
+    let needsSave = false
 
     if (!stats) {
       stats = {
@@ -328,9 +329,16 @@ export const queries = {
         storedPractices: 1, // Start with 1
         lastStoredPracticeRefresh: getLocalMonthString(), // YYYY-MM (local timezone)
         storedPracticeUses: [], // dates where stored practices were used
-        lastCheckedDate: getLocalDateString() // Track last date app was used
+        lastCheckedDate: getLocalDateString(), // Track last date app was used
+        updatedAt: new Date().toISOString()
       }
-      await database.put('practiceStats', stats)
+      needsSave = true
+    }
+
+    // Migrate: ensure updatedAt exists for older stats
+    if (!stats.updatedAt) {
+      stats.updatedAt = new Date().toISOString()
+      needsSave = true
     }
 
     // Check if we need to refresh stored practice (monthly)
@@ -338,7 +346,13 @@ export const queries = {
     if (stats.lastStoredPracticeRefresh !== currentMonth) {
       stats.storedPractices = Math.min(stats.storedPractices + 1, 3) // Max 3 stored
       stats.lastStoredPracticeRefresh = currentMonth
+      stats.updatedAt = new Date().toISOString()
+      needsSave = true
+    }
+
+    if (needsSave) {
       await database.put('practiceStats', stats)
+      triggerSync('practiceStats', stats.id)
     }
 
     return stats
@@ -348,8 +362,13 @@ export const queries = {
   async updatePracticeStats(updates) {
     const database = await getDB()
     const stats = await this.getPracticeStats()
-    const updatedStats = { ...stats, ...updates }
+    const updatedStats = {
+      ...stats,
+      ...updates,
+      updatedAt: new Date().toISOString()
+    }
     await database.put('practiceStats', updatedStats)
+    triggerSync('practiceStats', updatedStats.id)
     return updatedStats
   },
 

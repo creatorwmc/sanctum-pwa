@@ -1,0 +1,109 @@
+.security-banner {
+  background: var(--surface-elevated, #1e1e3f);
+  border-bottom: 1px solid var(--border-color, #333);
+  padding: 0.75rem 1rem;
+}
+
+.security-banner-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.security-banner-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.security-banner-text strong {
+  color: var(--text-primary, #e0e0e0);
+  font-size: 0.95rem;
+}
+
+.security-banner-text span {
+  color: var(--text-secondary, #888);
+  font-size: 0.85rem;
+}
+
+.security-banner-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.security-banner-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.security-banner-btn.primary {
+  background: var(--accent-color, #6366f1);
+  color: white;
+}
+
+.security-banner-btn.primary:hover:not(:disabled) {
+  background: var(--accent-hover, #5558e3);
+}
+
+.security-banner-btn.secondary {
+  background: transparent;
+  color: var(--text-secondary, #888);
+  border: 1px solid var(--border-color, #333);
+}
+
+.security-banner-btn.secondary:hover:not(:disabled) {
+  border-color: var(--text-secondary, #888);
+  color: var(--text-primary, #e0e0e0);
+}
+
+.security-banner-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.security-banner-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.security-banner-form label {
+  color: var(--text-primary, #e0e0e0);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.security-banner-input-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.security-banner-form input {
+  flex: 1;
+  min-width: 150px;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border-color, #333);
+  border-radius: 6px;
+  background: var(--surface-color, #0f0f1a);
+  color: var(--text-primary, #e0e0e0);
+  font-size: 0.9rem;
+}
+
+.security-banner-form input:focus {
+  outline: none;
+  border-color: var(--accent-color, #6366f1);
+}
+
+.security-banner-error {
+  color: var(--error-color, #ef4444);
+  font-size: 0.8rem;
+  margin: 0;
+}

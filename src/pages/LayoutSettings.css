@@ -1,0 +1,68 @@
+.layout-intro {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-bottom: 0.5rem;
+}
+
+.settings-section-hint {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  margin-bottom: 0.75rem;
+  padding-left: 0.25rem;
+}
+
+.quick-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+
+.quick-action-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+.quick-action-option:hover {
+  background: var(--bg-secondary);
+  border-color: var(--accent);
+}
+
+.quick-action-option--selected {
+  background: rgba(212, 175, 55, 0.1);
+  border-color: var(--accent);
+}
+
+.quick-action-option-icon {
+  font-size: 1.25rem;
+}
+
+.quick-action-option-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.quick-action-check {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.5rem;
+  color: var(--accent);
+  font-size: 0.75rem;
+}
+
+.layout-note {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  text-align: center;
+  font-style: italic;
+  margin-top: 1rem;
+}

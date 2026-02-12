@@ -6,7 +6,15 @@ import {
   onAuthStateChanged,
   updateProfile
 } from 'firebase/auth'
-import { doc, setDoc, getDoc } from 'firebase/firestore'
+import {
+  doc,
+  setDoc,
+  getDoc,
+  query,
+  collection,
+  where,
+  getDocs
+} from 'firebase/firestore'
 import { auth, firestore as db, isFirebaseConfigured } from '../config/firebase'
 import { initAutoSync, stopAutoSync, isSyncEnabled, getCloudSyncPreference, enableSync } from '../services/syncService'
 
@@ -85,50 +93,6 @@ export function AuthProvider({ children }) {
     }
   }
 
-  // Save security answer for password recovery
-  async function saveSecurityAnswer(uid, answer, email) {
-    if (!firebaseAvailable) {
-      throw new Error('Firebase is not configured')
-    }
-    await setDoc(doc(db, 'securityAnswers', uid), {
-      answer: answer.toLowerCase(),
-      email: email.toLowerCase(),
-    })
-  }
-
-  // Check if user has a security answer set
-  async function checkSecurityAnswerExists(uid) {
-    if (!firebaseAvailable) {
-      return false
-    }
-    const securityDoc = await getDoc(doc(db, 'securityAnswers', uid))
-    return securityDoc.exists()
-  }
-
-  // Reset password via serverless function
-  async function resetPasswordWithAnswer(email, answer, newPassword) {
-    const baseUrl = import.meta.env.VITE_FUNCTIONS_URL || '';
-    const response = await fetch(`${baseUrl}/.netlify/functions/reset-password`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, answer: answer.toLowerCase(), newPassword }),
-    })
-
-    const text = await response.text()
-    let data
-    try {
-      data = JSON.parse(text)
-    } catch {
-      console.error('Server response:', text)
-      throw new Error('Server error. Please try again later.')
-    }
-
-    if (!response.ok) {
-      throw new Error(data.error || 'Password reset failed')
-    }
-    return data
-  }
-
   async function signIn(email, password) {
     if (!firebaseAvailable) {
       throw new Error('Firebase is not configured')
@@ -160,6 +124,74 @@ export function AuthProvider({ children }) {
 
   function clearError() {
     setError(null)
+  }
+
+  // Save security answer to Firestore (stored by email for lookup without auth)
+  async function saveSecurityAnswer(uid, answer, email) {
+    if (!firebaseAvailable || !db) {
+      throw new Error('Firebase is not configured')
+    }
+
+    try {
+      // Store by email (lowercase) so we can look it up during password reset
+      const normalizedEmail = email.toLowerCase().trim()
+      await setDoc(doc(db, 'securityAnswers', normalizedEmail), {
+        answer: answer.toLowerCase().trim(),
+        uid,
+        updatedAt: new Date().toISOString()
+      })
+    } catch (err) {
+      console.error('Error saving security answer:', err)
+      throw new Error('Failed to save security answer')
+    }
+  }
+
+  // Check if user has set up a security answer
+  async function checkSecurityAnswerExists(uid) {
+    if (!firebaseAvailable || !db) {
+      return false
+    }
+
+    try {
+      // Query by uid to find if this user has an answer
+      const q = query(
+        collection(db, 'securityAnswers'),
+        where('uid', '==', uid)
+      )
+      const snapshot = await getDocs(q)
+      return !snapshot.empty
+    } catch (err) {
+      console.error('Error checking security answer:', err)
+      return false
+    }
+  }
+
+  // Reset password using security answer via Netlify Function
+  async function resetPasswordWithAnswer(email, answer, newPassword) {
+    try {
+      const response = await fetch('/.netlify/functions/reset-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email: email,
+          securityAnswer: answer,
+          newPassword: newPassword
+        })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Password reset failed')
+      }
+
+      return data
+    } catch (err) {
+      console.error('Error resetting password:', err)
+      throw new Error(err.message || 'Password reset failed. Please try again.')
+    }
   }
 
   const value = {

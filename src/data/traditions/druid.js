@@ -811,6 +811,7 @@ export const DRUID_PRESET = {
 
   // ============ CORRESPONDENCES FOR APP TERMINOLOGY ============
   correspondences: {
+    // Generic to tradition-specific terms
     'Ritual Bath': 'Purification Bath / Elemental Cleansing',
     'Meditation': 'Discursive Meditation',
     'Vessel Work': 'Body as Grove (physical practice)',
@@ -820,7 +821,16 @@ export const DRUID_PRESET = {
     'Sacred Union': 'Sacred Marriage / Partnership Rites',
     'Tending': 'Land Tending / Grove Keeping',
     'Tarot/Divination': 'Ogham / Divination',
-    'Ceremonial Work': 'Druid Ceremony / Seasonal Rites'
+    'Ceremonial Work': 'Druid Ceremony / Seasonal Rites',
+    // UI Labels
+    'Meditation Timer': 'Practice Timer',
+    'Timer': 'Practice Timer',
+    'Daily Log': 'Daily Practice',
+    'Daily': 'Practice',
+    'Practice': 'Practice',
+    'Practices': 'Practices',
+    'Log Practice': 'Log Practice',
+    'Start Practice': 'Begin Practice'
   },
 
   // ============ CALENDAR INTEGRATION ============

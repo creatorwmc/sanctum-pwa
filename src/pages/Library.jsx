@@ -3,6 +3,15 @@ import { useSearchParams, useNavigate } from 'react-router-dom'
 import { db } from '../db'
 import { getTraditionSettings } from '../components/TraditionSettings'
 import { AVAILABLE_TRADITIONS } from '../data/traditions'
+import {
+  isGoogleDriveConfigured,
+  isConnected as isDriveConnected,
+  connectGoogleDrive,
+  uploadBinaryToGoogleDrive,
+  deleteFromGoogleDrive,
+  MAX_FILE_SIZE,
+  ALLOWED_MIME_TYPES
+} from '../services/googleDrive'
 import './Library.css'
 
 const DEFAULT_TRADITIONS = [
@@ -40,6 +49,23 @@ function Library() {
   const [customLabels, setCustomLabels] = useState(DEFAULT_LABELS)
   const [editingLabels, setEditingLabels] = useState(false)
   const [useTraditionCategories, setUseTraditionCategories] = useState(false)
+
+  // File upload state
+  const [showUploadForm, setShowUploadForm] = useState(false)
+  const [selectedFile, setSelectedFile] = useState(null)
+  const [uploadStatus, setUploadStatus] = useState('idle') // idle, uploading, error
+  const [uploadError, setUploadError] = useState('')
+  const [uploadTitle, setUploadTitle] = useState('')
+  const [uploadTradition, setUploadTradition] = useState('BOTA')
+  const [uploadDescription, setUploadDescription] = useState('')
+  const [isDragOver, setIsDragOver] = useState(false)
+  const [driveConnected, setDriveConnected] = useState(isDriveConnected())
+  const [connecting, setConnecting] = useState(false)
+  const fileInputRef = useRef(null)
+
+  // File info modal state
+  const [showFileInfo, setShowFileInfo] = useState(null) // holds the file doc or null
+  const [fileInfoDescription, setFileInfoDescription] = useState('')
 
   // Double-click detection for tradition button
   const lastTraditionClickRef = useRef(0)
@@ -81,7 +107,12 @@ function Library() {
 
   async function loadDocuments() {
     try {
-      const docs = await db.getAll('documents')
+      let docs = await db.getAll('documents')
+      // Migration: add documentType field to existing docs
+      docs = docs.map(doc => ({
+        ...doc,
+        documentType: doc.documentType || 'text'
+      }))
       setDocuments(docs.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)))
     } catch (error) {
       console.error('Error loading documents:', error)
@@ -95,6 +126,7 @@ function Library() {
 
     try {
       const docData = {
+        documentType: 'text',
         title: title.trim(),
         tradition: useTraditionCategories ? selectedTradition?.id || 'custom' : tradition,
         category: useTraditionCategories ? tradition : null,
@@ -115,11 +147,21 @@ function Library() {
     }
   }
 
-  async function deleteDocument(id) {
+  async function deleteDocument(id, driveId = null) {
     if (confirm('Delete this document?')) {
       try {
+        // If it's a file document, also delete from Google Drive
+        if (driveId) {
+          try {
+            await deleteFromGoogleDrive(driveId)
+          } catch (driveError) {
+            console.error('Error deleting from Drive:', driveError)
+            // Continue with local deletion even if Drive deletion fails
+          }
+        }
         await db.delete('documents', id)
         setDocuments(prev => prev.filter(d => d.id !== id))
+        setShowFileInfo(null)
       } catch (error) {
         console.error('Error deleting document:', error)
       }
@@ -142,6 +184,152 @@ function Library() {
     setTradition('BOTA')
     setDescription('')
     setContent('')
+  }
+
+  // File upload functions
+  function resetUploadForm() {
+    setShowUploadForm(false)
+    setSelectedFile(null)
+    setUploadStatus('idle')
+    setUploadError('')
+    setUploadTitle('')
+    setUploadTradition('BOTA')
+    setUploadDescription('')
+    setIsDragOver(false)
+  }
+
+  function handleFileSelect(file) {
+    if (!file) return
+
+    // Validate file type
+    if (!ALLOWED_MIME_TYPES[file.type]) {
+      setUploadError('Only PDF and Word documents are supported')
+      setSelectedFile(null)
+      return
+    }
+
+    // Validate file size
+    if (file.size > MAX_FILE_SIZE) {
+      setUploadError('File exceeds 5MB limit')
+      setSelectedFile(null)
+      return
+    }
+
+    setUploadError('')
+    setSelectedFile(file)
+    // Auto-fill title from filename (without extension)
+    const nameWithoutExt = file.name.replace(/\.[^/.]+$/, '')
+    setUploadTitle(nameWithoutExt)
+  }
+
+  function handleDrop(e) {
+    e.preventDefault()
+    setIsDragOver(false)
+    const file = e.dataTransfer.files[0]
+    handleFileSelect(file)
+  }
+
+  function handleDragOver(e) {
+    e.preventDefault()
+    setIsDragOver(true)
+  }
+
+  function handleDragLeave(e) {
+    e.preventDefault()
+    setIsDragOver(false)
+  }
+
+  async function handleUpload() {
+    if (!selectedFile || !uploadTitle.trim()) return
+
+    // Check if connected to Google Drive
+    if (!driveConnected) {
+      setUploadError('Connect to Google Drive to upload files')
+      return
+    }
+
+    setUploadStatus('uploading')
+    setUploadError('')
+
+    try {
+      // Upload to Google Drive
+      const driveResult = await uploadBinaryToGoogleDrive(selectedFile)
+
+      // Save metadata to IndexedDB
+      const docData = {
+        documentType: 'file',
+        title: uploadTitle.trim(),
+        tradition: useTraditionCategories ? selectedTradition?.id || 'custom' : uploadTradition,
+        category: useTraditionCategories ? uploadTradition : null,
+        description: uploadDescription.trim(),
+        driveId: driveResult.id,
+        webViewLink: driveResult.webViewLink,
+        fileName: selectedFile.name,
+        fileType: ALLOWED_MIME_TYPES[selectedFile.type],
+        mimeType: selectedFile.type,
+        fileSize: selectedFile.size
+      }
+
+      await db.add('documents', docData)
+      await loadDocuments()
+      resetUploadForm()
+    } catch (error) {
+      console.error('Upload error:', error)
+      setUploadStatus('error')
+      setUploadError(error.message || 'Upload failed. Check connection and retry.')
+    }
+  }
+
+  async function handleConnectDrive() {
+    setConnecting(true)
+    setUploadError('')
+    try {
+      await connectGoogleDrive()
+      setDriveConnected(true)
+    } catch (error) {
+      console.error('Failed to connect to Google Drive:', error)
+      setUploadError(error.message || 'Failed to connect to Google Drive')
+    } finally {
+      setConnecting(false)
+    }
+  }
+
+  function formatFileSize(bytes) {
+    if (bytes < 1024) return bytes + ' B'
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
+  }
+
+  function getFileTypeIcon(fileType) {
+    const icons = {
+      pdf: '📕',
+      doc: '📄',
+      docx: '📄'
+    }
+    return icons[fileType] || '📎'
+  }
+
+  // File info modal functions
+  function openFileInfo(doc) {
+    setShowFileInfo(doc)
+    setFileInfoDescription(doc.description || '')
+  }
+
+  function closeFileInfo() {
+    setShowFileInfo(null)
+    setFileInfoDescription('')
+  }
+
+  async function saveFileDescription() {
+    if (!showFileInfo) return
+
+    try {
+      await db.update('documents', { ...showFileInfo, description: fileInfoDescription.trim() })
+      await loadDocuments()
+      closeFileInfo()
+    } catch (error) {
+      console.error('Error saving description:', error)
+    }
   }
 
   function handleFilterChange(traditionId) {
@@ -200,7 +388,7 @@ function Library() {
 
   return (
     <div className="library">
-      {!showForm ? (
+      {!showForm && !showUploadForm ? (
         <>
           <div className="library-header">
             <button
@@ -209,6 +397,14 @@ function Library() {
             >
               + Add Document
             </button>
+{isGoogleDriveConfigured() && (
+              <button
+                onClick={() => setShowUploadForm(true)}
+                className="btn btn-secondary"
+              >
+                📎 Upload PDF/Word
+              </button>
+            )}
             <button
               onClick={selectedTradition ? handleTraditionButtonClick : () => navigate('/settings')}
               className={`btn ${useTraditionCategories ? 'btn-primary' : 'btn-secondary'} tradition-btn`}
@@ -266,9 +462,18 @@ function Library() {
           ) : (
             <div className="documents-list">
               {filteredDocs.map(doc => (
-                <article key={doc.id} className="doc-card" onClick={() => startEdit(doc)}>
+                <article
+                  key={doc.id}
+                  className={`doc-card ${doc.documentType === 'file' ? 'doc-card--file' : ''}`}
+                  onClick={() => doc.documentType === 'file' ? openFileInfo(doc) : startEdit(doc)}
+                >
                   <div className="doc-header">
-                    <span className="doc-tradition">{getLabel(doc.tradition)}</span>
+                    <span className="doc-tradition">
+                      {doc.documentType === 'file' && (
+                        <span className="doc-file-type">{getFileTypeIcon(doc.fileType)}</span>
+                      )}
+                      {getLabel(doc.tradition)}
+                    </span>
                     <span className="doc-date">
                       {new Date(doc.createdAt).toLocaleDateString()}
                     </span>
@@ -277,10 +482,24 @@ function Library() {
                   {doc.description && (
                     <p className="doc-description">{doc.description}</p>
                   )}
+                  {doc.documentType === 'file' && (
+                    <div className="doc-file-info">
+                      <span className="doc-file-size">{formatFileSize(doc.fileSize)}</span>
+                      <a
+                        href={doc.webViewLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="doc-file-link"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        Open in Drive
+                      </a>
+                    </div>
+                  )}
                   <button
                     onClick={(e) => {
                       e.stopPropagation()
-                      deleteDocument(doc.id)
+                      deleteDocument(doc.id, doc.driveId)
                     }}
                     className="doc-delete"
                     aria-label="Delete document"
@@ -291,7 +510,173 @@ function Library() {
               ))}
             </div>
           )}
+
+          {/* File Info Modal */}
+          {showFileInfo && (
+            <div className="modal-overlay" onClick={closeFileInfo}>
+              <div className="modal file-info-modal" onClick={(e) => e.stopPropagation()}>
+                <button className="modal-close" onClick={closeFileInfo}>×</button>
+                <h2 className="modal-title">
+                  {getFileTypeIcon(showFileInfo.fileType)} {showFileInfo.title}
+                </h2>
+                <div className="file-info-details">
+                  <p><strong>File:</strong> {showFileInfo.fileName}</p>
+                  <p><strong>Size:</strong> {formatFileSize(showFileInfo.fileSize)}</p>
+                  <p><strong>Uploaded:</strong> {new Date(showFileInfo.createdAt).toLocaleDateString()}</p>
+                  <p><strong>Tradition:</strong> {getLabel(showFileInfo.tradition)}</p>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Description</label>
+                  <textarea
+                    value={fileInfoDescription}
+                    onChange={(e) => setFileInfoDescription(e.target.value)}
+                    placeholder="Add a description..."
+                    className="input"
+                    rows={3}
+                  />
+                </div>
+                <div className="file-info-actions">
+                  <a
+                    href={showFileInfo.webViewLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-primary"
+                  >
+                    Open in Drive
+                  </a>
+                  <button
+                    onClick={saveFileDescription}
+                    className="btn btn-secondary"
+                  >
+                    Save Description
+                  </button>
+                  <button
+                    onClick={() => deleteDocument(showFileInfo.id, showFileInfo.driveId)}
+                    className="btn btn-danger"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </>
+      ) : showUploadForm ? (
+        <div className="doc-form upload-form">
+          <h2 className="form-title">Upload PDF/Word Document</h2>
+
+          {!driveConnected ? (
+            <div className="drive-connect-prompt">
+              <p>Connect to Google Drive to upload files</p>
+              <button
+                onClick={handleConnectDrive}
+                className="btn btn-primary"
+                disabled={connecting}
+              >
+                {connecting ? 'Connecting...' : 'Connect Google Drive'}
+              </button>
+              {uploadError && <p className="upload-error">{uploadError}</p>}
+              <button onClick={resetUploadForm} className="btn btn-secondary">
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <>
+              <div
+                className={`drop-zone ${isDragOver ? 'drop-zone--active' : ''} ${selectedFile ? 'drop-zone--has-file' : ''}`}
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                  onChange={(e) => handleFileSelect(e.target.files[0])}
+                  style={{ display: 'none' }}
+                />
+                {selectedFile ? (
+                  <div className="drop-zone-file">
+                    <span className="drop-zone-icon">{getFileTypeIcon(ALLOWED_MIME_TYPES[selectedFile.type])}</span>
+                    <span className="drop-zone-filename">{selectedFile.name}</span>
+                    <span className="drop-zone-size">{formatFileSize(selectedFile.size)}</span>
+                  </div>
+                ) : (
+                  <div className="drop-zone-prompt">
+                    <span className="drop-zone-icon">📎</span>
+                    <p>Drop a file here or click to browse</p>
+                    <p className="drop-zone-hint">PDF, DOC, or DOCX (max 5MB)</p>
+                  </div>
+                )}
+              </div>
+
+              {uploadError && <p className="upload-error">{uploadError}</p>}
+
+              <div className="form-group">
+                <label className="form-label">Title</label>
+                <input
+                  type="text"
+                  value={uploadTitle}
+                  onChange={(e) => setUploadTitle(e.target.value)}
+                  placeholder="Document title"
+                  className="input"
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">
+                  {useTraditionCategories ? 'Category' : 'Tradition'}
+                </label>
+                <select
+                  value={uploadTradition}
+                  onChange={(e) => setUploadTradition(e.target.value)}
+                  className="input"
+                >
+                  {activeCategories.filter(t => t.id !== 'all').map(t => (
+                    <option key={t.id} value={t.id}>
+                      {useTraditionCategories ? t.label : getLabel(t.id)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Description (optional)</label>
+                <input
+                  type="text"
+                  value={uploadDescription}
+                  onChange={(e) => setUploadDescription(e.target.value)}
+                  placeholder="Brief description"
+                  className="input"
+                />
+              </div>
+
+              <div className="form-actions">
+                <button
+                  onClick={handleUpload}
+                  disabled={!selectedFile || !uploadTitle.trim() || uploadStatus === 'uploading'}
+                  className="btn btn-primary"
+                >
+                  {uploadStatus === 'uploading' ? 'Uploading...' : 'Upload'}
+                </button>
+                <button
+                  onClick={resetUploadForm}
+                  disabled={uploadStatus === 'uploading'}
+                  className="btn btn-secondary"
+                >
+                  Cancel
+                </button>
+              </div>
+
+              {uploadStatus === 'uploading' && (
+                <div className="upload-progress">
+                  <div className="upload-progress-bar"></div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       ) : (
         <div className="doc-form">
           <h2 className="form-title">{editDoc ? 'Edit Document' : 'New Document'}</h2>

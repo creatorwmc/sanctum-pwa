@@ -2,16 +2,16 @@
 // Central registry for all spiritual tradition presets
 
 import { DRUID_PRESET } from './druid'
+import { CHRISTIAN_PRESET } from './christian'
+import { ISLAMIC_PRESET } from './islamic'
+import { BUDDHIST_PRESET } from './buddhist'
 
 // Registry of all available tradition presets
 export const TRADITION_PRESETS = {
   druid: DRUID_PRESET,
-  // Future traditions will be added here:
-  // buddhist: BUDDHIST_PRESET,
-  // christian: CHRISTIAN_PRESET,
-  // jewish: JEWISH_PRESET,
-  // wiccan: WICCAN_PRESET,
-  // etc.
+  christian: CHRISTIAN_PRESET,
+  islamic: ISLAMIC_PRESET,
+  buddhist: BUDDHIST_PRESET
 }
 
 // List of all available traditions for selection
@@ -242,7 +242,7 @@ export const AVAILABLE_TRADITIONS = [
     description: 'Buddhist meditation and mindfulness traditions',
     icon: '☸',
     color: '#ff9500',
-    hasPreset: false,
+    hasPreset: true,
     libraryCategories: [
       'Core Texts',
       'Meditation Practice',
@@ -385,7 +385,7 @@ export const AVAILABLE_TRADITIONS = [
     description: 'Christian contemplative and mystical traditions',
     icon: '✝',
     color: '#c9a227',
-    hasPreset: false,
+    hasPreset: true,
     libraryCategories: [
       'Scripture',
       'Prayer Life',
@@ -852,7 +852,7 @@ export const AVAILABLE_TRADITIONS = [
     description: 'Islamic spiritual practice and Sufism',
     icon: '☪',
     color: '#2d8b5a',
-    hasPreset: false,
+    hasPreset: true,
     libraryCategories: [
       'Qur\'an',
       'Hadith Collections',
@@ -1711,7 +1711,7 @@ export const AVAILABLE_TRADITIONS = [
         id: 'red-road',
         name: 'Red Road / Pan-Indian',
         description: 'Intertribal spiritual path emphasizing harmony with all creation',
-        icon: '🛤',
+        icon: '🌄',
         color: '#8B0000',
         hasPreset: false
       },

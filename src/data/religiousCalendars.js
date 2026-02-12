@@ -748,6 +748,159 @@ function calculateEaster(year) {
   return { month, day }
 }
 
+// Orthodox Easter - Julian calendar calculation with Gregorian offset
+// Uses the Meeus Julian algorithm
+function calculateOrthodoxEaster(year) {
+  const a = year % 4
+  const b = year % 7
+  const c = year % 19
+  const d = (19 * c + 15) % 30
+  const e = (2 * a + 4 * b - d + 34) % 7
+  const month = Math.floor((d + e + 114) / 31) - 1
+  const day = ((d + e + 114) % 31) + 1
+
+  // Convert from Julian to Gregorian calendar
+  // Add 13 days offset (valid for 1900-2099)
+  const julianDate = new Date(year, month, day)
+  julianDate.setDate(julianDate.getDate() + 13)
+
+  return { month: julianDate.getMonth(), day: julianDate.getDate() }
+}
+
+// ============ LITURGICAL SEASONS ============
+export const LITURGICAL_SEASONS = {
+  advent: {
+    id: 'advent',
+    name: 'Advent',
+    color: '#800080',
+    colorName: 'purple',
+    description: 'Season of preparation for Christmas, beginning 4 Sundays before Christmas Day'
+  },
+  christmas: {
+    id: 'christmas',
+    name: 'Christmas',
+    color: '#ffffff',
+    colorName: 'white',
+    description: 'Celebration of the Nativity, from Christmas Day through Epiphany'
+  },
+  epiphany: {
+    id: 'epiphany',
+    name: 'Epiphany',
+    color: '#228b22',
+    colorName: 'green',
+    description: 'Season after Epiphany, Ordinary Time in winter'
+  },
+  lent: {
+    id: 'lent',
+    name: 'Lent',
+    color: '#800080',
+    colorName: 'purple',
+    description: '40 days of preparation for Easter, beginning on Ash Wednesday'
+  },
+  holyWeek: {
+    id: 'holyWeek',
+    name: 'Holy Week',
+    color: '#800080',
+    colorName: 'purple/red',
+    description: 'The week before Easter, commemorating the Passion of Christ'
+  },
+  easter: {
+    id: 'easter',
+    name: 'Easter',
+    color: '#ffffff',
+    colorName: 'white',
+    description: 'Celebration of the Resurrection, 50 days from Easter to Pentecost'
+  },
+  ordinaryTime: {
+    id: 'ordinaryTime',
+    name: 'Ordinary Time',
+    color: '#228b22',
+    colorName: 'green',
+    description: 'Weeks of growth in faith outside major seasons'
+  }
+}
+
+// Get liturgical season for a given date
+export function getLiturgicalSeason(date, isOrthodox = false) {
+  const year = date.getFullYear()
+  const month = date.getMonth()
+  const day = date.getDate()
+
+  // Get Easter date for this year
+  const easter = isOrthodox ? calculateOrthodoxEaster(year) : calculateEaster(year)
+  const easterDate = new Date(year, easter.month, easter.day)
+
+  // Calculate key dates
+  // Ash Wednesday: 46 days before Easter
+  const ashWednesday = new Date(easterDate)
+  ashWednesday.setDate(ashWednesday.getDate() - 46)
+
+  // Palm Sunday: 7 days before Easter
+  const palmSunday = new Date(easterDate)
+  palmSunday.setDate(palmSunday.getDate() - 7)
+
+  // Pentecost: 49 days after Easter
+  const pentecost = new Date(easterDate)
+  pentecost.setDate(pentecost.getDate() + 49)
+
+  // Advent: 4th Sunday before Christmas
+  const christmas = new Date(year, 11, 25)
+  const christmasDay = christmas.getDay()
+  // Find the Sunday closest to Nov 30
+  const daysBeforeChristmas = christmasDay === 0 ? 28 : 21 + christmasDay
+  const adventStart = new Date(year, 11, 25 - daysBeforeChristmas)
+
+  // Epiphany: January 6
+  const epiphany = new Date(year, 0, 6)
+  // First Sunday after Epiphany (Baptism of the Lord)
+  const epiphanyDay = epiphany.getDay()
+  const baptismOfLord = new Date(year, 0, 6 + (epiphanyDay === 0 ? 7 : 7 - epiphanyDay))
+
+  const currentDate = new Date(year, month, day)
+
+  // Determine the season
+  // Check Advent (starts ~Nov 27-Dec 3)
+  if (currentDate >= adventStart && currentDate < christmas) {
+    const weekNum = Math.floor((currentDate - adventStart) / (7 * 24 * 60 * 60 * 1000)) + 1
+    return { ...LITURGICAL_SEASONS.advent, week: weekNum }
+  }
+
+  // Check Christmas season (Dec 25 - Jan 5)
+  if ((month === 11 && day >= 25) || (month === 0 && day < 6)) {
+    return LITURGICAL_SEASONS.christmas
+  }
+
+  // Check Epiphany / early Ordinary Time (Jan 6 - Ash Wednesday)
+  if (currentDate >= epiphany && currentDate < ashWednesday) {
+    if (currentDate < baptismOfLord) {
+      return LITURGICAL_SEASONS.epiphany
+    }
+    const weekNum = Math.floor((currentDate - baptismOfLord) / (7 * 24 * 60 * 60 * 1000)) + 1
+    return { ...LITURGICAL_SEASONS.ordinaryTime, week: weekNum, period: 'winter' }
+  }
+
+  // Check Lent (Ash Wednesday - Palm Sunday)
+  if (currentDate >= ashWednesday && currentDate < palmSunday) {
+    const weekNum = Math.floor((currentDate - ashWednesday) / (7 * 24 * 60 * 60 * 1000)) + 1
+    return { ...LITURGICAL_SEASONS.lent, week: weekNum }
+  }
+
+  // Check Holy Week (Palm Sunday - Easter)
+  if (currentDate >= palmSunday && currentDate < easterDate) {
+    return LITURGICAL_SEASONS.holyWeek
+  }
+
+  // Check Easter season (Easter - Pentecost)
+  if (currentDate >= easterDate && currentDate <= pentecost) {
+    const weekNum = Math.floor((currentDate - easterDate) / (7 * 24 * 60 * 60 * 1000)) + 1
+    return { ...LITURGICAL_SEASONS.easter, week: weekNum }
+  }
+
+  // Otherwise, Ordinary Time (summer/fall)
+  const weekNum = Math.floor((currentDate - pentecost) / (7 * 24 * 60 * 60 * 1000)) + 1
+  return { ...LITURGICAL_SEASONS.ordinaryTime, week: weekNum, period: 'summer' }
+}
+
 // Get moveable Christian holidays based on Easter
 function getChristianMoveableHolidays(year) {
   const easter = calculateEaster(year)
@@ -944,4 +1097,78 @@ export function getHolidaysForMonth(year, month, enabledCalendars = []) {
 // Get color for calendar type
 export function getCalendarColor(type) {
   return CALENDAR_TYPES.find(c => c.id === type)?.color || '#6b7280'
+}
+
+// Export Easter calculation functions for external use
+export function getEasterDate(year, isOrthodox = false) {
+  const easter = isOrthodox ? calculateOrthodoxEaster(year) : calculateEaster(year)
+  return new Date(year, easter.month, easter.day)
+}
+
+// Get Orthodox moveable holidays (separate from Western)
+export function getOrthodoxMoveableHolidays(year) {
+  const easter = calculateOrthodoxEaster(year)
+  const easterDate = new Date(year, easter.month, easter.day)
+
+  const holidays = []
+
+  // Orthodox Easter (Pascha)
+  holidays.push({
+    month: easter.month, day: easter.day,
+    name: 'Orthodox Pascha (Easter)',
+    type: 'christian',
+    description: 'The Feast of Feasts celebrating the Resurrection of Christ. Most important day in the Orthodox calendar.',
+    dateRule: 'Moveable: Julian calendar calculation',
+    traditions: ['Eastern Orthodox', 'Oriental Orthodox']
+  })
+
+  // Clean Monday (48 days before Easter - Orthodox Ash Wednesday equivalent)
+  const cleanMonday = new Date(easterDate)
+  cleanMonday.setDate(cleanMonday.getDate() - 48)
+  holidays.push({
+    month: cleanMonday.getMonth(), day: cleanMonday.getDate(),
+    name: 'Clean Monday (Orthodox Lent begins)',
+    type: 'christian',
+    description: 'First day of Great Lent in Orthodox tradition. Day of strict fasting and spiritual cleansing.',
+    dateRule: 'Moveable: 48 days before Orthodox Easter',
+    traditions: ['Eastern Orthodox', 'Oriental Orthodox']
+  })
+
+  // Orthodox Palm Sunday
+  const palmSunday = new Date(easterDate)
+  palmSunday.setDate(palmSunday.getDate() - 7)
+  holidays.push({
+    month: palmSunday.getMonth(), day: palmSunday.getDate(),
+    name: 'Orthodox Palm Sunday',
+    type: 'christian',
+    description: "Entry of the Lord into Jerusalem. Blessing of palms and willows.",
+    dateRule: 'Moveable: Sunday before Orthodox Easter',
+    traditions: ['Eastern Orthodox', 'Oriental Orthodox']
+  })
+
+  // Orthodox Great and Holy Friday
+  const holyFriday = new Date(easterDate)
+  holyFriday.setDate(holyFriday.getDate() - 2)
+  holidays.push({
+    month: holyFriday.getMonth(), day: holyFriday.getDate(),
+    name: 'Orthodox Great and Holy Friday',
+    type: 'christian',
+    description: 'Commemoration of the Crucifixion. Strictest fast day of the year.',
+    dateRule: 'Moveable: Friday before Orthodox Easter',
+    traditions: ['Eastern Orthodox', 'Oriental Orthodox']
+  })
+
+  // Orthodox Pentecost
+  const pentecost = new Date(easterDate)
+  pentecost.setDate(pentecost.getDate() + 49)
+  holidays.push({
+    month: pentecost.getMonth(), day: pentecost.getDate(),
+    name: 'Orthodox Pentecost',
+    type: 'christian',
+    description: 'Descent of the Holy Spirit. One of the Great Feasts of Orthodoxy.',
+    dateRule: 'Moveable: 50 days after Orthodox Easter',
+    traditions: ['Eastern Orthodox', 'Oriental Orthodox']
+  })
+
+  return holidays
 }

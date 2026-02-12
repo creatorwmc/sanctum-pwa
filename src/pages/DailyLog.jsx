@@ -2,15 +2,23 @@ import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { db, queries } from '../db'
 import { getLocalDateString } from '../utils/dateUtils'
-import { getTraditionSettings } from '../components/TraditionSettings'
-import { AVAILABLE_TRADITIONS } from '../data/traditions'
+import { getTraditionSettings, saveTraditionSettings, APPLY_LEVELS, shouldApplyBranding } from '../components/TraditionSettings'
+import { AVAILABLE_TRADITIONS, hasSubgroups, getSubgroups, getSubgroup, translateTerm } from '../data/traditions'
+import { getStreakSettings, hasBeenAskedAboutStreaks } from '../utils/streakSettings'
+import StreakOptInModal from '../components/StreakOptInModal'
 import ShaktonaIcon from '../components/ShaktonaIcon'
 import './DailyLog.css'
 
-function getSelectedTraditionInfo() {
-  const settings = getTraditionSettings()
-  if (!settings.traditionId) return null
-  return AVAILABLE_TRADITIONS.find(t => t.id === settings.traditionId)
+
+// Translate a term if branding is enabled
+function getTranslatedTerm(term) {
+  if (shouldApplyBranding()) {
+    const settings = getTraditionSettings()
+    if (settings.traditionId) {
+      return translateTerm(term, settings.traditionId)
+    }
+  }
+  return term
 }
 
 function DailyLog() {
@@ -38,11 +46,21 @@ function DailyLog() {
   const [showConvertModal, setShowConvertModal] = useState(false)
 
   // Tradition
-  const selectedTradition = getSelectedTraditionInfo()
+  const [traditionSettings, setTraditionSettings] = useState(getTraditionSettings)
+  const selectedTradition = AVAILABLE_TRADITIONS.find(t => t.id === traditionSettings.traditionId)
+  const selectedSubgroup = traditionSettings.subgroupId ? getSubgroup(traditionSettings.traditionId, traditionSettings.subgroupId) : null
   const lastTraditionClickRef = useRef(0)
+
+  // Tradition picker modal
+  const [showTraditionPicker, setShowTraditionPicker] = useState(false)
+  const [expandedSubgroups, setExpandedSubgroups] = useState(null)
 
   // Practice detail modal
   const [detailPractice, setDetailPractice] = useState(null)
+
+  // Streak settings
+  const [streakEnabled, setStreakEnabled] = useState(getStreakSettings().enabled)
+  const [showStreakModal, setShowStreakModal] = useState(false)
 
   const today = getLocalDateString()
   const displayDate = new Date().toLocaleDateString('en-US', {
@@ -53,21 +71,44 @@ function DailyLog() {
 
   useEffect(() => {
     async function init() {
-      // Load practices first
-      const enabledPractices = await queries.getEnabledPractices()
-      setPractices(enabledPractices)
+      try {
+        // Load practices first
+        const enabledPractices = await queries.getEnabledPractices()
+        setPractices(enabledPractices)
 
-      const autoUseResult = await queries.checkAndAutoUseStoredPractice()
-      if (autoUseResult.autoUsed) {
-        setAutoUsedNotification(`Stored practice auto-used for ${new Date(autoUseResult.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} to maintain your streak!`)
-        setTimeout(() => setAutoUsedNotification(null), 5000)
+        const autoUseResult = await queries.checkAndAutoUseStoredPractice()
+        if (autoUseResult.autoUsed) {
+          setAutoUsedNotification(`Stored practice auto-used for ${new Date(autoUseResult.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} to maintain your streak!`)
+          setTimeout(() => setAutoUsedNotification(null), 5000)
+        }
+
+        await loadTodayLog()
+        await loadStats()
+      } catch (error) {
+        console.error('Error initializing DailyLog:', error)
+        setLoading(false)
       }
-
-      await loadTodayLog()
-      await loadStats()
     }
     init()
+
+    // Listen for streak settings changes
+    function handleStreakChange(e) {
+      setStreakEnabled(e.detail.enabled)
+    }
+    window.addEventListener('streak-settings-changed', handleStreakChange)
+    return () => window.removeEventListener('streak-settings-changed', handleStreakChange)
   }, [])
+
+  // Show streak opt-in modal for users who haven't been asked
+  useEffect(() => {
+    if (!loading && !hasBeenAskedAboutStreaks()) {
+      // Small delay to let the page render first
+      const timer = setTimeout(() => {
+        setShowStreakModal(true)
+      }, 1500)
+      return () => clearTimeout(timer)
+    }
+  }, [loading])
 
   async function loadTodayLog() {
     try {
@@ -297,12 +338,78 @@ function DailyLog() {
     const timeSinceLastClick = now - lastTraditionClickRef.current
 
     if (timeSinceLastClick < 300) {
-      // Double-click: navigate to settings to change tradition
+      // Double-click: navigate to settings for full tradition settings
       navigate('/settings')
+    } else {
+      // Single click: open tradition picker
+      setShowTraditionPicker(true)
     }
-    // Single click does nothing special on Daily page
 
     lastTraditionClickRef.current = now
+  }
+
+  function handleSelectTradition(traditionId) {
+    // If this tradition has subgroups, expand/collapse them
+    if (hasSubgroups(traditionId)) {
+      setExpandedSubgroups(expandedSubgroups === traditionId ? null : traditionId)
+      return
+    }
+
+    const tradition = AVAILABLE_TRADITIONS.find(t => t.id === traditionId)
+    const newSettings = {
+      ...traditionSettings,
+      traditionId,
+      subgroupId: null,
+      applyLevel: traditionSettings.applyLevel || (tradition?.hasPreset ? 'full' : 'identity'),
+      customName: ''
+    }
+    setTraditionSettings(newSettings)
+    saveTraditionSettings(newSettings)
+    setShowTraditionPicker(false)
+    setExpandedSubgroups(null)
+  }
+
+  function handleSelectSubgroup(traditionId, subgroupId) {
+    const subgroup = getSubgroup(traditionId, subgroupId)
+    const newSettings = {
+      ...traditionSettings,
+      traditionId,
+      subgroupId,
+      applyLevel: traditionSettings.applyLevel || (subgroup?.hasPreset ? 'full' : 'identity'),
+      customName: ''
+    }
+    setTraditionSettings(newSettings)
+    saveTraditionSettings(newSettings)
+    setShowTraditionPicker(false)
+    setExpandedSubgroups(null)
+  }
+
+  function handleSelectGenericTradition(traditionId) {
+    const tradition = AVAILABLE_TRADITIONS.find(t => t.id === traditionId)
+    const newSettings = {
+      ...traditionSettings,
+      traditionId,
+      subgroupId: null,
+      applyLevel: traditionSettings.applyLevel || (tradition?.hasPreset ? 'full' : 'identity'),
+      customName: ''
+    }
+    setTraditionSettings(newSettings)
+    saveTraditionSettings(newSettings)
+    setShowTraditionPicker(false)
+    setExpandedSubgroups(null)
+  }
+
+  function handleClearTradition() {
+    const newSettings = {
+      applyLevel: null,
+      traditionId: null,
+      subgroupId: null,
+      customName: ''
+    }
+    setTraditionSettings(newSettings)
+    saveTraditionSettings(newSettings)
+    setShowTraditionPicker(false)
+    setExpandedSubgroups(null)
   }
 
   if (loading) {
@@ -319,7 +426,7 @@ function DailyLog() {
       {/* 1. HEADER SECTION */}
       <div className="log-header">
         <h2>{displayDate}</h2>
-        <p className="log-subtitle">Track your daily practices</p>
+        <p className="log-subtitle">Track your daily {getTranslatedTerm('Practices').toLowerCase()}</p>
         <Link to="/practice-history" className="btn btn-secondary history-link">
           View Practice History
         </Link>
@@ -328,10 +435,12 @@ function DailyLog() {
       {/* 2. STATS SECTION */}
       {stats && (
         <div className="stats-bar">
-          <div className="stat-item">
-            <span className="stat-value">{streak}</span>
-            <span className="stat-label">day streak</span>
-          </div>
+          {streakEnabled === true && (
+            <div className="stat-item">
+              <span className="stat-value">{streak}</span>
+              <span className="stat-label">day streak</span>
+            </div>
+          )}
           <div className="stat-item">
             <span className="stat-value">{stats.bonusPoints}</span>
             <span className="stat-label">bonus pts</span>
@@ -371,14 +480,16 @@ function DailyLog() {
       {/* 3. PRACTICE SELECTION SECTION */}
       <section className="practices-section">
         <div className="section-header">
-          <h3 className="section-title">Log Practice</h3>
+          <h3 className="section-title">{getTranslatedTerm('Log Practice')}</h3>
           <div className="section-header-actions">
             <button
-              onClick={selectedTradition ? handleTraditionClick : () => navigate('/settings')}
+              onClick={handleTraditionClick}
               className="tradition-btn-small"
-              title={selectedTradition ? "Double-click to change tradition" : "Select a tradition"}
+              title={selectedTradition ? "Click to change, double-click for settings" : "Select a tradition"}
             >
-              {selectedTradition ? `${selectedTradition.icon} ${selectedTradition.name}` : '✨ Select Tradition'}
+              {selectedTradition
+                ? `${selectedSubgroup?.icon || selectedTradition.icon} ${selectedSubgroup ? selectedSubgroup.name : selectedTradition.name}`
+                : '✨ Select Tradition'}
             </button>
             <Link to="/practices" className="practices-settings-btn" title="Manage Practices">
               ⚙
@@ -415,7 +526,7 @@ function DailyLog() {
             disabled={saving || selectedPractices.length === 0}
             className="btn btn-primary log-btn"
           >
-            {saving ? 'Logging...' : `Log ${selectedPractices.length > 0 ? `(${selectedPractices.length})` : 'Practice'}`}
+            {saving ? 'Logging...' : `Log ${selectedPractices.length > 0 ? `(${selectedPractices.length})` : getTranslatedTerm('Practice')}`}
           </button>
         </div>
 
@@ -623,6 +734,86 @@ function DailyLog() {
           </div>
         </div>
       )}
+
+      {/* Tradition Picker Modal */}
+      {showTraditionPicker && (
+        <div className="modal-overlay" onClick={() => setShowTraditionPicker(false)}>
+          <div className="modal-content tradition-picker-modal" onClick={e => e.stopPropagation()}>
+            <h3>Choose Tradition</h3>
+            <div className="tradition-picker-grid">
+              {AVAILABLE_TRADITIONS.map(tradition => (
+                <div key={tradition.id} className="tradition-picker-wrapper">
+                  <button
+                    className={`tradition-picker-option ${traditionSettings.traditionId === tradition.id && !traditionSettings.subgroupId ? 'tradition-picker-option--selected' : ''} ${hasSubgroups(tradition.id) ? 'tradition-picker-option--expandable' : ''} ${expandedSubgroups === tradition.id ? 'tradition-picker-option--expanded' : ''}`}
+                    onClick={() => handleSelectTradition(tradition.id)}
+                    style={{ '--tradition-color': tradition.color }}
+                  >
+                    <span className="tradition-picker-icon">{tradition.icon}</span>
+                    <span className="tradition-picker-name">{tradition.name}</span>
+                    {hasSubgroups(tradition.id) && (
+                      <span className="tradition-picker-expand">{expandedSubgroups === tradition.id ? '▼' : '▶'}</span>
+                    )}
+                  </button>
+
+                  {/* Subgroups */}
+                  {expandedSubgroups === tradition.id && (
+                    <div className="tradition-picker-subgroups">
+                      <button
+                        className={`tradition-picker-subgroup tradition-picker-subgroup--general ${traditionSettings.traditionId === tradition.id && !traditionSettings.subgroupId ? 'tradition-picker-subgroup--selected' : ''}`}
+                        onClick={() => handleSelectGenericTradition(tradition.id)}
+                        style={{ '--tradition-color': tradition.color }}
+                      >
+                        <span className="tradition-picker-subicon">{tradition.icon}</span>
+                        <span>{tradition.name} (General)</span>
+                      </button>
+                      {getSubgroups(tradition.id).map(subgroup => (
+                        <button
+                          key={subgroup.id}
+                          className={`tradition-picker-subgroup ${traditionSettings.traditionId === tradition.id && traditionSettings.subgroupId === subgroup.id ? 'tradition-picker-subgroup--selected' : ''}`}
+                          onClick={() => handleSelectSubgroup(tradition.id, subgroup.id)}
+                          style={{ '--tradition-color': subgroup.color }}
+                        >
+                          <span className="tradition-picker-subicon">{subgroup.icon}</span>
+                          <span>{subgroup.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+            <p className="tradition-picker-hint">Double-click the tradition button to access full settings</p>
+            <div className="tradition-picker-actions">
+              {traditionSettings.traditionId && (
+                <button
+                  onClick={handleClearTradition}
+                  className="btn btn-secondary tradition-picker-reset"
+                >
+                  Reset to Default
+                </button>
+              )}
+              <button
+                onClick={() => setShowTraditionPicker(false)}
+                className="btn btn-secondary tradition-picker-close"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Streak Opt-In Modal */}
+      <StreakOptInModal
+        isOpen={showStreakModal}
+        onClose={(enabled) => {
+          setShowStreakModal(false)
+          if (enabled !== null) {
+            setStreakEnabled(enabled)
+          }
+        }}
+        currentStreak={streak}
+      />
     </div>
   )
 }

@@ -1,19 +1,23 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
+import ForgotPasswordModal from './ForgotPasswordModal'
 import './AuthModal.css'
 
 function AuthModal({ isOpen, onClose, initialMode = 'signin' }) {
   const [mode, setMode] = useState(initialMode) // 'signin' or 'signup'
+  const [showForgotPassword, setShowForgotPassword] = useState(false)
 
   // Reset mode when modal opens with specified initialMode
   useEffect(() => {
     if (isOpen) {
       setMode(initialMode)
+      setShowForgotPassword(false)
     }
   }, [isOpen, initialMode])
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [displayName, setDisplayName] = useState('')
+  const [securityAnswer, setSecurityAnswer] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [localError, setLocalError] = useState('')
@@ -35,12 +39,17 @@ function AuthModal({ isOpen, onClose, initialMode = 'signin' }) {
       return
     }
 
+    if (mode === 'signup' && !securityAnswer.trim()) {
+      setLocalError('Please enter your security answer.')
+      return
+    }
+
     setLoading(true)
     try {
       if (mode === 'signin') {
         await signIn(email, password)
       } else {
-        await signUp(email, password, displayName.trim())
+        await signUp(email, password, displayName.trim(), securityAnswer.trim())
       }
       handleClose()
     } catch (err) {
@@ -54,15 +63,28 @@ function AuthModal({ isOpen, onClose, initialMode = 'signin' }) {
     setEmail('')
     setPassword('')
     setDisplayName('')
+    setSecurityAnswer('')
     setLocalError('')
     clearError()
+    setShowForgotPassword(false)
     onClose()
   }
 
   function toggleMode() {
     setMode(mode === 'signin' ? 'signup' : 'signin')
+    setSecurityAnswer('')
     setLocalError('')
     clearError()
+  }
+
+  if (showForgotPassword) {
+    return (
+      <ForgotPasswordModal
+        isOpen={true}
+        onClose={() => setShowForgotPassword(false)}
+        onBack={() => setShowForgotPassword(false)}
+      />
+    )
   }
 
   if (!isOpen) return null
@@ -139,6 +161,22 @@ function AuthModal({ isOpen, onClose, initialMode = 'signin' }) {
             </div>
           </div>
 
+          {mode === 'signup' && (
+            <div className="form-group">
+              <label htmlFor="auth-security">Security Question</label>
+              <p className="form-hint">What is your favorite color?</p>
+              <input
+                type="text"
+                id="auth-security"
+                value={securityAnswer}
+                onChange={(e) => setSecurityAnswer(e.target.value)}
+                placeholder="Your answer (for password recovery)"
+                className="input"
+                autoComplete="off"
+              />
+            </div>
+          )}
+
           {displayError && (
             <p className="auth-error">{displayError}</p>
           )}
@@ -163,6 +201,15 @@ function AuthModal({ isOpen, onClose, initialMode = 'signin' }) {
               {mode === 'signin' ? 'Sign Up' : 'Sign In'}
             </button>
           </p>
+          {mode === 'signin' && (
+            <button
+              type="button"
+              onClick={() => setShowForgotPassword(true)}
+              className="forgot-password-btn"
+            >
+              Forgot password?
+            </button>
+          )}
         </div>
 
         <div className="auth-privacy-note">

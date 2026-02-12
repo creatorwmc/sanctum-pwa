@@ -201,10 +201,120 @@
   padding: 0.75rem 2rem;
 }
 
+/* Admin Stats */
+.admin-stats {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.admin-stat {
+  flex: 1;
+  background: var(--surface-color, rgba(45, 55, 72, 0.5));
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+}
+
+.admin-stat-value {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--accent-primary, #68d391);
+}
+
+.admin-stat-label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-secondary, #a0aec0);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 4px;
+}
+
+/* Filter Select */
+.admin-filter-select {
+  flex: 1;
+  padding: 0.5rem;
+  background: var(--surface-color, rgba(45, 55, 72, 0.5));
+  border: 1px solid var(--border-color, #4a5568);
+  color: var(--text-primary, #e2e8f0);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.admin-filter-select:focus {
+  outline: none;
+  border-color: var(--accent-primary, #68d391);
+}
+
+.admin-refresh-btn {
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: 1px solid var(--border-color, #4a5568);
+  color: var(--text-secondary, #a0aec0);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-refresh-btn:hover {
+  border-color: var(--accent-primary, #68d391);
+  color: var(--accent-primary, #68d391);
+}
+
+/* Status Select */
+.status-select {
+  padding: 0.4rem 0.75rem;
+  background: var(--surface-color, rgba(45, 55, 72, 0.5));
+  border: 1px solid var(--border-color, #4a5568);
+  color: var(--text-primary, #e2e8f0);
+  border-radius: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.status-select:focus {
+  outline: none;
+}
+
+/* Feedback Context Quote */
+.feedback-context-quote {
+  background: var(--bg-primary, #0d1210);
+  border-left: 2px solid var(--accent-primary, #68d391);
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
+  border-radius: 0 6px 6px 0;
+}
+
+.feedback-context-quote .quote-label {
+  font-size: 0.7rem;
+  color: var(--text-secondary, #a0aec0);
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.feedback-context-quote .quote-text {
+  font-style: italic;
+  color: var(--text-primary, #e2e8f0);
+  font-size: 0.9rem;
+}
+
 /* Mobile */
 @media (max-width: 480px) {
   .admin-page {
     padding: 0.75rem;
+  }
+
+  .admin-filters {
+    flex-wrap: wrap;
+  }
+
+  .admin-filter-select {
+    flex: 1 1 45%;
   }
 
   .filter-btn {
@@ -216,5 +326,13 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 0.5rem;
+  }
+
+  .admin-stats {
+    flex-wrap: wrap;
+  }
+
+  .admin-stat {
+    flex: 1 1 45%;
   }
 }
