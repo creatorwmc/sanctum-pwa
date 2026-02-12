@@ -51,6 +51,15 @@
   padding-left: 0.25rem;
 }
 
+.settings-subsection-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent);
+  margin-top: 1.25rem;
+  margin-bottom: 0.75rem;
+  padding-left: 0.25rem;
+}
+
 .settings-list {
   display: flex;
   flex-direction: column;
@@ -298,9 +307,11 @@
 }
 
 .toggle-switch input {
+  position: absolute;
   opacity: 0;
   width: 0;
   height: 0;
+  pointer-events: none;
 }
 
 .toggle-slider {
@@ -323,6 +334,7 @@
   background: var(--text-muted);
   border-radius: 50%;
   transition: all 0.2s ease;
+  box-shadow: none;
 }
 
 .toggle-switch input:checked + .toggle-slider {
@@ -333,6 +345,7 @@
 .toggle-switch input:checked + .toggle-slider::before {
   transform: translateX(1.375rem);
   background: var(--accent);
+  box-shadow: none;
 }
 
 /* Action button row */

@@ -359,11 +359,9 @@ function Settings() {
             </div>
           </label>
         </div>
-      </section>
 
-      {/* Background Theme */}
-      <section className="settings-section">
-        <h2 className="settings-section-title">Background Theme</h2>
+        {/* App Color & Theme */}
+        <h3 className="settings-subsection-title">App Color & Theme</h3>
         <BackgroundSettings />
       </section>
 
