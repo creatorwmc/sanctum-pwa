@@ -2,7 +2,7 @@ const admin = require('firebase-admin');
 
 // --- CORS origin validation ---
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || '').split(',').filter(Boolean);
-const DEFAULT_ORIGIN = 'https://sanctum-pwa.netlify.app';
+const DEFAULT_ORIGIN = 'https://practicespace.netlify.app';
 
 function getCorsHeaders(event) {
   const origin = event.headers?.origin || event.headers?.Origin || '';
