@@ -6,8 +6,8 @@ dist/
 
 # Local env files
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
 
 # Logs
 *.log
@@ -30,4 +30,3 @@ dev-dist/
 .netlify
 
 service-account.json
-.env.localfn
