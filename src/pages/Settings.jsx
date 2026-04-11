@@ -740,6 +740,31 @@ function Settings() {
         </section>
       )}
 
+      {/* Our Apps */}
+      <section className="settings-section">
+        <h2 className="settings-section-title">Our Apps</h2>
+        <div className="settings-list">
+          {[
+            { name: 'Starbound', desc: 'Cooperative bucket list for couples', icon: '⭐', url: 'https://starbound-app.netlify.app' },
+            { name: 'Relationship Refuge', desc: 'Games & date night toolkit', icon: '💜', url: 'https://relationship-refuge.netlify.app' },
+            { name: 'Plant Pruning Advisor', desc: 'AI-powered plant pruning guidance', icon: '🌱', url: 'https://plant-pruning-advisor.netlify.app' },
+            { name: 'Solitaire Plus', desc: 'Classic card games collection', icon: '♠', url: 'https://solitaire-plus.netlify.app' },
+            { name: 'The Paige Hospital', desc: 'Family health & care hub', icon: '🏥', url: 'https://paigehospital.netlify.app' },
+          ].map((app) => (
+            <a key={app.name} className="settings-item" href={app.url} rel="noreferrer" style={{ textDecoration: 'none', color: 'inherit' }}>
+              <div className="settings-item-content">
+                <span className="settings-item-icon">{app.icon}</span>
+                <div>
+                  <span className="settings-item-label">{app.name}</span>
+                  <span className="settings-item-desc">{app.desc}</span>
+                </div>
+              </div>
+              <span className="settings-item-arrow">↗</span>
+            </a>
+          ))}
+        </div>
+      </section>
+
       {/* Rate and Share */}
       <section className="settings-section">
         <h2 className="settings-section-title">Support Practice Space</h2>
