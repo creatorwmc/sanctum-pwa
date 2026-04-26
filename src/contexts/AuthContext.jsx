@@ -4,7 +4,9 @@ import {
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
-  updateProfile
+  updateProfile,
+  GoogleAuthProvider,
+  signInWithPopup
 } from 'firebase/auth'
 import {
   doc,
@@ -89,6 +91,33 @@ export function AuthProvider({ children }) {
       return result.user
     } catch (err) {
       setError(getErrorMessage(err.code))
+      throw err
+    }
+  }
+
+  async function signInWithGoogle() {
+    if (!firebaseAvailable) {
+      throw new Error('Firebase is not configured')
+    }
+
+    setError(null)
+    try {
+      const provider = new GoogleAuthProvider()
+      const result = await signInWithPopup(auth, provider)
+      return result.user
+    } catch (err) {
+      // User dismissed popup — silent
+      if (
+        err.code === 'auth/popup-closed-by-user' ||
+        err.code === 'auth/cancelled-popup-request'
+      ) {
+        return null
+      }
+      if (err.code === 'auth/popup-blocked') {
+        setError('Popup was blocked. Allow popups for this site and try again.')
+      } else {
+        setError('Google sign-in failed. Please try again.')
+      }
       throw err
     }
   }
@@ -201,6 +230,7 @@ export function AuthProvider({ children }) {
     firebaseAvailable,
     signUp,
     signIn,
+    signInWithGoogle,
     logout,
     clearError,
     isAuthenticated: !!user,
