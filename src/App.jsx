@@ -5,6 +5,8 @@ import { ThemeProvider } from './contexts/ThemeContext'
 import { OnboardingProvider, useOnboarding } from './contexts/OnboardingContext'
 import { PrivacyProvider } from './contexts/PrivacyContext'
 import PanicButton from './components/PanicButton'
+import FeedbackButton from './lib/workbench/FeedbackButton'
+import { auth as fbAuth } from './config/firebase'
 import Layout from './components/Layout'
 import AuthModal from './components/AuthModal'
 import Dashboard from './pages/Dashboard'
@@ -269,9 +271,11 @@ function SplashScreen({ isQuick, showAuthButtons, onGoogleClick, onEmailClick, o
   )
 }
 
+const WORKBENCH_ENDPOINT = 'https://kairos-pwa.netlify.app/.netlify/functions/workbench-submit'
+
 function AppContent() {
   const { showOnboarding, isComplete } = useOnboarding()
-  const { isAuthenticated, signInWithGoogle } = useAuth()
+  const { isAuthenticated, user, signInWithGoogle } = useAuth()
   const [showSplash, setShowSplash] = useState(true)
   const [isInstalledApp] = useState(() => isPWA())
   const navigate = useNavigate()
@@ -395,6 +399,15 @@ function AppContent() {
         <Route path="/tools" element={<EsotericTools />} />
         <Route path="/play" element={<Play />} />
       </Routes>
+      <FeedbackButton
+        appId="practice-space"
+        appName="Practice Space"
+        user={user}
+        getIdToken={() => fbAuth?.currentUser?.getIdToken()}
+        endpoint={WORKBENCH_ENDPOINT}
+        accent="rgba(212, 162, 89, 0.95)"
+        surface="rgba(20, 16, 28, 0.95)"
+      />
     </Layout>
   )
 }
