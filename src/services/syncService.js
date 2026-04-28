@@ -11,8 +11,15 @@ import {
   where,
   serverTimestamp
 } from 'firebase/firestore'
-import { firestore, isFirebaseConfigured } from '../config/firebase'
+import { firestore, auth, isFirebaseConfigured } from '../config/firebase'
 import { db as localDb } from '../db'
+
+// Email of the currently-signed-in user. Used to stamp synced docs with
+// user_email so cross-app readers (Kairos, Wayfinder) can join by email.
+// Firebase Auth UIDs are per-project; email is the cross-project key.
+function currentEmail() {
+  return auth?.currentUser?.email || null
+}
 
 const SYNC_PREFS_KEY = 'sanctum-sync-prefs'
 const LAST_SYNC_KEY = 'sanctum-last-sync'
@@ -144,7 +151,8 @@ export async function uploadAllData(userId) {
           batch.set(docRef, {
             ...item,
             _syncedAt: serverTimestamp(),
-            _userId: userId
+            _userId: userId,
+            user_email: currentEmail(),
           })
           hasChanges = true
         }
@@ -377,7 +385,8 @@ export async function syncItem(userId, storeName, item) {
     await setDoc(docRef, {
       ...item,
       _syncedAt: serverTimestamp(),
-      _userId: userId
+      _userId: userId,
+      user_email: currentEmail(),
     })
   } catch (error) {
     console.error('Sync item error:', error)
@@ -525,7 +534,8 @@ async function flushPendingChanges() {
           batch.set(docRef, {
             ...item,
             _syncedAt: serverTimestamp(),
-            _userId: currentUserId
+            _userId: currentUserId,
+            user_email: currentEmail(),
           })
         }
       }
