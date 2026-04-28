@@ -37,7 +37,7 @@ function isPWA() {
          document.referrer.includes('android-app://')
 }
 
-function SplashScreen({ isQuick, showAuthButtons, onSignUpClick, onSignInClick, onSkip }) {
+function SplashScreen({ isQuick, showAuthButtons, onGoogleClick, onEmailClick, onSkip, googleBusy, googleError }) {
   return (
     <>
       <style>{`
@@ -60,6 +60,37 @@ function SplashScreen({ isQuick, showAuthButtons, onSignUpClick, onSignInClick, 
         @keyframes fadeInAuthButtons {
           0% { opacity: 0; transform: translateY(15px); }
           100% { opacity: 1; transform: translateY(0); }
+        }
+        .splash-google-btn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          background: #ffffff;
+          color: #1a1a2e;
+          border: none;
+          padding: 0.875rem 2rem;
+          border-radius: 12px;
+          font-size: 1rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: transform 0.2s, box-shadow 0.2s;
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+          min-width: 240px;
+        }
+        .splash-google-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+        }
+        .splash-google-btn:active { transform: translateY(0); }
+        .splash-google-btn:disabled { opacity: 0.6; cursor: wait; transform: none; }
+        .splash-google-icon { width: 18px; height: 18px; }
+        .splash-google-error {
+          color: #ff8a8a;
+          font-size: 0.75rem;
+          margin-top: 0.25rem;
+          max-width: 240px;
+          text-align: center;
         }
         .splash-logo {
           width: 120px;
@@ -202,11 +233,23 @@ function SplashScreen({ isQuick, showAuthButtons, onSignUpClick, onSignInClick, 
         {showAuthButtons && (
           <>
             <div className="splash-auth-buttons">
-              <button className="splash-signup-btn" onClick={onSignUpClick}>
-                Create Account
+              <button
+                className="splash-google-btn"
+                onClick={onGoogleClick}
+                disabled={googleBusy}
+                aria-label="Continue with Google"
+              >
+                <svg className="splash-google-icon" viewBox="0 0 18 18" aria-hidden>
+                  <path fill="#ffc107" d="M17.6 9.2l-.1-1.1H9v2.7h4.8C13.6 12 13 13 12 13.7v2.2h2.9c1.7-1.6 2.7-4 2.7-6.7z"/>
+                  <path fill="#ff3d00" d="M3.9 11.4L3 12 .9 13.6c1.4 2.7 4.2 4.5 7.3 4.5 2.2 0 4-.7 5.4-1.9l-2.9-2.2c-.7.5-1.5.8-2.5.8-1.9 0-3.6-1.3-4.2-3z"/>
+                  <path fill="#4caf50" d="M.9 4.4C.3 5.7 0 7.1 0 8.6s.3 2.9.9 4.2c0 0 3-2.3 3-2.3-.1-.4-.2-.8-.2-1.3 0-.4.1-.9.2-1.3-.1 0-3-2.3-3-2.3z"/>
+                  <path fill="#1976d2" d="M9 3.5c1.2 0 2.3.4 3.2 1.2L14.7 2.2C13.1.7 11 0 9 0 5.9 0 3.1 1.8 1.7 4.4l3 2.3C5.4 4.9 7.1 3.5 9 3.5z"/>
+                </svg>
+                {googleBusy ? 'Signing in…' : 'Continue with Google'}
               </button>
-              <button className="splash-signin-btn" onClick={onSignInClick}>
-                Sign In
+              {googleError && <div className="splash-google-error">{googleError}</div>}
+              <button className="splash-signin-btn" onClick={onEmailClick}>
+                Use email & password
               </button>
               <button className="splash-skip-link" onClick={onSkip}>
                 Skip for now
@@ -228,7 +271,7 @@ function SplashScreen({ isQuick, showAuthButtons, onSignUpClick, onSignInClick, 
 
 function AppContent() {
   const { showOnboarding, isComplete } = useOnboarding()
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, signInWithGoogle } = useAuth()
   const [showSplash, setShowSplash] = useState(true)
   const [isInstalledApp] = useState(() => isPWA())
   const navigate = useNavigate()
@@ -236,6 +279,8 @@ function AppContent() {
   const [hasRedirected, setHasRedirected] = useState(false)
   const [authModalOpen, setAuthModalOpen] = useState(false)
   const [authModalMode, setAuthModalMode] = useState('signin')
+  const [googleBusy, setGoogleBusy] = useState(false)
+  const [googleError, setGoogleError] = useState(null)
 
   // Show splash screen - auto-dismiss only for authenticated users
   useEffect(() => {
@@ -268,12 +313,23 @@ function AppContent() {
   }, [showSplash, isComplete, hasRedirected, location.pathname, navigate])
 
   // Auth button handlers
-  function handleSignUpClick() {
-    setAuthModalMode('signup')
-    setAuthModalOpen(true)
+  async function handleGoogleClick() {
+    setGoogleError(null)
+    setGoogleBusy(true)
+    try {
+      const user = await signInWithGoogle()
+      // Splash auto-dismisses via the isAuthenticated effect; nothing else to do.
+      // null return = popup dismissed; leave splash up.
+      if (user === null) {
+        setGoogleBusy(false)
+      }
+    } catch (err) {
+      setGoogleError(err?.message || 'Google sign-in failed. Try again.')
+      setGoogleBusy(false)
+    }
   }
 
-  function handleSignInClick() {
+  function handleEmailClick() {
     setAuthModalMode('signin')
     setAuthModalOpen(true)
   }
@@ -293,9 +349,11 @@ function AppContent() {
         <SplashScreen
           isQuick={isInstalledApp}
           showAuthButtons={!isAuthenticated}
-          onSignUpClick={handleSignUpClick}
-          onSignInClick={handleSignInClick}
+          onGoogleClick={handleGoogleClick}
+          onEmailClick={handleEmailClick}
           onSkip={handleSkipAuth}
+          googleBusy={googleBusy}
+          googleError={googleError}
         />
         <AuthModal
           isOpen={authModalOpen}
