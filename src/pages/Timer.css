@@ -760,3 +760,107 @@
     font-size: 1.125rem;
   }
 }
+
+/* ─── Stillpoint deep-link handoff (Stage 4.2) ─────────────────────────── */
+
+.add-btn--active {
+  border-color: var(--accent);
+  background: rgba(212, 162, 89, 0.15);
+  box-shadow: 0 0 16px var(--accent-glow);
+}
+
+.stillpoint-handoff-intro {
+  text-align: center;
+  max-width: 320px;
+}
+
+.stillpoint-handoff-title {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.5rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: var(--text-primary);
+}
+
+.stillpoint-handoff-subtitle {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.config-section {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.config-section .interval-label {
+  text-align: center;
+}
+
+.practice-type-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  justify-content: center;
+}
+
+.type-chip {
+  padding: 0.4rem 0.85rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  transition: all 0.15s ease;
+}
+
+.type-chip:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.type-chip--active {
+  border-color: var(--accent);
+  background: rgba(212, 162, 89, 0.15);
+  color: var(--accent);
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  justify-content: center;
+}
+
+.bell-select {
+  width: 100%;
+}
+
+.stillpoint-advanced-link {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 0.8125rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  text-decoration: none;
+  transition: opacity 0.15s ease;
+}
+
+.stillpoint-advanced-link:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+.stillpoint-handoff-footer {
+  margin: 0;
+  padding: 0 1.5rem;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  max-width: 360px;
+  line-height: 1.5;
+}
