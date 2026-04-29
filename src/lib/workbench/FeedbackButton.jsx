@@ -49,6 +49,7 @@ export default function FeedbackButton({
   appId,
   appName,
   endpoint = '/.netlify/functions/workbench-submit',
+  notificationsEndpoint,
   getIdToken,
   user,
   // Visual overrides — defaults work against most dark surfaces.
@@ -63,7 +64,12 @@ export default function FeedbackButton({
   const [busy, setBusy] = useState(false)
   const [done, setDone] = useState(false)
   const [error, setError] = useState(null)
+  const [notes, setNotes] = useState([])
   const textareaRef = useRef(null)
+
+  // Derive notifications endpoint from the submit endpoint by swapping the
+  // last path segment. Host apps can override via `notificationsEndpoint`.
+  const notifsUrl = notificationsEndpoint || endpoint.replace(/\/[^/]+$/, '/workbench-notifications')
 
   useEffect(() => {
     installErrorListeners()
@@ -85,13 +91,61 @@ export default function FeedbackButton({
   }, [isOpen])
 
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect */
     if (isOpen) {
       setDone(false)
       setError(null)
       // Focus textarea once mounted
       setTimeout(() => textareaRef.current?.focus(), 50)
     }
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [isOpen])
+
+  // Fetch unread closure_notes for this user once we have an ID token.
+  // Failures are silent — the floating button works fine without notes.
+  useEffect(() => {
+    if (!getIdToken || !user) return
+    let cancelled = false
+    async function fetchNotes() {
+      try {
+        const idToken = await getIdToken()
+        if (!idToken || cancelled) return
+        const res = await fetch(notifsUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${idToken}`,
+          },
+          body: JSON.stringify({ action: 'list' }),
+        })
+        if (!res.ok) return
+        const data = await res.json()
+        if (!cancelled && Array.isArray(data?.notes)) setNotes(data.notes)
+      } catch {
+        // ignore — notifications are non-critical
+      }
+    }
+    fetchNotes()
+    return () => { cancelled = true }
+  }, [getIdToken, user, notifsUrl])
+
+  async function dismissNote(noteId) {
+    setNotes((prev) => prev.filter((n) => n.id !== noteId))
+    try {
+      const idToken = getIdToken ? await getIdToken() : null
+      if (!idToken) return
+      await fetch(notifsUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({ action: 'dismiss', note_ids: [noteId] }),
+      })
+    } catch {
+      // Local dismiss already happened — server-side resync on next mount
+    }
+  }
 
   function toggleTag(t) {
     setTags((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]))
@@ -152,8 +206,63 @@ export default function FeedbackButton({
   // commonly mount this at the root and want it hidden on login screens.
   const canSubmit = !!user && !!getIdToken
 
+  // Top-most note in the stack. We show one at a time so the panel
+  // stays compact; dismissing reveals the next.
+  const currentNote = canSubmit && notes.length > 0 ? notes[0] : null
+
   return (
     <>
+      {/* Notification panel — pinned just above the floating button */}
+      {currentNote && (
+        <div
+          style={{
+            position: 'fixed',
+            right: position.right,
+            bottom: `calc(${position.bottom} + 56px)`,
+            zIndex: 8999,
+            width: 'min(340px, calc(100vw - 40px))',
+            background: surface,
+            color: textColor,
+            border: `1px solid ${accent}`,
+            borderRadius: '12px',
+            padding: '12px 14px',
+            boxShadow: '0 8px 28px rgba(0,0,0,0.45)',
+            fontFamily: 'inherit',
+          }}
+        >
+          <div style={{ fontSize: '11px', opacity: 0.6, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+            From Zach · {currentNote.disposition === 'deleted' ? 'request removed' : currentNote.disposition?.replace('_', ' ') || 'update'}
+            {notes.length > 1 ? ` · 1 of ${notes.length}` : ''}
+          </div>
+          {currentNote.original_comment_summary && (
+            <div style={{ fontSize: '11px', opacity: 0.55, marginBottom: '8px', fontStyle: 'italic', lineHeight: 1.4 }}>
+              re: "{currentNote.original_comment_summary}{currentNote.original_comment_summary.length >= 200 ? '…' : ''}"
+            </div>
+          )}
+          <div style={{ fontSize: '13px', lineHeight: 1.45, whiteSpace: 'pre-wrap', marginBottom: '10px' }}>
+            {currentNote.developer_note}
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+            <button
+              onClick={() => dismissNote(currentNote.id)}
+              style={{
+                padding: '6px 12px',
+                borderRadius: '6px',
+                background: accent,
+                color: '#1a1a1a',
+                border: 'none',
+                fontSize: '12px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                fontFamily: 'inherit',
+              }}
+            >
+              Got it
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Floating trigger */}
       {canSubmit && (
         <button
