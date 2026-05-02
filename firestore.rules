@@ -27,9 +27,12 @@ service cloud.firestore {
         request.auth.token.email.lower() == email;
     }
 
-    // Password reset tokens (temporary, for verified resets)
+    // Password reset tokens — admin SDK only.
+    // Admin SDK bypasses rules, so denying all client access here is
+    // equivalent to "only server-side functions can touch this collection."
+    // Currently unused; kept locked for any future token-based reset flow.
     match /passwordResetTokens/{email} {
-      allow read, write: if true;
+      allow read, write: if false;
     }
   }
 }

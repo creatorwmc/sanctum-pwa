@@ -92,6 +92,14 @@ export const handler = async (event) => {
       };
     }
 
+    if (newPassword.length < 8) {
+      return {
+        statusCode: 400,
+        headers: { ...cors, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ error: 'Password must be at least 8 characters' }),
+      };
+    }
+
     // Find user by email
     const userRecord = await admin.auth().getUserByEmail(email.toLowerCase());
 
@@ -110,7 +118,7 @@ export const handler = async (event) => {
     const storedAnswer = securityDoc.data().answer;
 
     // Verify the answer
-    if (storedAnswer !== answer.toLowerCase()) {
+    if (storedAnswer !== answer.toLowerCase().trim()) {
       return {
         statusCode: 401,
         headers: { ...cors, 'Content-Type': 'application/json' },
@@ -121,6 +129,12 @@ export const handler = async (event) => {
     // Update the password
     await admin.auth().updateUser(userRecord.uid, {
       password: newPassword,
+    });
+
+    await db.collection('passwordResetLogs').add({
+      email: normalizedEmail,
+      resetAt: admin.firestore.FieldValue.serverTimestamp(),
+      success: true,
     });
 
     return {
