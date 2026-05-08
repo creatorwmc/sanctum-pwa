@@ -407,6 +407,7 @@ function AppContent() {
         endpoint={WORKBENCH_ENDPOINT}
         accent="rgba(212, 162, 89, 0.95)"
         surface="rgba(20, 16, 28, 0.95)"
+        position={{ right: '20px', bottom: 'calc(5rem + env(safe-area-inset-bottom) + 12px)' }}
       />
     </Layout>
   )
