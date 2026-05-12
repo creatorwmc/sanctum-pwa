@@ -30,3 +30,5 @@ dev-dist/
 .netlify
 
 service-account.json
+.service-accounts/
+*-firebase-adminsdk-*.json

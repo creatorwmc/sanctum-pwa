@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { db, queries } from '../db'
 import RatingPrompt, { shouldShowRatingPrompt, markRatingShown } from '../components/RatingPrompt'
 import FeedbackModal from '../components/FeedbackModal'
+import BroadcastBanner from '../components/BroadcastBanner'
 import { getStreakSettings } from '../utils/streakSettings'
 import { getTraditionSettings, shouldApplyBranding } from '../components/TraditionSettings'
 import { translateTerm } from '../data/traditions'
@@ -97,6 +98,7 @@ function Dashboard() {
 
   return (
     <div className="dashboard">
+      <BroadcastBanner />
       <div className="greeting">
         <h1 className="app-title">Practice Space</h1>
         <p className="app-subtitle">Your Sacred Place</p>

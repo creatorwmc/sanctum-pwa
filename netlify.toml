@@ -3,6 +3,10 @@
   publish = "dist"
   functions = "netlify/functions"
 
+# Bundle gitignored SA files with deployed functions (local-CLI deploys only).
+[functions]
+  included_files = [".service-accounts/*.json"]
+
 [dev]
   command = "npm run dev"
   targetPort = 5173
