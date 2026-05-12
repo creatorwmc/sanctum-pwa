@@ -1,6 +1,24 @@
 import { useAuth } from '../contexts/AuthContext'
 import { useBroadcasts } from '../lib/broadcasts'
 
+function audienceLabel(segment) {
+  switch (segment) {
+    case 'all': return 'Everyone'
+    case 'admins': return 'Admins'
+    case 'recipients': return 'Recipients'
+    case 'authors': return 'Authors'
+    default: return segment
+  }
+}
+
+const caption = {
+  fontSize: 10,
+  letterSpacing: '0.08em',
+  textTransform: 'uppercase',
+  opacity: 0.6,
+  marginBottom: 4,
+}
+
 const wrap = {
   display: 'flex',
   flexDirection: 'column',
@@ -42,6 +60,7 @@ export default function BroadcastBanner() {
     <div style={wrap}>
       {items.map((b) => (
         <div key={b.id} style={item}>
+          <div style={caption}>Broadcast from Zach to {audienceLabel(b.segment)}</div>
           {b.body}
           <button
             type="button"
