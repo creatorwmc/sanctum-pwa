@@ -1,6 +1,5 @@
 package com.sanctum.wear.presentation.screens
 
-import android.os.VibrationEffect
 import android.os.Vibrator
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -13,6 +12,13 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.core.content.getSystemService
 import androidx.wear.compose.material.*
+
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.kairos.wear.common.data.observeListAs
+import com.kairos.wear.common.data.rememberFirestoreList
+import com.kairos.wear.common.haptics.tap
+import com.kairos.wear.common.ui.WearScreen
 import com.sanctum.wear.data.FirestoreRepository
 import com.sanctum.wear.data.Practice
 import com.sanctum.wear.presentation.theme.DeepPurple
@@ -26,25 +32,31 @@ fun PracticesScreen(onBack: () -> Unit) {
     val vibrator = context.getSystemService<Vibrator>()
     val scope = rememberCoroutineScope()
     val repository = remember { FirestoreRepository() }
+    val uid = FirebaseAuth.getInstance().currentUser?.uid
 
-    var practices by remember { mutableStateOf<List<Practice>>(emptyList()) }
+    val practices by rememberFirestoreList(key = uid) {
+        FirebaseFirestore.getInstance()
+            .collection("users")
+            .document(uid ?: "_none_")
+            .collection("practices")
+            .observeListAs { doc ->
+                val name = doc.getString("name") ?: return@observeListAs null
+                Practice(
+                    id = doc.id,
+                    name = name,
+                    category = doc.getString("category") ?: ""
+                )
+            }
+    }
+
     var completedIds by remember { mutableStateOf<Set<String>>(emptySet()) }
-    var isLoading by remember { mutableStateOf(true) }
 
-    // Load practices on mount
-    LaunchedEffect(Unit) {
-        try {
-            val (loadedPractices, completed) = repository.getTodaysPractices()
-            practices = loadedPractices
-            completedIds = completed
-        } catch (e: Exception) {
-            // Handle error - show empty state
-        }
-        isLoading = false
+    LaunchedEffect(uid) {
+        completedIds = repository.getTodaysPractices().second
     }
 
     fun togglePractice(practice: Practice) {
-        vibrator?.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
+        vibrator?.tap()
 
         val newCompleted = if (completedIds.contains(practice.id)) {
             completedIds - practice.id
@@ -58,23 +70,10 @@ fun PracticesScreen(onBack: () -> Unit) {
         }
     }
 
-    Scaffold(
-        timeText = { TimeText() }
-    ) {
-        if (isLoading) {
+    if (practices.isEmpty()) {
+        Scaffold(timeText = { TimeText() }) {
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(DeepPurple),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(indicatorColor = Gold)
-            }
-        } else if (practices.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(DeepPurple),
+                modifier = Modifier.fillMaxSize().background(DeepPurple),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -84,62 +83,57 @@ fun PracticesScreen(onBack: () -> Unit) {
                     textAlign = TextAlign.Center
                 )
             }
-        } else {
-            ScalingLazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(DeepPurple),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                item {
+        }
+        return
+    }
+
+    WearScreen(modifier = Modifier.background(DeepPurple)) {
+        item {
+            Text(
+                text = "Today",
+                style = MaterialTheme.typography.title3,
+                color = Gold
+            )
+        }
+
+        item { Spacer(modifier = Modifier.height(8.dp)) }
+
+        items(practices.size) { index ->
+            val practice = practices[index]
+            val isCompleted = completedIds.contains(practice.id)
+
+            ToggleChip(
+                checked = isCompleted,
+                onCheckedChange = { togglePractice(practice) },
+                label = {
                     Text(
-                        text = "Today",
-                        style = MaterialTheme.typography.title3,
-                        color = Gold
+                        text = practice.name,
+                        textDecoration = if (isCompleted)
+                            TextDecoration.LineThrough
+                        else
+                            TextDecoration.None,
+                        color = if (isCompleted) TextSecondary else Gold
                     )
-                }
-
-                item { Spacer(modifier = Modifier.height(8.dp)) }
-
-                items(practices.size) { index ->
-                    val practice = practices[index]
-                    val isCompleted = completedIds.contains(practice.id)
-
-                    ToggleChip(
-                        checked = isCompleted,
-                        onCheckedChange = { togglePractice(practice) },
-                        label = {
-                            Text(
-                                text = practice.name,
-                                textDecoration = if (isCompleted)
-                                    TextDecoration.LineThrough
-                                else
-                                    TextDecoration.None,
-                                color = if (isCompleted) TextSecondary else Gold
-                            )
-                        },
-                        toggleControl = {
-                            Icon(
-                                imageVector = ToggleChipDefaults.checkboxIcon(isCompleted),
-                                contentDescription = if (isCompleted) "Completed" else "Not completed"
-                            )
-                        },
-                        modifier = Modifier.fillMaxWidth(0.9f)
+                },
+                toggleControl = {
+                    Icon(
+                        imageVector = ToggleChipDefaults.checkboxIcon(isCompleted),
+                        contentDescription = if (isCompleted) "Completed" else "Not completed"
                     )
+                },
+                modifier = Modifier.fillMaxWidth(0.9f)
+            )
 
-                    Spacer(modifier = Modifier.height(4.dp))
-                }
+            Spacer(modifier = Modifier.height(4.dp))
+        }
 
-                // Summary
-                item {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "${completedIds.size}/${practices.size}",
-                        style = MaterialTheme.typography.caption1,
-                        color = TextSecondary
-                    )
-                }
-            }
+        item {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "${completedIds.size}/${practices.size}",
+                style = MaterialTheme.typography.caption1,
+                color = TextSecondary
+            )
         }
     }
 }

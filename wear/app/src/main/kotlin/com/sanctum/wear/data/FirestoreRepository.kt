@@ -12,6 +12,16 @@ data class Practice(
     val category: String = ""
 )
 
+data class SessionData(
+    val type: String,
+    val duration: Int,          // target duration in seconds
+    val actualDuration: Int,    // actual elapsed seconds
+    val startTime: Long,        // epoch millis
+    val endTime: Long,          // epoch millis
+    val completed: Boolean,
+    val source: String = "watch"
+)
+
 class FirestoreRepository {
     private val firestore = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
@@ -24,25 +34,29 @@ class FirestoreRepository {
     }
 
     /**
-     * Save a meditation session to Firestore
-     * Matches the PWA's sessions collection structure
+     * Save a session to Firestore with full PWA-compatible fields
      */
-    suspend fun saveSession(durationSeconds: Long) {
+    suspend fun saveSession(session: SessionData) {
         val userId = getUserId() ?: return
+        val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.US)
 
-        val session = hashMapOf(
-            "duration" to durationSeconds.toInt(),
-            "date" to Date(),
-            "timestamp" to System.currentTimeMillis(),
-            "type" to "meditation",
-            "source" to "watch"
+        val data = hashMapOf(
+            "type" to session.type,
+            "duration" to session.actualDuration,
+            "actualDuration" to session.duration,
+            "date" to sdf.format(Date(session.startTime)),
+            "startTime" to session.startTime,
+            "endTime" to session.endTime,
+            "timestamp" to session.startTime,
+            "completed" to session.completed,
+            "source" to session.source
         )
 
         firestore
             .collection("users")
             .document(userId)
             .collection("sessions")
-            .add(session)
+            .add(data)
             .await()
     }
 
