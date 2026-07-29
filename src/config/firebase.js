@@ -8,7 +8,14 @@
 // 6. Enable Firestore: Build > Firestore Database > Create Database > Start in production mode
 
 import { initializeApp } from 'firebase/app'
-import { getAuth } from 'firebase/auth'
+import {
+  initializeAuth,
+  getAuth,
+  indexedDBLocalPersistence,
+  browserLocalPersistence,
+  browserSessionPersistence,
+  browserPopupRedirectResolver,
+} from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
 import { getFunctions } from 'firebase/functions'
 
@@ -36,10 +43,27 @@ let auth = null
 let db = null
 let functions = null
 
+// Explicit persistence chain — IndexedDB first, so the session survives an
+// installed-PWA relaunch on Android. Default getAuth() writes to a storage
+// partition standalone mode doesn't read back, dropping the user to sign-in
+// every launch. popupRedirectResolver is mandatory with initializeAuth;
+// getAuth() wires it in automatically, initializeAuth does not. The catch
+// covers Vite HMR re-running this module.
+function getOrInitAuth(firebaseApp) {
+  try {
+    return initializeAuth(firebaseApp, {
+      persistence: [indexedDBLocalPersistence, browserLocalPersistence, browserSessionPersistence],
+      popupRedirectResolver: browserPopupRedirectResolver,
+    })
+  } catch {
+    return getAuth(firebaseApp)
+  }
+}
+
 if (isFirebaseConfigured()) {
   try {
     app = initializeApp(firebaseConfig)
-    auth = getAuth(app)
+    auth = getOrInitAuth(app)
     db = getFirestore(app)
     functions = getFunctions(app)
   } catch (error) {
