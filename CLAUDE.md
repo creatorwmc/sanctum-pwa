@@ -10,7 +10,7 @@ When running or testing the application:
 
 **Production deployment requires explicit instruction:**
 - User must say "deploy to live", "deploy to production", "deploy to Netlify", or similar
-- Nightly deployments are handled automatically via GitHub Actions
+- There is no CI deploy — the weekly workflow was removed 2026-08-16. This site bundles `.service-accounts/*.json`, which are gitignored, so any CI build published `get-broadcasts` with no credentials on disk.
 - Manual production deploys should be rare exceptions
 
 ## Development Commands
@@ -34,7 +34,7 @@ npm run lint             # ESLint check
 - **Local Storage**: IndexedDB via `idb` for offline persistence
 - **Sync**: Bidirectional Firestore/IndexedDB sync (user opt-in)
 - **Hosting**: Netlify (with Netlify Forms for feedback)
-- **CI/CD**: GitHub Actions nightly deploy at 12:15 AM EST
+- **CI/CD**: none, by policy — local-CLI deploys only (functions bundle service accounts)
 
 ## Key Directories
 
